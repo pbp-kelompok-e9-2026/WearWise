@@ -49,6 +49,10 @@
 
 - [Climatiq](https://www.climatiq.io/docs/api-reference)
 
+## Design Plan
+
+- [Figma](https://www.figma.com/design/PVHrNdTOolsl7Ke1kR2Fv8/Untitled?node-id=0-1&p=f&t=FQ7cldO460FBvFS6-0)
+
 ## Peran Pengguna
 
 ### 1. User
