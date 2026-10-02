@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+  <title>Profile | WearWise</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&family=Instrument+Serif&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% endblock meta %}
+
+{% block content %}
+<div class="ww-body">
+  <div class="ww-profile">
+
+    <!-- Sidebar -->
+    <aside class="ww-side">
+      <a href="{% url 'main:show_main' %}" class="ww-logo">WearWise</a>
+
+      <nav class="ww-side-nav" aria-label="Main">
+        <a href="{% url 'main:show_main' %}">Home</a>
+        <a href="#">Discover</a>
+        <a href="#">Worth to Buy</a>
+        <a href="#">Numbers</a>
+        <a href="{% url 'wardrobe:show_wardrobe' %}">Wardrobe</a>
+        <a href="#">Lifecycle</a>
+
+        <p class="ww-side-label">Account</p>
+        <a href="#" aria-current="page">Edit Profile</a>
+        <a href="#">Settings</a>
+      </nav>
+
+      <div class="ww-side-foot">
+        <a href="#">Logout</a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="ww-main">
+      <header class="ww-top">
+        <span class="ww-crumb">Profile</span>
+
+        <div class="ww-top-right">
+          <button type="button" class="ww-icon-btn" aria-label="Search">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7.5"/><path d="m16.5 16.5 5 5"/>
+            </svg>
+          </button>
+
+          <div class="ww-account">
+            <span class="ww-chip">{{ request.user.username|default:"User"|slice:":1"|upper }}</span>
+            <span class="ww-account-text">
+              <span class="ww-account-name">{{ request.user.username|default:"User" }}</span>
+              <span class="ww-account-sub">My Account</span>
+            </span>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m2.5 4.5 3.5 3.5 3.5-3.5"/>
+            </svg>
+          </div>
+        </div>
+      </header>
+
+      <main class="ww-content">
+        <section class="ww-hero">
+          <div class="ww-avatar">
+            <svg viewBox="0 0 80 80" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-label="Profile photo placeholder" role="img">
+              <circle cx="40" cy="22" r="11"/>
+              <path d="M10 70c0-17 13-24 30-24s30 7 30 24"/>
+            </svg>
+          </div>
+
+          <div>
+            <p class="ww-eyebrow">My Account</p>
+            <h1 class="ww-title">Hello, {{ request.user.username|default:"User" }}!</h1>
+
+            <dl class="ww-fields">
+              <div class="ww-field">
+                <dt>Name</dt>
+                <dd>{{ request.user.get_full_name|default:request.user.username|default:"User" }}</dd>
+              </div>
+              <div class="ww-field">
+                <dt>Email</dt>
+                <dd>{{ request.user.email|default:"user@email.com" }}</dd>
+              </div>
+              <div class="ww-field">
+                <dt>Phone Number</dt>
+                <dd>{{ profile.phone|default:"+62 000 0000 0000" }}</dd>
+              </div>
+              <div class="ww-field">
+                <dt>Address</dt>
+                <dd>{{ profile.address|default:"Street, City, Country" }}</dd>
+              </div>
+            </dl>
+
+            <div class="ww-actions">
+              <a href="#" class="ww-btn ww-btn--solid">Edit Profile</a>
+              <a href="#" class="ww-btn ww-btn--ghost">Settings</a>
+            </div>
+          </div>
+        </section>
+
+        <ul class="ww-stats">
+          <li class="ww-stat">
+            <span class="ww-stat-num">{{ wears_logged|default:"128" }}</span>
+            <span class="ww-stat-label">Wears logged</span>
+          </li>
+          <li class="ww-stat">
+            <span class="ww-stat-num">${{ avg_cost_per_wear|default:"3.20" }}</span>
+            <span class="ww-stat-label">Avg. cost per wear</span>
+          </li>
+          <li class="ww-stat">
+            <span class="ww-stat-num">{{ sustainability_score|default:"82" }}</span>
+            <span class="ww-stat-label">Sustainability score</span>
+          </li>
+        </ul>
+      </main>
+    </div>
+
+  </div>
+</div>
+{% endblock content %}

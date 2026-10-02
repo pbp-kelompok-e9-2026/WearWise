@@ -18,6 +18,16 @@
         <div class="flex gap-4 items-center">
             <a href="{% url 'main:show_main' %}" class="hover:text-emerald-200 transition">Beranda</a>
             <a href="{% url 'wardrobe:show_wardrobe' %}" class="hover:text-emerald-200 transition">Wardrobe</a>
+
+            {% if user.is_authenticated %}
+            <a href="{% url 'dashboard:show_profile' %}" class="hover:text-emerald-200 transition">Profile</a>
+            <span class="text-emerald-200">|</span>
+            <span class="text-sm">{{ user.username }}</span>
+            <a href="{% url 'logout' %}" class="hover:text-emerald-200 transition">Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="hover:text-emerald-200 transition">Login</a>
+            <a href="{% url 'dashboard:register' %}" class="hover:text-emerald-200 transition">Daftar</a>
+        {% endif %}
         </div>
     </nav>
 
