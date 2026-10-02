@@ -33,8 +33,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'wardrobe',        # Modul 1
-    # 'buy_analyzer',    # Modul 2
-    # 'carbon_footprint',# Modul 3
+    'worth_to_buy_analyzer.apps.WorthToBuyAnalyzerConfig',    # Modul 2
+    'carbon_footprint', # Modul 3
     # 'lifecycle',       # Modul 4
     # 'dashboard',       # Modul 5
 ]
