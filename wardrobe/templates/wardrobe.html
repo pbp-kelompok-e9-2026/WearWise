@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800">Digital Wardrobe</h1>
+            <p class="text-gray-600">Koleksi pakaian milik {{ username }}</p>
+        </div>
+        
+        <!-- Filter Kategori & Modal Trigger -->
+        <div class="flex gap-3">
+            <select id="category-filter" class="border rounded-lg px-3 py-2 bg-white text-gray-700">
+                <option value="">Semua Kategori</option>
+                <option value="TOP">Atasan</option>
+                <option value="BOTTOM">Bawahan</option>
+                <option value="OUTER">Outerwear</option>
+                <option value="DRESS">Dress</option>
+                <option value="SHOES">Sepatu</option>
+                <option value="ACCESSORY">Aksesoris</option>
+            </select>
+
+            <button type="button" popovertarget="add-wardrobe-modal" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2 rounded-lg transition">
+                + Tambah Pakaian
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading, Empty, & Grid State -->
+    <div id="loading-state" class="text-center py-12 text-gray-500">Memuat koleksi pakaian...</div>
+    <div id="empty-state" class="hidden text-center py-12 text-gray-500">Belum ada pakaian di dalam wardrobe kamu.</div>
+    <div id="wardrobe-grid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</div>
+
+<!-- Popover Modal Form Tambah Pakaian -->
+<div id="add-wardrobe-modal" popover class="p-6 bg-white rounded-xl shadow-2xl max-w-md w-full border backdrop:bg-black/40">
+    <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold text-gray-800">Tambah Pakaian Baru</h2>
+        <button type="button" popovertarget="add-wardrobe-modal" popovertargetaction="hide" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+    </div>
+
+    <form id="add-wardrobe-form" method="POST" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Nama Pakaian</label>
+            <input type="text" name="name" required class="w-full border rounded-lg p-2 mt-1">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Kategori</label>
+            <select name="category" required class="w-full border rounded-lg p-2 mt-1 bg-white">
+                <option value="TOP">Atasan</option>
+                <option value="BOTTOM">Bawahan</option>
+                <option value="OUTER">Outerwear</option>
+                <option value="DRESS">Dress</option>
+                <option value="SHOES">Sepatu</option>
+                <option value="ACCESSORY">Aksesoris</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Bahan / Material</label>
+            <input type="text" name="material" placeholder="misal: Katun, Denim" required class="w-full border rounded-lg p-2 mt-1">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Harga Beli (Rp)</label>
+            <input type="number" name="price" required class="w-full border rounded-lg p-2 mt-1">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Tanggal Beli</label>
+            <input type="date" name="purchase_date" required class="w-full border rounded-lg p-2 mt-1">
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700">Jumlah Pemakaian Awal</label>
+            <input type="number" name="wear_count" value="0" min="0" class="w-full border rounded-lg p-2 mt-1">
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3">
+            <button type="button" popovertarget="add-wardrobe-modal" popovertargetaction="hide" class="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50">Batal</button>
+            <button type="submit" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">Simpan</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const GET_JSON_URL = "{% url 'wardrobe:get_wardrobe_json' %}";
+    const ADD_AJAX_URL = "{% url 'wardrobe:add_clothing_ajax' %}";
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>"']/g, function(m) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+        });
+    }
+
+    async function fetchWardrobe(category = '') {
+        const loading = document.getElementById('loading-state');
+        const empty = document.getElementById('empty-state');
+        const grid = document.getElementById('wardrobe-grid');
+
+        loading.classList.remove('hidden');
+        empty.classList.add('hidden');
+        grid.classList.add('hidden');
+
+        try {
+            const url = category ? `${GET_JSON_URL}?category=${category}` : GET_JSON_URL;
+            const res = await fetch(url);
+            const items = await res.json();
+
+            loading.classList.add('hidden');
+            if (items.length === 0) {
+                empty.classList.remove('hidden');
+            } else {
+                grid.innerHTML = '';
+                items.forEach(item => grid.appendChild(createCardElement(item)));
+                grid.classList.remove('hidden');
+            }
+        } catch (err) {
+            console.error('Error fetching wardrobe:', err);
+        }
+    }
+
+    function createCardElement(item) {
+        const p = item.fields;
+        const id = item.pk;
+
+        const article = document.createElement('article');
+        article.className = "bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition flex flex-col justify-between";
+
+        article.innerHTML = `
+            <div>
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="font-bold text-lg text-gray-800">${escapeHtml(p.name)}</h3>
+                    <span class="text-xs bg-emerald-100 text-emerald-800 font-semibold px-2.5 py-0.5 rounded-full">${escapeHtml(p.category)}</span>
+                </div>
+                <p class="text-sm text-gray-500 mb-3">Bahan: ${escapeHtml(p.material)}</p>
+                
+                <div class="bg-gray-50 p-3 rounded-lg mb-3 space-y-1 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Harga Beli:</span>
+                        <span class="font-semibold text-gray-800">Rp ${Number(p.price).toLocaleString('id-ID')}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Cost Per Wear:</span>
+                        <span class="font-semibold text-emerald-600" id="cpw-${id}">Rp ${Number(p.cost_per_wear).toLocaleString('id-ID')}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Frekuensi Pakai:</span>
+                        <span class="font-semibold text-gray-800"><span id="wear-${id}">${p.wear_count}</span>x</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2 pt-2 border-t mt-2">
+                <button onclick="incrementWear('${id}')" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold py-2 rounded-lg transition">+ Pakai Hari Ini</button>
+                <button onclick="deleteItem('${id}')" class="bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold px-3 py-2 rounded-lg transition">Hapus</button>
+            </div>
+        `;
+        return article;
+    }
+
+    async function incrementWear(id) {
+        const res = await fetch(`/wardrobe/increment-wear/${id}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        if (res.ok) {
+            const data = await res.json();
+            document.getElementById(`wear-${id}`).innerText = data.new_wear_count;
+            document.getElementById(`cpw-${id}`).innerText = `Rp ${Number(data.new_cpw).toLocaleString('id-ID')}`;
+        }
+    }
+
+    async function deleteItem(id) {
+        if (!confirm('Yakin ingin menghapus pakaian ini dari wardrobe?')) return;
+        const res = await fetch(`/wardrobe/delete-ajax/${id}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') }
+        });
+        if (res.ok) fetchWardrobe(document.getElementById('category-filter').value);
+    }
+
+    document.getElementById('category-filter').addEventListener('change', (e) => {
+        fetchWardrobe(e.target.value);
+    });
+
+    document.getElementById('add-wardrobe-form').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        const res = await fetch(ADD_AJAX_URL, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': getCookie('csrftoken') },
+            body: formData
+        });
+
+        if (res.ok) {
+            this.reset();
+            document.getElementById('add-wardrobe-modal').hidePopover();
+            fetchWardrobe(document.getElementById('category-filter').value);
+        } else {
+            alert('Gagal menambahkan pakaian. Pastikan semua input sudah terisi dengan benar.');
+        }
+    });
+
+    // Load data awal
+    fetchWardrobe();
+</script>
+{% endblock %}

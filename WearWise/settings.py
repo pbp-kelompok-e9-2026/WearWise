@@ -32,7 +32,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
-    'worth_to_buy_analyzer.apps.WorthToBuyAnalyzerConfig',
+    'wardrobe',        # Modul 1
+    'worth_to_buy_analyzer.apps.WorthToBuyAnalyzerConfig',    # Modul 2
+    'carbon_footprint', # Modul 3
+    # 'lifecycle',       # Modul 4
+    # 'dashboard',       # Modul 5
 ]
 
 MIDDLEWARE = [
