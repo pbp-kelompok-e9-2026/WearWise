@@ -32,6 +32,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'wardrobe',        # Modul 1
+    # 'buy_analyzer',    # Modul 2
+    # 'carbon_footprint',# Modul 3
+    # 'lifecycle',       # Modul 4
+    # 'dashboard',       # Modul 5
 ]
 
 MIDDLEWARE = [
@@ -49,7 +54,7 @@ ROOT_URLCONF = 'WearWise.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
