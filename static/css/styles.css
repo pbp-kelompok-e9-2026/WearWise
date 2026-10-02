@@ -1,0 +1,57 @@
+/* Usulan awal design system; finalisasi bersama kelompok. */
+:root {
+    --color-primary: #285844;
+    --color-primary-hover: #1c4031;
+    --color-background: #f7f6f0;
+    --color-surface: #ffffff;
+    --color-text: #243a30;
+    --color-muted: #58675e;
+    --color-border: #dce2d9;
+    --color-soft: #eaf0e7;
+    --color-accent: #dfe7b8;
+    --radius-card: 20px;
+    --radius-input: 10px;
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 32px;
+    --font-body: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--color-background); color: var(--color-text); font-family: var(--font-body); line-height: 1.6; }
+a { color: var(--color-primary); }
+h1, h2, h3, p { margin-top: 0; }
+h1, h2, h3 { line-height: 1.2; }
+.container { width: min(1120px, calc(100% - 40px)); margin-inline: auto; }
+.site-header { border-bottom: 1px solid var(--color-border); }
+.header-inner { min-height: 88px; display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); }
+.brand { font-size: 24px; font-weight: 800; letter-spacing: -1px; }
+.brand-dot { color: var(--color-primary); }
+.nav-link { display: inline-block; font-size: 14px; text-decoration: none; padding: 9px 16px; border-radius: 999px; background: var(--color-soft); font-weight: 600; }
+.card { padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-card); }
+.badge { display: inline-block; padding: 5px 12px; border-radius: 999px; background: var(--color-soft); color: var(--color-primary); font-size: 12px; font-weight: 700; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--color-primary); }
+.muted, .help-text { color: var(--color-muted); }
+.help-text { font-size: 13px; margin: 8px 0 0; }
+.form-field { display: flex; flex-direction: column; gap: var(--space-1); }
+.form-field label { font-size: 14px; font-weight: 600; }
+.input, .select { width: 100%; min-height: 48px; border: 1px solid var(--color-border); border-radius: var(--radius-input); background: var(--color-surface); padding: 12px 14px; color: var(--color-text); font: inherit; }
+.input::placeholder { color: var(--color-muted); }
+:focus-visible { outline: 3px solid var(--color-primary); outline-offset: 3px; }
+.button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 12px 24px; border: 0; border-radius: var(--radius-input); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; }
+.button-primary { color: white; background: var(--color-primary); }
+.button-primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+.button:disabled { cursor: not-allowed; background: var(--color-soft); color: var(--color-muted); }
+.site-footer { margin-top: 64px; padding-block: 28px; border-top: 1px solid var(--color-border); display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); color: var(--color-muted); font-size: 13px; }
+.site-footer .brand { font-size: 18px; }
+.skip-link { position: absolute; top: -100px; left: 16px; padding: 12px; background: white; z-index: 10; }
+.skip-link:focus { top: 12px; }
+@media (max-width: 600px) {
+    .container { width: calc(100% - 32px); }
+    .card { padding: var(--space-3); }
+    .header-inner { min-height: 76px; }
+    .brand { font-size: 22px; }
+    .nav-link { font-size: 12px; padding: 8px 12px; }
+    .site-footer { flex-direction: column; align-items: flex-start; margin-top: 40px; }
+}

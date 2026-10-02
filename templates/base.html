@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WearWise{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Lewati ke konten</a>
+    <header class="site-header">
+        <div class="container header-inner">
+            <span class="brand">WearWise<span class="brand-dot">.</span></span>
+            <nav aria-label="Navigasi utama">
+                {% block navigation %}{% endblock %}
+            </nav>
+        </div>
+    </header>
+    <main id="main-content" class="container">
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer container">
+        <span class="brand">WearWise.</span>
+        <span>Lebih bijak memilih. Lebih lama memakai.</span>
+    </footer>
+</body>
+</html>
