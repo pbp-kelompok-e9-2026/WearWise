@@ -4,11 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {% block meta %}
-        <title>WearWise</title>
-    {% endblock meta %}
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>{% block title %}WearWise{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col">
 
@@ -29,18 +27,13 @@
             <a href="{% url 'dashboard:register' %}" class="hover:text-emerald-200 transition">Daftar</a>
         {% endif %}
         </div>
-    </nav>
-
-    <!-- Content Block -->
-    <main class="flex-grow">
-        {% block content %}
-        {% endblock content %}
+    </header>
+    <main id="main-content" class="container">
+        {% block content %}{% endblock %}
     </main>
-
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white text-center py-4 text-sm">
-        <p>&copy; 2026 WearWise - Sustainable Fashion Project</p>
+    <footer class="site-footer container">
+        <span class="brand">WearWise.</span>
+        <span>Lebih bijak memilih. Lebih lama memakai.</span>
     </footer>
-
 </body>
-</html> 
+</html>

@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-(d^)%6cdy$%h_rg0k8veqcu2au68-a!q%2a$b7)^woqk0y+s#%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
@@ -32,11 +32,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
-    'wardrobe',
-    # 'buy_analyzer',
-    # 'carbon_footprint',
-    # 'lifecycle',
-    'dashboard',
+    'wardrobe',        # Modul 1
+    'worth_to_buy_analyzer.apps.WorthToBuyAnalyzerConfig',    # Modul 2
+    'carbon_footprint', # Modul 3
+    # 'lifecycle',       # Modul 4
+    # 'dashboard',       # Modul 5
 ]
 
 MIDDLEWARE = [

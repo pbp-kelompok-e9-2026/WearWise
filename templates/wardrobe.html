@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block meta %}
+        <title>WearWise</title>
+    {% endblock meta %}
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans min-h-screen flex flex-col">
+
+    <!-- Navigation Bar -->
+    <nav class="bg-emerald-700 text-white shadow-md py-4 px-6 flex justify-between items-center">
+        <a href="{% url 'main:show_main' %}" class="text-xl font-bold tracking-wide">WearWise</a>
+        <div class="flex gap-4 items-center">
+            <a href="{% url 'main:show_main' %}" class="hover:text-emerald-200 transition">Beranda</a>
+            <a href="{% url 'wardrobe:show_wardrobe' %}" class="hover:text-emerald-200 transition">Wardrobe</a>
+        </div>
+    </nav>
+
+    <!-- Content Block -->
+    <main class="flex-grow">
+        {% block content %}
+        {% endblock content %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white text-center py-4 text-sm">
+        <p>&copy; 2026 WearWise - Sustainable Fashion Project</p>
+    </footer>
+
+</body>
+</html> 
