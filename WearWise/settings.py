@@ -16,7 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-(d^)%6cdy$%h_rg0k8veqcu2au68-a!q%2a$b7)^woqk0y+s#%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'worth_to_buy_analyzer.apps.WorthToBuyAnalyzerConfig',    # Modul 2
     'carbon_footprint', # Modul 3
     # 'lifecycle',       # Modul 4
-    # 'dashboard',       # Modul 5
+    'dashboard',       # Modul 5
 ]
 
 MIDDLEWARE = [
@@ -137,3 +137,6 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CLIMATIQ_API_KEY = os.environ.get("CLIMATIQ_API_KEY", "")
+CLIMATIQ_DATA_VERSION = "^38"
