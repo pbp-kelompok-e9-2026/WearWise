@@ -1,0 +1,334 @@
+/* Modul Carbon Footprint & Sustainability (halaman "Numbers").
+   Memakai variabel dari CSS tim (--color-text, --color-muted, --font-body, dst.)
+   dan menambah token khusus modul dengan prefix --cf-. */
+
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap");
+
+.cf {
+  --cf-ink: var(--color-text, #1b1a17);
+  --cf-muted: var(--color-muted, #5b5a50);
+  --cf-font-display: "Instrument Serif", "Times New Roman", serif;
+  --cf-value-size: clamp(3.5rem, 6.4vw, 7.5rem);
+
+  /* warna visual dari desain */
+  --cf-track: #cfc7b8;
+  --cf-dot-off: #d9d3c4;
+  --cf-cost: #b2624a;
+  --cf-carbon: #6b6a45;
+  --cf-score: #6e8468;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3, 24px);
+  min-height: 70vh;
+  padding: var(--space-4, 32px) clamp(20px, 4vw, 64px);
+  color: var(--cf-ink);
+}
+
+.cf-eyebrow,
+.cf-stat__label {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.cf-eyebrow {
+  margin-bottom: var(--space-1, 8px);
+}
+
+/* Judul + deskripsi */
+.cf-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2, 16px) var(--space-4, 32px);
+  margin-bottom: var(--space-3, 24px);
+}
+
+.cf-title {
+  margin: 0;
+  font-family: var(--cf-font-display);
+  font-size: clamp(2.5rem, 4.4vw, 4.25rem);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.015em;
+}
+
+.cf-lede {
+  max-width: 26rem;
+  margin: 0;
+  color: var(--cf-muted);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+/* Empat statistik */
+.cf-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4, 32px);
+}
+
+.cf-stat {
+  padding-top: var(--space-1, 8px);
+  border-top: 1px solid var(--cf-ink);
+}
+
+.cf-stat__value {
+  margin: 0;
+  font-family: var(--cf-font-display);
+  font-size: var(--cf-value-size);
+  min-height: calc(var(--cf-value-size) * 1.05); /* tinggi sama supaya batang di bawahnya sejajar */
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.cf-stat__label {
+  margin-top: var(--space-1, 8px);
+  color: var(--cf-muted);
+}
+
+/* Titik wears */
+.cf-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 3rem;
+}
+
+.cf-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--cf-dot-off);
+}
+
+.cf-dot.is-on {
+  background: var(--cf-ink);
+}
+
+/* Batang progres */
+.cf-bar {
+  height: 5px;
+  margin-top: 3rem;
+  background: var(--cf-track);
+  overflow: hidden;
+}
+
+.cf-bar__fill {
+  display: block;
+  height: 100%;
+  transform-origin: left center;
+  animation: cf-fill 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.cf-bar--cost .cf-bar__fill { background: var(--cf-cost); }
+.cf-bar--carbon .cf-bar__fill { background: var(--cf-carbon); }
+.cf-bar--score .cf-bar__fill { background: var(--cf-score); }
+
+@keyframes cf-fill {
+  from { transform: scaleX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-bar__fill { animation: none; }
+}
+
+/* Keadaan kosong */
+.cf-empty {
+  margin: 0;
+  padding-top: var(--space-2, 16px);
+  border-top: 1px solid var(--cf-ink);
+  color: var(--cf-muted);
+}
+
+@media (max-width: 640px) {
+  .cf { min-height: 0; }
+  .cf-stats { gap: var(--space-3, 24px); }
+}
+
+/* ---------- Halaman CRUD (list, form, hapus) ---------- */
+
+.cf--top {
+  justify-content: flex-start;
+  min-height: 0;
+}
+
+.cf-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1, 8px) var(--space-3, 24px);
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.cf-meta__sep {
+  color: var(--cf-track);
+}
+
+.cf-link {
+  padding-bottom: 2px;
+  border-bottom: 1px solid currentColor;
+  color: var(--cf-ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.cf-link:hover { border-bottom-width: 2px; padding-bottom: 1px; }
+.cf-link--danger { color: var(--cf-cost); }
+
+.cf-btn {
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--cf-ink);
+  border-radius: var(--radius-input, 10px);
+  background: var(--cf-ink);
+  color: var(--color-background, #f4efe6);
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cf-btn:hover { opacity: 0.88; }
+.cf-btn--danger { border-color: var(--cf-cost); background: var(--cf-cost); }
+
+.cf-flash {
+  margin: 0;
+  padding: var(--space-1, 8px) var(--space-2, 16px);
+  border-left: 3px solid var(--cf-score);
+  background: var(--color-soft, #eaf0e7);
+  list-style: none;
+  font-size: 0.9375rem;
+}
+
+/* Daftar estimasi + perbandingan */
+.cf-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.cf-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr) minmax(0, 2fr) auto;
+  align-items: center;
+  gap: var(--space-2, 16px) var(--space-4, 32px);
+  padding: var(--space-3, 24px) 0;
+  border-top: 1px solid var(--cf-ink);
+}
+
+.cf-row:last-child { border-bottom: 1px solid var(--cf-ink); }
+
+.cf-row__name {
+  font-family: var(--cf-font-display);
+  font-size: 1.75rem;
+  line-height: 1.1;
+  color: var(--cf-ink);
+  text-decoration: none;
+}
+
+.cf-row__name:hover { text-decoration: underline; }
+
+.cf-row__meta {
+  margin: 4px 0 0;
+  color: var(--cf-muted);
+  font-size: 0.875rem;
+}
+
+.cf-row__figure .cf-stat__label { margin-top: 2px; }
+
+.cf-row__value {
+  margin: 0;
+  font-family: var(--cf-font-display);
+  font-size: 2rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.cf-row__bar { margin-top: 0; }
+
+.cf-row__actions {
+  display: flex;
+  gap: var(--space-2, 16px);
+  font-size: 0.875rem;
+}
+
+/* Form */
+.cf-form { max-width: 44rem; }
+
+.cf-form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3, 24px) var(--space-4, 32px);
+  margin-bottom: var(--space-4, 32px);
+}
+
+.cf-field__label {
+  display: block;
+  margin-bottom: var(--space-1, 8px);
+  color: var(--cf-muted);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.cf-input {
+  width: 100%;
+  padding: 0.5rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--cf-ink);
+  border-radius: 0;
+  background: transparent;
+  color: var(--cf-ink);
+  font: inherit;
+  font-size: 1.0625rem;
+}
+
+.cf-input:focus-visible {
+  outline: 2px solid var(--cf-score);
+  outline-offset: 2px;
+}
+
+.cf-field__help {
+  margin: 6px 0 0;
+  color: var(--cf-muted);
+  font-size: 0.8125rem;
+}
+
+.cf-field__error {
+  margin: 6px 0 0;
+  padding: 0;
+  color: var(--cf-cost);
+  font-size: 0.8125rem;
+  list-style: none;
+}
+
+@media (max-width: 860px) {
+  .cf-row { grid-template-columns: 1fr auto; }
+  .cf-row__bar { grid-column: 1 / -1; order: 3; }
+  .cf-row__actions { grid-column: 1 / -1; order: 4; }
+}
+
+.cf-source {
+  max-width: 44rem;
+  margin: var(--space-2, 16px) 0 0;
+  color: var(--cf-muted);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+/* Nominal Rupiah: awalan kecil, dan font mengecil untuk angka yang panjang */
+.cf-stat__unit {
+  margin-right: 0.08em;
+  font-size: 0.4em;
+  letter-spacing: 0;
+}
+
+.cf-stat__value--long { font-size: clamp(2.75rem, 4.6vw, 5.5rem); }
+.cf-stat__value--xl { font-size: clamp(2rem, 3.4vw, 4rem); }
