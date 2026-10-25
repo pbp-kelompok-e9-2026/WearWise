@@ -40,14 +40,3 @@ def show_profile(request):
         'sustainability_score': score,
     }
     return render(request, 'profile.html', context)
-
-def register(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)   # langsung login setelah daftar
-            return redirect('dashboard:show_profile')
-    else:
-        form = RegisterForm()
-    return render(request, 'register.html', {'form': form})

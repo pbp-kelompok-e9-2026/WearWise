@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.shortcuts import render, redirect
+from django.views.decorators.http import require_POST
 
 # Main
 
@@ -10,7 +11,7 @@ def show_main(request):
         'app_name': 'WearWise',
         'name': request.user.username if request.user.is_authenticated else 'Pengunjung',
     }
-    return render(request, "index.html", context)
+    return render(request, "register.html", context)
 
 # Authentication
 
@@ -29,6 +30,7 @@ def login_user(request):
         return redirect("main:home")
     return render(request, "main/login.html", {"form": form})
 
+@require_POST
 def logout_user(request):
     logout(request)
     return redirect("main:login")

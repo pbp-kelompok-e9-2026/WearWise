@@ -4,9 +4,7 @@ MATERIAL_CHOICES = [
     ("cotton", "Cotton"),
     ("polyester", "Polyester"),
     ("wool", "Wool"),
-    ("linen", "Linen"),
-    ("nylon", "Nylon"),
-    ("viscose", "Viscose"),
+    ("silk", "Silk"),
 ]
 
 CATEGORY_CHOICES = [
@@ -42,10 +40,10 @@ PRICE_CURRENCY_LABEL = "Rp"   # label yang ditampilkan di halaman
 FALLBACK_KG_CO2E_PER_KG = {
     "cotton": 18.12, # CAEP 2022 China Products Carbon Footprint Factors Database
     "polyester": 25.7, # CAEP 2022 China Products Carbon Footprint Factors Database
-    "wool": 2.23, # CAEP 2022 China Products Carbon Footprint Factors Database
+    "wool": 20.32, # CAEP 2022 China Products Carbon Footprint Factors Database
     "silk": 18.7 # CAEP 2022 China Products Carbon Footprint Factors Database
 }
-FALLBACK_DEFAULT_KG_CO2E_PER_KG = 16.2
+FALLBACK_DEFAULT_KG_CO2E_PER_KG = 20.7
 
 # Skor keberlanjutan 0-100 = 100 * (1 - (kg CO2e per wear) / SCORE_MAX_CO2E_PER_WEAR).
 # Ini rumus sederhana buatan modul ini (bukan dari Climatiq)

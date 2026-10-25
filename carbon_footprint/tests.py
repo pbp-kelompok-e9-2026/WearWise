@@ -6,19 +6,37 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from . import services
-from .constants import MONEY_FACTOR_ID
+import uuid
+
+from .constants import (
+    CATEGORY_CHOICES,
+    CATEGORY_WEIGHT_KG,
+    FALLBACK_DEFAULT_KG_CO2E_PER_KG,
+    FALLBACK_KG_CO2E_PER_KG,
+    MATERIAL_CHOICES,
+    MONEY_FACTOR_ID,
+    SCORE_MAX_CO2E_PER_WEAR,
+)
 from .models import CarbonEstimate
 
 User = get_user_model()
 
 FORM = {
-    "name": "Oversized Linen Shirt",
+    "name": "Oversized Cotton Shirt",
     "category": "shirt",
-    "material": "linen",
+    "material": "cotton",
     "weight_kg": "",
     "price": "300000",
     "estimated_wears": "24",
 }
+
+
+def fallback_co2e(material, weight):
+    """Hasil yang diharapkan dari tabel cadangan: berat dikali kg CO2e per kg material.
+
+    Dihitung dari constants.py supaya test tidak ikut pecah saat angkanya diperbarui.
+    """
+    return Decimal(str(round(float(weight) * FALLBACK_KG_CO2E_PER_KG[material], 2)))
 
 
 def fake_response(payload):
@@ -26,6 +44,44 @@ def fake_response(payload):
     resp.raise_for_status.return_value = None
     resp.json.return_value = payload
     return resp
+
+
+@override_settings(CLIMATIQ_API_KEY="")
+class OfflineTestCase(TestCase):
+    """Dasar untuk test yang tidak boleh memakai API key asli atau menyentuh jaringan.
+
+    API key dikosongkan walau environment-mu memilikinya, dan setiap panggilan
+    requests.post yang lolos akan membuat test gagal. Test yang butuh jalur
+    Climatiq memakai override_settings dan mock sendiri.
+    """
+
+    def setUp(self):
+        super().setUp()
+        guard = mock.patch.object(
+            services.requests, "post", side_effect=AssertionError("Test memanggil jaringan sungguhan")
+        )
+        guard.start()
+        self.addCleanup(guard.stop)
+
+
+class ConstantsTests(TestCase):
+    """Menjaga constants.py tetap konsisten, supaya salah ketik ketahuan sebelum jadi bug."""
+
+    def test_every_material_has_a_fallback_rate_and_no_extras(self):
+        materials = {value for value, _label in MATERIAL_CHOICES}
+        self.assertEqual(materials, set(FALLBACK_KG_CO2E_PER_KG))
+
+    def test_every_category_has_a_default_weight_and_no_extras(self):
+        categories = {value for value, _label in CATEGORY_CHOICES}
+        self.assertEqual(categories, set(CATEGORY_WEIGHT_KG))
+
+    def test_numbers_are_positive(self):
+        values = [*FALLBACK_KG_CO2E_PER_KG.values(), *CATEGORY_WEIGHT_KG.values(),
+                  FALLBACK_DEFAULT_KG_CO2E_PER_KG, SCORE_MAX_CO2E_PER_WEAR]
+        self.assertTrue(all(v > 0 for v in values))
+
+    def test_money_factor_id_is_a_uuid(self):
+        uuid.UUID(MONEY_FACTOR_ID)
 
 
 class ScoreTests(TestCase):
@@ -57,11 +113,17 @@ class EstimateMoneyTests(TestCase):
                     services.estimate_money_co2e(MONEY_FACTOR_ID, 100, "idr")
 
 
-class ComputeTests(TestCase):
+class ComputeTests(OfflineTestCase):
     def test_fallback_without_api_key(self):
         co2e, source = services.compute_co2e("cotton", Decimal("0.5"), Decimal("300000"))
         self.assertEqual(source, services.SOURCE_FALLBACK)
-        self.assertEqual(co2e, Decimal("4.00"))
+        self.assertEqual(co2e, fallback_co2e("cotton", Decimal("0.5")))
+
+    def test_unknown_material_uses_default_rate(self):
+        # Data lama bisa berisi material yang sudah dihapus dari MATERIAL_CHOICES.
+        co2e, source = services.compute_co2e("linen", Decimal("1"), None)
+        self.assertEqual(source, services.SOURCE_FALLBACK)
+        self.assertEqual(co2e, Decimal(str(round(FALLBACK_DEFAULT_KG_CO2E_PER_KG, 2))))
 
     @override_settings(CLIMATIQ_API_KEY="test")
     def test_uses_climatiq_when_price_and_key_exist(self):
@@ -84,8 +146,9 @@ class ComputeTests(TestCase):
         self.assertEqual(source, services.SOURCE_FALLBACK)
 
 
-class CrudTests(TestCase):
+class CrudTests(OfflineTestCase):
     def setUp(self):
+        super().setUp()
         self.user = User.objects.create_user("zidan", password="pw")
         self.other = User.objects.create_user("budi", password="pw")
         self.client.force_login(self.user)
@@ -101,7 +164,7 @@ class CrudTests(TestCase):
         obj = CarbonEstimate.objects.get()
         self.assertEqual(obj.user, self.user)
         self.assertEqual(obj.weight_kg, Decimal("0.25"))     # berat default kategori shirt
-        self.assertEqual(obj.co2e_kg, Decimal("1.25"))       # 0.25 kg * 5.0 (linen, tabel cadangan, tanpa API key)
+        self.assertEqual(obj.co2e_kg, fallback_co2e("cotton", Decimal("0.25")))   # tabel cadangan, tanpa API key
         self.assertEqual(obj.source, services.SOURCE_FALLBACK)
 
     @override_settings(CLIMATIQ_API_KEY="test")
@@ -150,7 +213,7 @@ class CrudTests(TestCase):
     def test_numbers_page_shows_item_stats(self):
         self.client.post(reverse("carbon_footprint:create"), FORM)
         resp = self.client.get(reverse("carbon_footprint:index"))
-        self.assertContains(resp, "Oversized Linen Shirt")
+        self.assertContains(resp, "Oversized Cotton Shirt")
         self.assertContains(resp, "Rp")
         self.assertContains(resp, "CEDA 2025")                     # catatan sumber data
         self.assertEqual(resp.context["stats"]["wears"], 24)
