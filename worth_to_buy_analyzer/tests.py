@@ -174,16 +174,27 @@ class AnalyzerFlowTests(TestCase):
         self.client.logout()
         target = self.url("create")
         response = self.client.get(target)
-        self.assertRedirects(response, f"{reverse('login')}?next={target}")
-        response = self.client.post(f"{reverse('login')}?next={target}", {"username": "lica", "password": "test-password"})
+        self.assertRedirects(response, f"{reverse('main:login')}?next={target}")
+        response = self.client.post(f"{reverse('main:login')}?next={target}", {"username": "lica", "password": "test-password"})
         self.assertRedirects(response, target)
-        response = self.client.post(reverse("logout"))
-        self.assertRedirects(response, reverse("login"))
+        response = self.client.post(reverse("main:logout"))
+        self.assertRedirects(response, reverse("main:login"))
 
     def test_login_rejects_external_redirect(self):
+        for next_url in ("https://example.com/", "//example.com/", "javascript:alert(1)"):
+            with self.subTest(next_url=next_url):
+                self.client.logout()
+                response = self.client.post(reverse("main:login"), {
+                    "username": "lica", "password": "test-password", "next": next_url,
+                })
+                self.assertRedirects(response, reverse("main:show_main"))
+
+    def test_login_rejects_external_next_from_query_string(self):
         self.client.logout()
-        response = self.client.post(reverse("login") + "?next=https://example.com/", {"username": "lica", "password": "test-password"})
-        self.assertRedirects(response, self.url("analyzer"))
+        response = self.client.post(reverse("main:login") + "?next=https://example.com/", {
+            "username": "lica", "password": "test-password",
+        })
+        self.assertRedirects(response, reverse("main:show_main"))
 
     def test_anonymous_requests_cannot_read_or_mutate(self):
         obj = self.saved_item()
