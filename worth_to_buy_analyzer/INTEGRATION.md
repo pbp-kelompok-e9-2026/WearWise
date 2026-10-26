@@ -21,13 +21,18 @@
 - Integrasi kelompok menggunakan commit, push, dan pull request yang ditinjau.
   Patch backend diajukan melalui branch terpisah; merge menunggu review kelompok.
 
-## Dasar pekerjaan
+## Alur Git kelompok
 
-Branch `codex/analyzer-backend` dibuat dalam worktree terpisah dari
-`origin/main` pada commit `e85f62d`. Commit `origin/Modul-2` (`2bf7e26`) sudah
-menjadi ancestor `main`, sehingga pekerjaan modul sebelumnya tetap tercakup.
-Checkout asli `Modul-2` tidak di-pull atau diubah. CSS dan template dasar kelompok
-tidak diubah oleh patch backend ini.
+- Pekerjaan Worth to Buy Analyzer menggunakan branch `Modul-2`.
+- Sinkronkan perubahan kelompok setelah memastikan perubahan lokal tersimpan.
+  Pada 26 Oktober 2026, `Modul-2` diselaraskan secara fast-forward ke `main`
+  (`8d889d1`) yang sudah memuat backend analyzer dan frontend kelompok.
+- Ajukan perubahan melalui PR dari `Modul-2` ke `main`; merge dilakukan setelah
+  review kelompok. Jangan force-push atau menulis ulang riwayat bersama.
+- Pesan commit mengikuti [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/):
+  `feat: ...` untuk fitur, `fix: ...` untuk perbaikan bug, dan `docs: ...` untuk
+  perubahan dokumentasi saja. Scope bersifat opsional.
+- CSS dan template dasar kelompok tetap mengikuti pekerjaan frontend bersama.
 
 ## Menjalankan setelah integrasi
 
@@ -37,7 +42,7 @@ tidak diubah oleh patch backend ini.
 3. Jalankan `python manage.py check` dan
    `python manage.py test worth_to_buy_analyzer --noinput`.
 4. Jalankan server lokal dan buka `/worth-to-buy/`. Pengguna diarahkan ke login
-   kelompok di `/accounts/login/?next=/worth-to-buy/` jika belum masuk.
+   kelompok di `/login/?next=/worth-to-buy/` jika belum masuk.
 5. Buat analisis, buka detail, edit pemakaian, simpan keputusan, lalu coba hapus
    lewat halaman konfirmasi. Akun lain tidak boleh mengakses objek tersebut.
 
@@ -126,18 +131,17 @@ bukan sustainability score Zidan, dan bukan skor yang diberikan Climatiq.
 
 ## Sambungan login dan perhatian integrasi
 
-`base.html` kelompok memanggil named URL `login`/`logout`, tetapi `main` pada
-`e85f62d` belum mendaftarkannya. Patch ini menambahkan dua route di `WearWise/urls.py`
-memakai LoginView/LogoutView bawaan Django dan template `login.html` yang sudah ada.
-Login mengikuti `next` lokal; tanpa `next` kembali ke analyzer.
+Gunakan named URL `main:login` dan `main:logout` sesuai frontend kelompok terbaru.
+Route auth tambahan yang lama dihapus agar tidak merujuk template yang sudah
+dipindahkan. Login menerima `next` lokal untuk kembali ke analyzer, menolak
+tujuan eksternal, dan kembali ke beranda jika tujuan tidak valid atau kosong.
+Logout memakai POST + CSRF sesuai form pada template dasar kelompok.
 
-Logout Django memakai POST + CSRF. Link GET logout lama dalam `base.html` perlu
-Zidan ubah menjadi form POST saat merapikan frontend. Template bersama sengaja
-tidak diedit bersamaan dengan pekerjaannya. Jika hasil frontend terbaru sudah
-menambahkan route login/logout, gabungkan tanpa membuat route duplikat dan
-pertahankan nama yang disepakati.
+Migrasi analyzer `0003` menyelaraskan pilihan material dengan konstanta terbaru
+modul karbon (cotton, polyester, wool, silk). Ini perubahan pilihan field;
+nilai material yang sudah tersimpan tidak dihapus atau diganti otomatis.
 
-## Temuan di luar modul analyzer
+## Temuan awal sebelum pembaruan frontend dan karbon
 
 - Tes wardrobe `test_wardrobe_url_protected` mengharapkan redirect login, tetapi
   view sekarang menghasilkan 200. Ini juga gagal pada salinan `main` sebelum patch.
@@ -151,7 +155,7 @@ pertahankan nama yang disepakati.
   saat ini (package karbon tidak memiliki `__init__.py`). Untuk pemeriksaan
   lintas modul, sebutkan `carbon_footprint.tests` secara eksplisit.
 
-## Hasil verifikasi 26 Oktober 2026
+## Verifikasi awal 26 Oktober 2026 (sebelum pembaruan kelompok)
 
 - 30 tes analyzer lulus: aturan perhitungan, batas angka termasuk PostgreSQL,
   CRUD, redirect login, CSRF, pemisahan data pengguna, escaping HTML, keputusan,
@@ -169,3 +173,16 @@ pertahankan nama yang disepakati.
   melaporkan perubahan `dashboard.Profile.user` yang belum dimigrasikan.
 - Tidak ada pengujian live terhadap PWS/API Climatiq atau perubahan styling.
   Tampilan final tetap perlu ditinjau bersama hasil frontend Zidan.
+
+## Verifikasi setelah sinkronisasi Modul-2
+
+- Branch dasar sudah memuat hasil merge backend dan frontend kelompok (`8d889d1`).
+- 31 tes analyzer lulus dengan route login/logout bersama yang aktif. Tujuan
+  `next` eksternal ditolak, baik dari query string maupun POST.
+- Tes gabungan analyzer, karbon, wardrobe, dashboard, dan main: 55 dari 56 lulus.
+  Kegagalan tersisa adalah `wardrobe.test_wardrobe_url_protected` yang sudah
+  tercatat sebelumnya. Tes karbon kini lulus setelah pembaruan pemilik modul.
+- Migrasi `0003` mencatat perubahan pilihan material; tidak ada perubahan model
+  analyzer yang belum dimigrasikan. Perubahan `dashboard.Profile.user` masih
+  dilaporkan oleh pemeriksaan migrasi global dan perlu ditangani pemilik modul.
+- Koreksi ini tidak mengubah CSS maupun template frontend kelompok.
