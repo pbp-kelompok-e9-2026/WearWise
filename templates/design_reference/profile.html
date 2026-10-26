@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Profile - WearWise{% endblock title %}
+{% block page_title %}Profile{% endblock page_title %}
+
+{% block content %}
+<section class="ww-page">
+  <div class="ww-profile">
+    <div class="ww-portrait" aria-hidden="true">
+      <svg viewBox="0 0 82 86" fill="none" stroke="currentColor" stroke-width="3"><circle cx="41" cy="20" r="17"/><path d="M3 85c0-22 17-34 38-34s38 12 38 34"/></svg>
+    </div>
+
+    <div>
+      <p class="ww-eyebrow ww-eyebrow--soft">My account</p>
+      <h1 class="ww-profile__hello">Hello, {{ user.get_username|default:"User" }}!</h1>
+
+      <dl class="ww-defs">
+        <div><dt>Name</dt><dd>{{ user.get_full_name|default:user.get_username }}</dd></div>
+        <div><dt>Email</dt><dd>{{ user.email|default:"user@email.com" }}</dd></div>
+        <div><dt>Phone number</dt><dd>+62 000 0000 0000</dd></div>
+        <div><dt>Address</dt><dd>Street, City, Country</dd></div>
+      </dl>
+
+      <div class="ww-btns">
+        <a class="ww-btn" href="#">Edit Profile</a>
+        <a class="ww-btn ww-btn--outline" href="#">Settings</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="ww-stats ww-stats--lg">
+    <div class="ww-stat"><p class="ww-stat__value">128</p><p class="ww-stat__label">Wears logged</p></div>
+    <div class="ww-stat"><p class="ww-stat__value">$3.20</p><p class="ww-stat__label">Avg. cost per wear</p></div>
+    <div class="ww-stat"><p class="ww-stat__value">82</p><p class="ww-stat__label">Sustainability score</p></div>
+  </div>
+</section>
+{% endblock content %}

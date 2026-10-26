@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Estimates - WearWise{% endblock title %}
+
+{% block extra_css %}
+{% include 'carbon_footprint/_assets.html' %}
+{% endblock extra_css %}
+
+{% block content %}
+
+<section class="cf cf--top">
+  <p class="cf-eyebrow">03 — Wear</p>
+
+  <header class="cf-head">
+    <h1 class="cf-title">Every piece, in kilograms.</h1>
+    <p class="cf-lede">Compare the carbon footprint of what you own or plan to buy.</p>
+  </header>
+
+  {% if messages %}
+  <ul class="cf-flash" role="status">
+    {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+  </ul>
+  {% endif %}
+
+  <p class="cf-meta">
+    <a class="cf-link" href="{% url 'carbon_footprint:create' %}">New estimate →</a>
+    <a class="cf-link" href="{% url 'carbon_footprint:index' %}">Numbers</a>
+  </p>
+
+  {% if estimates %}
+  <ul class="cf-rows">
+    {% for e in estimates %}
+    <li class="cf-row">
+      <div class="cf-row__main">
+        <a class="cf-row__name" href="{% url 'carbon_footprint:index' %}?item={{ e.pk }}">{{ e.name }}</a>
+        <p class="cf-row__meta">{{ e.get_category_display }} · {{ e.get_material_display }} · {{ e.weight_kg|floatformat:"2u" }} kg</p>
+      </div>
+      <div class="cf-row__figure">
+        <p class="cf-row__value">{{ e.co2e_kg|floatformat:"1u" }} kg</p>
+        <p class="cf-stat__label">CO₂e{% if e.source == 'fallback' %} · estimate{% endif %}</p>
+      </div>
+      <div class="cf-bar cf-bar--carbon cf-row__bar" aria-hidden="true">
+        <span class="cf-bar__fill" style="width: {{ e.bar_pct }}%"></span>
+      </div>
+      <div class="cf-row__actions">
+        <a class="cf-link" href="{% url 'carbon_footprint:update' e.pk %}">Edit</a>
+        <a class="cf-link cf-link--danger" href="{% url 'carbon_footprint:delete' e.pk %}">Delete</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% include 'carbon_footprint/_source_note.html' %}
+  {% else %}
+  <p class="cf-empty">No estimates yet. Add your first piece to start comparing.</p>
+  {% endif %}
+</section>
+{% endblock %}

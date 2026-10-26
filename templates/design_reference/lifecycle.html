@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Lifecycle - WearWise{% endblock title %}
+{% block page_title %}Lifecycle{% endblock page_title %}
+
+{% block content %}
+{% comment %}Panah antar kartu: SVG kecil, dipakai tiga kali{% endcomment %}
+<section class="ww-page ww-page--center">
+  <p class="ww-eyebrow">05 — After the purchase</p>
+  <header class="ww-head ww-head--loose">
+    <h1 class="ww-title">Don't let good clothes end too soon.</h1>
+  </header>
+
+  <div class="ww-flow">
+    <article class="ww-step">
+      <p class="ww-eyebrow">01 — Wear</p>
+      <div class="ww-img ww-img--tan"></div>
+      <h2 class="ww-step__title">Wear</h2>
+      <p class="ww-step__text">Wear it often. Every extra wear lowers its cost and its impact.</p>
+    </article>
+    <svg class="ww-arrow" viewBox="0 0 44 10" fill="none" stroke="currentColor" aria-hidden="true"><path d="M0 5h43M39 1l4 4-4 4"/></svg>
+    <article class="ww-step">
+      <p class="ww-eyebrow">02 — Repair</p>
+      <div class="ww-img ww-img--clay ww-shape--arch"></div>
+      <h2 class="ww-step__title">Repair</h2>
+      <p class="ww-step__text">Small damage doesn't mean the end.</p>
+    </article>
+    <svg class="ww-arrow" viewBox="0 0 44 10" fill="none" stroke="currentColor" aria-hidden="true"><path d="M0 5h43M39 1l4 4-4 4"/></svg>
+    <article class="ww-step">
+      <p class="ww-eyebrow">03 — Reuse</p>
+      <div class="ww-img ww-img--olive ww-shape--pill"></div>
+      <h2 class="ww-step__title">Reuse</h2>
+      <p class="ww-step__text">Give an old piece a new purpose.</p>
+    </article>
+    <svg class="ww-arrow" viewBox="0 0 44 10" fill="none" stroke="currentColor" aria-hidden="true"><path d="M0 5h43M39 1l4 4-4 4"/></svg>
+    <article class="ww-step">
+      <p class="ww-eyebrow">04 — Recycle</p>
+      <div class="ww-img ww-img--sage ww-shape--leaf"></div>
+      <h2 class="ww-step__title">Recycle</h2>
+      <p class="ww-step__text">Keep valuable materials in circulation.</p>
+    </article>
+  </div>
+</section>
+{% endblock content %}

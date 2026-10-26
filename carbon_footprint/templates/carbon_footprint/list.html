@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{% block title %}Estimates - WearWise{% endblock title %}
+{% block page_title %}Numbers{% endblock page_title %}
+
+{% block extra_css %}
 {% include 'carbon_footprint/_assets.html' %}
+{% endblock extra_css %}
+
+{% block content %}
 
 <section class="cf cf--top">
   <p class="cf-eyebrow">03 — Wear</p>
@@ -10,12 +16,6 @@
     <h1 class="cf-title">Every piece, in kilograms.</h1>
     <p class="cf-lede">Compare the carbon footprint of what you own or plan to buy.</p>
   </header>
-
-  {% if messages %}
-  <ul class="cf-flash" role="status">
-    {% for message in messages %}<li>{{ message }}</li>{% endfor %}
-  </ul>
-  {% endif %}
 
   <p class="cf-meta">
     <a class="cf-link" href="{% url 'carbon_footprint:create' %}">New estimate →</a>

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Estimate - WearWise{% endblock title %}
+{% block page_title %}Numbers{% endblock page_title %}
+
+{% block extra_css %}
+{% include 'carbon_footprint/_assets.html' %}
+{% endblock extra_css %}
+
+{% block content %}
+
+<section class="cf cf--top">
+  <p class="cf-eyebrow">03 — Wear</p>
+
+  <header class="cf-head">
+    <h1 class="cf-title">{% if mode == 'update' %}Edit this piece.{% else %}Weigh a new piece.{% endif %}</h1>
+    <p class="cf-lede">Add a price and we calculate the footprint with Climatiq. Without one, weight and material give a rougher estimate.</p>
+  </header>
+
+  <form method="post" class="cf-form" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <ul class="cf-field__error">{% for err in form.non_field_errors %}<li>{{ err }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    <div class="cf-form__grid">
+      {% for field in form %}
+      <div class="cf-field">
+        <label class="cf-field__label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}<p class="cf-field__help">{{ field.help_text }}</p>{% endif %}
+        {% for err in field.errors %}<p class="cf-field__error">{{ err }}</p>{% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <p class="cf-meta">
+      <button class="cf-btn" type="submit">{% if mode == 'update' %}Save changes{% else %}Calculate &amp; save{% endif %}</button>
+      <a class="cf-link" href="{% url 'carbon_footprint:list' %}">Cancel</a>
+    </p>
+  </form>
+</section>
+{% endblock %}

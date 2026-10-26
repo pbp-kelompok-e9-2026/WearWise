@@ -1,0 +1,148 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    /* Pulihkan status sidebar sebelum halaman digambar (hindari kedipan) */
+    (function () {
+      var c = false;
+      try {
+        var v = localStorage.getItem("ww-sidebar");
+        c = v === null ? window.matchMedia("(max-width: 900px)").matches : v === "closed";
+      } catch (e) {}
+      if (c) document.documentElement.classList.add("ww-collapsed");
+    })();
+  </script>
+  <title>{% block title %}WearWise{% endblock title %}</title>
+
+  {# Font desain: Instrument Serif (judul) + Hanken Grotesk (teks) #}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+
+  {# Urutan penting: styles.css milik tim dulu, wearwise.css terakhir supaya token desain berlaku #}
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/wearwise.css' %}">
+  {% block extra_css %}{% endblock extra_css %}
+</head>
+
+{# Nama URL di bawah adalah tebakan; kalau nama di proyekmu beda, link jatuh ke "#" tanpa error #}
+{% url 'main:show_main' as u_home %}
+{% url 'main:about' as u_about %}
+{% url 'dashboard:profile' as u_profile %}{% if not u_profile %}{% url 'main:profile' as u_profile %}{% endif %}
+{% url 'main:login' as u_login %}
+{% url 'main:register' as u_register %}
+{% url 'main:logout' as u_logout %}
+{% url 'carbon_footprint:index' as u_numbers %}
+{% url 'carbon_footprint:list' as u_numbers_list %}
+{% url 'wardrobe:show_wardrobe' as u_wardrobe %}{% if not u_wardrobe %}{% url 'wardrobe:index' as u_wardrobe %}{% endif %}
+{% url 'dashboard:discover' as u_discover %}
+{% url 'dashboard:worth_to_buy' as u_worth %}
+{% url 'dashboard:lifecycle' as u_lifecycle %}
+{% url 'admin:index' as u_settings %}
+
+<body class="ww {% block body_class %}{% endblock body_class %}">
+<div class="ww-shell">
+
+  {% block sidebar %}
+  <aside class="ww-sidebar" id="ww-sidebar">
+    <a class="ww-logo" href="{% firstof u_home '/' %}">WearWise</a>
+
+    <nav aria-label="Menu utama">
+      <ul class="ww-nav">
+        <li><a class="ww-nav__link{% if request.path == u_home %} is-active{% endif %}" href="{% firstof u_home '/' %}">Home</a></li>
+        <li><a class="ww-nav__link{% if u_discover and request.path == u_discover %} is-active{% endif %}" href="{% firstof u_discover '#' %}">Discover</a></li>
+        <li><a class="ww-nav__link{% if u_worth and request.path == u_worth %} is-active{% endif %}" href="{% firstof u_worth '#' %}">Worth to Buy</a></li>
+        <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'carbon_footprint' %} is-active{% endif %}" href="{% firstof u_numbers '#' %}">Numbers</a></li>
+        <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'wardrobe' %} is-active{% endif %}" href="{% firstof u_wardrobe '#' %}">Wardrobe</a></li>
+        <li><a class="ww-nav__link{% if u_lifecycle and request.path == u_lifecycle %} is-active{% endif %}" href="{% firstof u_lifecycle '#' %}">Lifecycle</a></li>
+      </ul>
+
+      {% if user.is_authenticated %}
+      <p class="ww-nav__label">Account</p>
+      <ul class="ww-nav">
+        <li><a class="ww-nav__link{% if u_profile and request.path == u_profile %} is-active{% endif %}" href="{% firstof u_profile '#' %}">Edit Profile</a></li>
+        <li><a class="ww-nav__link" href="{% firstof u_settings '#' %}">Settings</a></li>
+      </ul>
+      {% endif %}
+    </nav>
+
+    <div class="ww-sidebar__foot">
+      {% if user.is_authenticated %}
+      {# Django 5: logout wajib POST #}
+      <form method="post" action="{% firstof u_logout '/logout/' %}">
+        {% csrf_token %}
+        <button type="submit" class="ww-nav__link">Logout</button>
+      </form>
+      {% else %}
+      <a class="ww-nav__link" href="{% firstof u_login '#' %}">Login</a>
+      <a class="ww-nav__link" href="{% firstof u_register '#' %}">Daftar</a>
+      {% endif %}
+    </div>
+  </aside>
+  {% endblock sidebar %}
+
+  <div class="ww-main {% block main_class %}{% endblock main_class %}">
+    {% block topbar %}
+    <header class="ww-topbar">
+      {% block sidebar_toggle %}
+      <button type="button" class="ww-toggle" id="ww-toggle" aria-controls="ww-sidebar" aria-expanded="true" aria-label="Buka atau tutup menu">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/></svg>
+      </button>
+      {% endblock sidebar_toggle %}
+      <p class="ww-topbar__title">{% block page_title %}WearWise{% endblock page_title %}</p>
+
+      {% block topbar_tools %}
+      <div class="ww-topbar__tools">
+        <span class="ww-topbar__search" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="9" r="6.25"/><path d="M13.75 13.75 18 18" stroke-linecap="round"/></svg>
+        </span>
+
+        {% if user.is_authenticated %}
+        <a class="ww-user" href="{% firstof u_profile '#' %}">
+          <span class="ww-avatar">{{ user.get_username|slice:":1"|upper }}</span>
+          <span class="ww-user__text">
+            <span class="ww-user__name">{{ user.get_username }}</span>
+            <span class="ww-user__role">My account</span>
+          </span>
+          <svg class="ww-user__chev" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m1 1 4 4 4-4"/></svg>
+        </a>
+        {% else %}
+        <a class="ww-link ww-link--plain" href="{% firstof u_login '#' %}">Login</a>
+        {% endif %}
+      </div>
+      {% endblock topbar_tools %}
+    </header>
+    {% endblock topbar %}
+
+    {% if messages %}
+    <ul class="ww-flash" role="status">
+      {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+
+    <main class="ww-content">
+      {% block content %}{% endblock content %}
+    </main>
+
+    {% block footer %}{% endblock footer %}
+  </div>
+</div>
+<script>
+  (function () {
+    var root = document.documentElement, btn = document.getElementById("ww-toggle");
+    if (!btn) return;
+    function sync() { btn.setAttribute("aria-expanded", root.classList.contains("ww-collapsed") ? "false" : "true"); }
+    btn.addEventListener("click", function () {
+      var closed = root.classList.toggle("ww-collapsed");
+      try { localStorage.setItem("ww-sidebar", closed ? "closed" : "open"); } catch (e) {}
+      sync();
+    });
+    sync();
+  })();
+</script>
+{% block extra_js %}{% endblock extra_js %}
+</body>
+</html>

@@ -95,6 +95,9 @@ else:
         }
     }
 
+LOGIN_URL = "main:login"
+LOGIN_REDIRECT_URL = "main:show_main"
+LOGOUT_REDIRECT_URL = "main:login"
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
