@@ -20,6 +20,10 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/login/', auth_views.LoginView.as_view(
+        template_name='login.html', next_page='worth_to_buy_analyzer:analyzer',
+    ), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
     path('', include('main.urls')),
     path('wardrobe/', include('wardrobe.urls')),
     path('worth-to-buy/', include('worth_to_buy_analyzer.urls')),  # Modul 2
