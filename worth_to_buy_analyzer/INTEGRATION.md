@@ -186,3 +186,25 @@ nilai material yang sudah tersimpan tidak dihapus atau diganti otomatis.
   analyzer yang belum dimigrasikan. Perubahan `dashboard.Profile.user` masih
   dilaporkan oleh pemeriksaan migrasi global dan perlu ditangani pemilik modul.
 - Koreksi ini tidak mengubah CSS maupun template frontend kelompok.
+
+## Tampilan Worth to Buy, 26 Oktober 2026
+
+- Template modul kini membagi form menjadi tiga bagian: identitas pakaian,
+  kebutuhan, dan rencana biaya/pemakaian. Merek, link produk, frekuensi bulanan,
+  dan data karbon disimpan dalam bagian opsional yang bisa dibuka.
+- CSS khusus ada di `static/css/worth_to_buy.css`; seluruh selector berawalan
+  `wtb-` dan menggunakan token warna/font dari `wearwise.css`. Tidak memakai
+  Tailwind, tidak mengubah CSS bersama atau tampilan modul lain.
+- `static/js/worth_to_buy.js` hanya menampilkan perkiraan biaya per pakai dengan
+  pembulatan half-up. Hasil akhir, validasi, rekomendasi, dan penyimpanan tetap
+  dihitung Django. Form tetap dapat disimpan tanpa JavaScript.
+- Saat validasi gagal, isian tetap ada dan bagian opsional terkait otomatis
+  terbuka. Ringkasan error mengarahkan pengguna ke kolom yang perlu diperbaiki.
+  Pesan sukses/gagal menggunakan pesan dari template dasar agar tidak muncul dua kali.
+- Halaman hasil, riwayat, keputusan, dan konfirmasi hapus memakai komponen modul
+  yang sama. Angka rupiah memakai format Indonesia. Tidak ada perubahan model,
+  migrasi, skema database, atau rumus skor dalam pembaruan tampilan ini.
+- Verifikasi: 53 tes analyzer dan karbon lulus. Pengujian browser menggunakan
+  akun/database sementara yang terpisah dari database pengguna: preview biaya,
+  penyimpanan analisis, data karbon offline, validasi pasangan bahan/berat,
+  penyimpanan keputusan, serta form dan hasil pada layar 390px.

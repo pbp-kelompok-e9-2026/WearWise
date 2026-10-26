@@ -1,17 +1,16 @@
 {% extends 'base.html' %}
+{% load static i18n %}
 {% block title %}Worth to Buy Analyzer{% endblock %}
 {% block page_title %}Worth to Buy{% endblock %}
+{% block extra_css %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/worth_to_buy.css' %}">{% endblock %}
 {% block content %}
-<section class="wtb-page" aria-label="Worth to Buy Analyzer">
+{% language 'id' %}
+<section class="ww-page wtb-page" aria-label="Worth to Buy Analyzer">
     <nav class="wtb-nav" aria-label="Navigasi Worth to Buy">
-        <a href="{% url 'worth_to_buy_analyzer:analyzer' %}">Riwayat analisis</a>
-        <a href="{% url 'worth_to_buy_analyzer:create' %}">Analisis baru</a>
+        <a href="{% url 'worth_to_buy_analyzer:analyzer' %}"{% if request.resolver_match.url_name == 'analyzer' %} aria-current="page"{% endif %}>Koleksi analisis</a>
+        <a href="{% url 'worth_to_buy_analyzer:create' %}"{% if request.resolver_match.url_name == 'create' %} aria-current="page"{% endif %}>Analisis baru <span aria-hidden="true">↗</span></a>
     </nav>
-    {% if messages %}
-    <ul class="wtb-messages" aria-live="polite">
-        {% for message in messages %}<li>{{ message }}</li>{% endfor %}
-    </ul>
-    {% endif %}
     {% block analyzer_content %}{% endblock %}
 </section>
+{% endlanguage %}
 {% endblock %}

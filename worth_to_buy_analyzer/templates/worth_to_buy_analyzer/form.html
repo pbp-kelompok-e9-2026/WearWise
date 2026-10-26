@@ -1,16 +1,87 @@
 {% extends 'worth_to_buy_analyzer/_layout.html' %}
+{% load static %}
 {% block analyzer_content %}
-<h1>{% if mode == 'update' %}Edit analisis{% else %}Analisis calon pakaian{% endif %}</h1>
-<p>Masukkan harga dalam rupiah dan perkiraan total pemakaian. Material dan berat bersifat opsional untuk estimasi karbon.</p>
-{% if mode == 'update' %}<p>Perubahan isian akan menghitung ulang hasil dan mengembalikan keputusan ke “Belum diputuskan”. Catatan sebelumnya tetap disimpan untuk ditinjau kembali.</p>{% endif %}
-<form method="post" class="wtb-form" novalidate>
+<header class="wtb-heading">
+    <p class="wtb-eyebrow">01 / Sebelum masuk keranjang</p>
+    <h1 class="wtb-title">{% if mode == 'update' %}Rencana berubah?<br><em>Hitung ulang, yuk.</em>{% else %}Suka bajunya.<br><em>Sepadan belinya?</em>{% endif %}</h1>
+    <p class="wtb-intro">Kenali kebutuhanmu, cek budget, dan lihat nilai setiap pemakaian.</p>
+</header>
+<div class="wtb-form-layout">
+<form method="post" class="wtb-form" id="wtb-analysis-form" novalidate>
     {% csrf_token %}
-    {% include 'worth_to_buy_analyzer/_fields.html' %}
-    <button type="submit">Hitung dan simpan analisis</button>
-    {% if mode == 'update' %}
-    <a href="{% url 'worth_to_buy_analyzer:detail' item.pk %}">Batal</a>
-    {% else %}
-    <a href="{% url 'worth_to_buy_analyzer:analyzer' %}">Batal</a>
+    {% if form.errors %}
+    <div class="wtb-alert" role="alert" tabindex="-1" id="wtb-errors">
+        <strong>Ada isian yang perlu dicek.</strong>
+        <p>Isianmu tetap tersimpan di form ini. Perbaiki bagian berikut, lalu coba lagi.</p>
+        {{ form.non_field_errors }}
+        <ul>{% for field in form %}{% if field.errors %}<li><a href="#{{ field.id_for_label }}">{{ field.label }}: {{ field.errors|join:' ' }}</a></li>{% endif %}{% endfor %}</ul>
+    </div>
     {% endif %}
+    {% if mode == 'update' %}<p class="wtb-notice">Jika isian berubah, hasil dihitung ulang dan keputusan perlu dipilih kembali. Catatanmu tetap disimpan.</p>{% endif %}
+    <fieldset class="wtb-section">
+        <legend><span class="wtb-step">01</span> Kenalan dengan incaranmu</legend>
+        <p class="wtb-section-copy">Mulai dari pakaian yang sedang kamu pertimbangkan.</p>
+        <div class="wtb-grid">
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.clothing_name %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.category %}
+        </div>
+        <details class="wtb-disclosure"{% if form.brand.value or form.product_url.value or form.brand.errors or form.product_url.errors %} open{% endif %}>
+            <summary>Tambahkan merek &amp; link produk <span class="wtb-optional">Opsional</span></summary>
+            <div class="wtb-grid">
+                {% include 'worth_to_buy_analyzer/_field.html' with field=form.brand %}
+                {% include 'worth_to_buy_analyzer/_field.html' with field=form.product_url %}
+            </div>
+        </details>
+    </fieldset>
+    <fieldset class="wtb-section">
+        <legend><span class="wtb-step">02</span> Ada tempat di lemarimu?</legend>
+        <p class="wtb-section-copy">Pikirkan fungsi pakaian ini dalam keseharianmu.</p>
+        <div class="wtb-grid">
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.existing_clothing %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.purpose %}
+        </div>
+    </fieldset>
+    <fieldset class="wtb-section">
+        <legend><span class="wtb-step">03</span> Biar belinya terasa sepadan</legend>
+        <p class="wtb-section-copy">Harga dibagi total pemakaian = biaya sekali pakai.</p>
+        <div class="wtb-grid">
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.price %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.budget %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.expected_wears %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.target_cpw %}
+        </div>
+        <details class="wtb-disclosure"{% if form.wears_per_month.value or form.wears_per_month.errors %} open{% endif %}>
+            <summary>Kapan targetku tercapai? <span class="wtb-optional">Opsional</span></summary>
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.wears_per_month %}
+        </details>
+    </fieldset>
+    <details class="wtb-disclosure wtb-carbon-option"{% if form.material.value or form.weight_kg.value or form.material.errors or form.weight_kg.errors %} open{% endif %}>
+        <summary>Sertakan estimasi karbon <span class="wtb-optional">Opsional</span></summary>
+        <p class="wtb-help">Tahu bahan dan beratnya? Isi keduanya. Kalau belum tahu, kamu tetap bisa lanjut.</p>
+        <div class="wtb-grid">
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.material %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.weight_kg %}
+        </div>
+    </details>
+    <div class="wtb-actions">
+        <button class="wtb-button" type="submit">{% if mode == 'update' %}Simpan &amp; hitung ulang{% else %}Lihat hasil analisisku{% endif %} <span aria-hidden="true">↗</span></button>
+        <a class="wtb-text-link" href="{% if mode == 'update' %}{% url 'worth_to_buy_analyzer:detail' item.pk %}{% else %}{% url 'worth_to_buy_analyzer:analyzer' %}{% endif %}">Batal</a>
+    </div>
+    <p class="wtb-help">Analisis otomatis disimpan ke koleksimu dan hanya bisa diakses lewat akunmu.</p>
 </form>
+<aside class="wtb-aside" aria-label="Panduan biaya per pakai">
+    <div class="wtb-preview">
+        <p class="wtb-eyebrow">Sedikit hitung, lebih yakin</p>
+        <svg class="wtb-shirt" viewBox="0 0 180 160" fill="none" aria-hidden="true"><path d="M62 22 28 38 10 77 41 91 50 73v65h80V73l9 18 31-14-18-39-34-16c-3 17-53 17-56 0Z" stroke="currentColor" stroke-width="1.5"/><path d="M62 22c0 34 56 34 56 0M50 115h80" stroke="currentColor" stroke-width="1.5"/><path d="m137 14 3-9 3 9 9 3-9 3-3 9-3-9-9-3 9-3Z" fill="currentColor"/></svg>
+        <p class="wtb-preview-label">Perkiraan biaya sekali pakai</p>
+        <div id="wtb-live-preview" aria-live="polite" aria-atomic="true">
+            <p class="wtb-preview-value" id="wtb-cpw">—</p>
+            <p class="wtb-preview-note" id="wtb-preview-note">Isi harga dan total pemakaian untuk melihat perkiraannya.</p>
+        </div>
+        <p class="wtb-preview-foot">Hasil lengkap dan rekomendasi muncul setelah kamu menyimpan analisis.</p>
+    </div>
+    <div class="wtb-tip"><span class="wtb-eyebrow">Coba bayangkan</span><p>Baju Rp300.000 yang dipakai 60 kali berarti <strong>Rp5.000 per pakai.</strong></p><p class="wtb-help">Pilih perkiraan pemakaian yang realistis untuk rutinitasmu.</p></div>
+</aside>
+</div>
 {% endblock %}
+{% block extra_js %}{{ block.super }}<script src="{% static 'js/worth_to_buy.js' %}" defer></script>{% endblock %}
