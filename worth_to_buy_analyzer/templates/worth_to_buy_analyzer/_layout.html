@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Worth to Buy Analyzer{% endblock %}
+{% block content %}
+<section class="wtb-page" aria-label="Worth to Buy Analyzer">
+    <nav class="wtb-nav" aria-label="Navigasi Worth to Buy">
+        <a href="{% url 'worth_to_buy_analyzer:analyzer' %}">Riwayat analisis</a>
+        <a href="{% url 'worth_to_buy_analyzer:create' %}">Analisis baru</a>
+    </nav>
+    {% if messages %}
+    <ul class="wtb-messages" aria-live="polite">
+        {% for message in messages %}<li>{{ message }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+    {% block analyzer_content %}{% endblock %}
+</section>
+{% endblock %}

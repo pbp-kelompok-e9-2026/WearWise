@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.validators import MinValueValidator, URLValidator
 from django.db import models
 
+from carbon_footprint.constants import MATERIAL_CHOICES
+
 
 class PurchaseAnalysis(models.Model):
     class Category(models.TextChoices):
@@ -43,6 +45,14 @@ class PurchaseAnalysis(models.Model):
     product_url = models.URLField(
         "Link pembelian", max_length=500, blank=True,
         validators=[URLValidator(schemes=["http", "https"])],
+    )
+    material = models.CharField(
+        "Material (opsional)", max_length=30, choices=MATERIAL_CHOICES, blank=True,
+    )
+    weight_kg = models.DecimalField(
+        "Berat pakaian (kg, opsional)", max_digits=6, decimal_places=2,
+        null=True, blank=True,
+        validators=[MinValueValidator(Decimal("0.01"))],
     )
     existing_clothing = models.CharField(
         "Pakaian yang sudah dimiliki", max_length=20,
