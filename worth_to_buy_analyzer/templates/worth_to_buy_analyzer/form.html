@@ -1,0 +1,16 @@
+{% extends 'worth_to_buy_analyzer/_layout.html' %}
+{% block analyzer_content %}
+<h1>{% if mode == 'update' %}Edit analisis{% else %}Analisis calon pakaian{% endif %}</h1>
+<p>Masukkan harga dalam rupiah dan perkiraan total pemakaian. Material dan berat bersifat opsional untuk estimasi karbon.</p>
+{% if mode == 'update' %}<p>Perubahan isian akan menghitung ulang hasil dan mengembalikan keputusan ke “Belum diputuskan”. Catatan sebelumnya tetap disimpan untuk ditinjau kembali.</p>{% endif %}
+<form method="post" class="wtb-form" novalidate>
+    {% csrf_token %}
+    {% include 'worth_to_buy_analyzer/_fields.html' %}
+    <button type="submit">Hitung dan simpan analisis</button>
+    {% if mode == 'update' %}
+    <a href="{% url 'worth_to_buy_analyzer:detail' item.pk %}">Batal</a>
+    {% else %}
+    <a href="{% url 'worth_to_buy_analyzer:analyzer' %}">Batal</a>
+    {% endif %}
+</form>
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'worth_to_buy_analyzer/_layout.html' %}
+{% block analyzer_content %}
+<h1>Worth to Buy Analyzer</h1>
+<p>Periksa kebutuhan, budget, dan rencana pemakaian sebelum membeli pakaian.</p>
+<h2>Riwayat analisis kamu</h2>
+{% for item in page_obj %}
+<article class="wtb-history-item">
+    <h3><a href="{% url 'worth_to_buy_analyzer:detail' item.pk %}">{{ item.clothing_name }}</a></h3>
+    <p>{{ item.get_category_display }} · Rp{{ item.price|floatformat:2 }} · {{ item.expected_wears }} kali pemakaian</p>
+    <p>{{ item.created_at|date:'d M Y H:i' }} · {{ item.get_decision_display }}</p>
+    <a href="{% url 'worth_to_buy_analyzer:update' item.pk %}">Edit</a>
+    <a href="{% url 'worth_to_buy_analyzer:delete' item.pk %}">Hapus</a>
+</article>
+{% empty %}
+<p>Belum ada analisis. Mulai dengan <a href="{% url 'worth_to_buy_analyzer:create' %}">calon pakaian pertamamu</a>.</p>
+{% endfor %}
+{% if page_obj.has_other_pages %}
+<nav aria-label="Halaman riwayat">
+    {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}">Sebelumnya</a>{% endif %}
+    <span>Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}">Berikutnya</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

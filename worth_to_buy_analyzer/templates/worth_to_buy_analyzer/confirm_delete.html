@@ -1,0 +1,10 @@
+{% extends 'worth_to_buy_analyzer/_layout.html' %}
+{% block analyzer_content %}
+<h1>Hapus analisis?</h1>
+<p>Analisis untuk <strong>{{ item.clothing_name }}</strong> beserta catatan keputusannya akan dihapus.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Ya, hapus analisis</button>
+    <a href="{% url 'worth_to_buy_analyzer:detail' item.pk %}">Batal</a>
+</form>
+{% endblock %}

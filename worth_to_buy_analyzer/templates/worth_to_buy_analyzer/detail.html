@@ -1,0 +1,60 @@
+{% extends 'worth_to_buy_analyzer/_layout.html' %}
+{% block analyzer_content %}
+<h1>{{ item.clothing_name }}</h1>
+<p>{{ item.get_category_display }}{% if item.brand %} · {{ item.brand }}{% endif %}</p>
+{% if item.product_url %}<p><a href="{{ item.product_url }}" rel="noopener noreferrer">Lihat produk</a></p>{% endif %}
+<a href="{% url 'worth_to_buy_analyzer:update' item.pk %}">Edit analisis</a>
+<a href="{% url 'worth_to_buy_analyzer:delete' item.pk %}">Hapus analisis</a>
+<section class="wtb-result" aria-labelledby="wtb-result-title">
+    <h2 id="wtb-result-title">Hasil analisis</h2>
+    <dl>
+        <dt>Harga</dt><dd>Rp{{ item.price|floatformat:2 }}</dd>
+        <dt>Budget</dt><dd>Rp{{ item.budget|floatformat:2 }} — {% if result.within_budget %}Sesuai budget{% else %}Melebihi budget{% endif %}</dd>
+        <dt>Perkiraan total pemakaian</dt><dd>{{ item.expected_wears }} kali</dd>
+        <dt>Biaya per pakai</dt><dd>Rp{{ result.cost_per_wear|floatformat:2 }}</dd>
+        <dt>Target biaya per pakai</dt><dd>Rp{{ item.target_cpw|floatformat:2 }} — {% if result.meets_cpw_target %}Target tercapai{% else %}Belum mencapai target{% endif %}</dd>
+        <dt>Minimal pemakaian untuk mencapai target</dt><dd>{{ result.wears_to_target }} kali</dd>
+        {% if result.months_to_target %}<dt>Perkiraan waktu mencapai target</dt><dd>{{ result.months_to_target }} bulan pada {{ item.wears_per_month }} kali per bulan</dd>{% endif %}
+        <dt>Purchase score</dt><dd>{{ result.purchase_score }}/100</dd>
+        <dt>Rekomendasi</dt><dd>{{ result.recommendation_label }}</dd>
+    </dl>
+    <p>{{ result.reason }}</p>
+    <details class="wtb-rules">
+        <summary>Cara menghitung skor (aturan versi {{ result.rule_version }})</summary>
+        <p>Skor ini aturan aplikasi, bukan ukuran ilmiah keberlanjutan atau skor dari Climatiq. Rekomendasi tetap mengutamakan pakaian yang sudah dimiliki dan budget.</p>
+        <ul>
+            <li>Biaya per pakai: 40 × minimum(1, target ÷ biaya per pakai). Hasil: {{ result.score_breakdown.cost_per_wear }}/40.</li>
+            <li>Budget: 30 × minimum(1, budget ÷ harga). Hasil: {{ result.score_breakdown.budget }}/30.</li>
+            <li>Pakaian serupa: belum punya 20, perlu diperbaiki 10, masih layak 0. Hasil: {{ result.score_breakdown.existing_clothing }}/20.</li>
+            <li>Tujuan: rutin/penggantian 10, acara tertentu 5, variasi 0. Hasil: {{ result.score_breakdown.purpose }}/10.</li>
+        </ul>
+        <p>Jumlah komponen dibulatkan menjadi skor 0–100. Perkiraan pemakaian berasal dari isianmu, bukan jaminan frekuensi pemakaian.</p>
+    </details>
+</section>
+<section class="wtb-carbon" aria-labelledby="wtb-carbon-title">
+    <h2 id="wtb-carbon-title">Estimasi karbon</h2>
+    {% if item.carbon_kg_co2e is not None %}
+    <p>{{ item.carbon_kg_co2e|floatformat:4 }} kg CO2e · {{ result.carbon_per_wear|floatformat:4 }} kg CO2e per pakai</p>
+    <p>{{ item.get_material_display }} · {{ item.weight_kg }} kg</p>
+    <p>Sumber: {{ item.carbon_reference }}</p>
+    <p>{{ item.carbon_scope }}</p>
+    <p>Diestimasi pada {{ item.carbon_estimated_at|date:'d M Y H:i' }}.</p>
+    {% else %}
+    <p>Data karbon belum tersedia. Lengkapi material dan berat pakaian, atau coba perbarui estimasi jika layanan sebelumnya gagal.</p>
+    {% endif %}
+    <form method="post" action="{% url 'worth_to_buy_analyzer:refresh_carbon' item.pk %}">
+        {% csrf_token %}
+        <button type="submit">Perbarui estimasi karbon</button>
+    </form>
+</section>
+<section class="wtb-decision" aria-labelledby="wtb-decision-title">
+    <h2 id="wtb-decision-title">Keputusanmu</h2>
+    <p>Rekomendasi tidak otomatis menjadi keputusan. Tentukan pilihanmu di sini.</p>
+    {% if item.decided_at %}<p>Diputuskan pada {{ item.decided_at|date:'d M Y H:i' }}.</p>{% endif %}
+    <form method="post" action="{% url 'worth_to_buy_analyzer:decide' item.pk %}" novalidate>
+        {% csrf_token %}
+        {% include 'worth_to_buy_analyzer/_fields.html' with form=decision_form %}
+        <button type="submit">Simpan keputusan</button>
+    </form>
+</section>
+{% endblock %}
