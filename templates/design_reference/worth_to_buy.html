@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}Worth to Buy - WearWise{% endblock title %}
+{% block page_title %}Worth to Buy{% endblock page_title %}
+{% block main_class %}ww-main--deep{% endblock main_class %}
+
+{% block content %}
+<section class="ww-page">
+  <p class="ww-eyebrow">02 — Analyze</p>
+  <header class="ww-head ww-head--tight">
+    <h1 class="ww-title">The price isn't the whole story.</h1>
+    <p class="ww-lede">WearWise turns a potential purchase into a clearer decision.</p>
+  </header>
+
+  <div class="ww-panel">
+    <div>
+      <p class="ww-panel__label">Item</p>
+      <h2 class="ww-panel__name">Oversized Linen Shirt</h2>
+      <p class="ww-panel__price"><span class="ww-panel__label">Price</span><span>$89</span></p>
+      <div class="ww-ring" role="img" aria-label="Sustainability 82 dari 100">
+        <svg viewBox="0 0 136 136">
+          <circle class="ww-ring__track" cx="68" cy="68" r="65"/>
+          <circle class="ww-ring__fill" cx="68" cy="68" r="65" stroke-dasharray="408.4" stroke-dashoffset="73.5"/>
+        </svg>
+        <span class="ww-ring__value">82</span>
+      </div>
+    </div>
+
+    <ul class="ww-rows">
+      <li><span class="ww-rows__label">Estimated wears</span><span class="ww-rows__value">24×</span></li>
+      <li><span class="ww-rows__label">Cost per wear</span><span class="ww-rows__value">$3.70</span></li>
+      <li><span class="ww-rows__label">Carbon footprint</span><span class="ww-rows__value">3.2 kg CO₂e</span></li>
+      <li><span class="ww-rows__label">Sustainability</span><span class="ww-rows__value">82 / 100</span></li>
+    </ul>
+  </div>
+
+  <p class="ww-more"><a class="ww-link" href="#">Analyze another item</a></p>
+</section>
+{% endblock content %}

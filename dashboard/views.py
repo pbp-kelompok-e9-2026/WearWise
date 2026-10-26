@@ -39,4 +39,4 @@ def show_profile(request):
         'avg_cost_per_wear': avg_cost_per_wear,
         'sustainability_score': score,
     }
-    return render(request, 'profile.html', context)
+    return render(request, 'dashboard/profile.html', context)

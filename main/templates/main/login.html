@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - WearWise{% endblock title %}
+{% block body_class %}ww-bare{% endblock body_class %}
+{% block sidebar %}{% endblock sidebar %}
+{% block sidebar_toggle %}{% endblock sidebar_toggle %}
+{% block page_title %}WearWise{% endblock page_title %}
+{% block topbar_tools %}{% endblock topbar_tools %}
+
+{% block content %}
+<section class="ww-auth">
+  <div class="ww-auth__card">
+    <p class="ww-eyebrow ww-eyebrow--soft">Welcome back</p>
+    <h1 class="ww-auth__title">Login.</h1>
+
+    {% if form.errors %}
+    <p class="ww-error">Username atau password salah.</p>
+    {% endif %}
+
+    {# Tanpa atribut action, supaya ?next=... ikut terkirim dan user kembali ke halaman semula #}
+    <form method="post" class="ww-form">
+      {% csrf_token %}
+      <div class="ww-field">
+        <label for="id_username">Username</label>
+        <input type="text" name="username" id="id_username" autocomplete="username" autofocus required>
+      </div>
+      <div class="ww-field">
+        <label for="id_password">Password</label>
+        <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="ww-btn ww-btn--block">Login</button>
+    </form>
+
+    <p class="ww-auth__alt">Belum punya akun? <a href="{% url 'main:register' %}">Daftar</a></p>
+  </div>
+</section>
+{% endblock content %}

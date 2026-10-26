@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Discover - WearWise{% endblock title %}
+{% block page_title %}Discover{% endblock page_title %}
+
+{% block content %}
+<section class="ww-page">
+  <p class="ww-eyebrow">01 — Discover</p>
+  <header class="ww-head">
+    <h1 class="ww-title">Fashion worth discovering.</h1>
+    <p class="ww-lede">Explore pieces based not only on how they look, but how they live with you.</p>
+  </header>
+
+  <div class="ww-discover">
+    <article class="ww-feature">
+      <div class="ww-img ww-img--clay ww-img--shade-strong"></div>
+      <div class="ww-feature__label">
+        <p class="ww-meta-eyebrow">Atelier Nord</p>
+        <h2 class="ww-item-name">Baju1</h2>
+        <p class="ww-item-line">$214 · Wool blend · 60+ wears</p>
+      </div>
+    </article>
+
+    <div class="ww-stack">
+      <article class="ww-stack__item">
+        <div class="ww-img ww-img--tan"></div>
+        <p class="ww-meta-eyebrow">Studio Form</p>
+        <h2 class="ww-item-name">Baju2</h2>
+        <p class="ww-item-line"><strong>$89</strong> Linen · Breathable</p>
+        <span class="ww-tag">High wear potential</span>
+      </article>
+      <article class="ww-stack__item">
+        <div class="ww-img ww-img--sage"></div>
+        <p class="ww-meta-eyebrow">Maison Oto</p>
+        <h2 class="ww-item-name">Baju3</h2>
+        <p class="ww-item-line"><strong>$124</strong> Organic cotton · Durable</p>
+        <span class="ww-tag">High wear potential</span>
+      </article>
+    </div>
+
+    <aside class="ww-callout">
+      <p class="ww-meta-eyebrow" style="color:var(--ww-ink)">Wear potential</p>
+      <div class="ww-callout__body">
+        <p class="ww-callout__number">9 of 10</p>
+        <p class="ww-callout__text">pieces in this edit are designed to be worn 30 times or more. Quality is the first step toward a lower cost per wear.</p>
+      </div>
+      <a class="ww-link" href="#">See the full edit</a>
+    </aside>
+  </div>
+</section>
+{% endblock content %}
