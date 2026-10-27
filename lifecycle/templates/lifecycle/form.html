@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }} - WearWise{% endblock title %}
+{% block page_title %}Lifecycle{% endblock page_title %}
+
+{% block content %}
+<section class="ww-page">
+  <h1 class="ww-title">{{ title }}</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Simpan</button>
+    <a href="{% url 'lifecycle:index' %}">Batal</a>
+  </form>
+</section>
+{% endblock content %}

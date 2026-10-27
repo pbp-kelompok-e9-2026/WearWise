@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Hapus catatan - WearWise{% endblock title %}
+{% block page_title %}Lifecycle{% endblock page_title %}
+
+{% block content %}
+<section class="ww-page">
+  <h1 class="ww-title">Hapus catatan?</h1>
+  <p>Catatan kondisi <strong>{{ record }}</strong> akan dihapus permanen.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Ya, hapus</button>
+    <a href="{% url 'lifecycle:index' %}">Batal</a>
+  </form>
+</section>
+{% endblock content %}
