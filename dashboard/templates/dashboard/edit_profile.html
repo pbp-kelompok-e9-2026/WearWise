@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="ww-page">
+    <div class="ww-profile">
+
+        <div class="ww-portrait" role="img" aria-label="Profile photo placeholder">
+            <svg viewBox="0 0 82 86" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true">
+                <circle cx="41" cy="22" r="12"/>
+                <path d="M6 82c0-18 15-26 35-26s35 8 35 26"/>
+            </svg>
+        </div>
+
+        <div>
+            <p class="ww-eyebrow ww-eyebrow--soft">My Account</p>
+            <h1 class="ww-profile__hello">Edit profile</h1>
+
+            <form method="post" class="ww-form" novalidate style="max-width: 640px;">
+                {% csrf_token %}
+
+                {% if user_form.non_field_errors or detail_form.non_field_errors %}
+                    <p class="ww-error">
+                        {{ user_form.non_field_errors|join:" " }} {{ detail_form.non_field_errors|join:" " }}
+                    </p>
+                {% endif %}
+
+                <div class="ww-field">
+                    <label for="id_username">Username</label>
+                    <input type="text" id="id_username" value="{{ request.user.username }}" disabled>
+                    <p class="ww-field__help">Your username can't be changed.</p>
+                </div>
+
+                {% for field in user_form %}
+                    <div class="ww-field">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<p class="ww-field__error">{{ error }}</p>{% endfor %}
+                    </div>
+                {% endfor %}
+
+                {% for field in detail_form %}
+                    <div class="ww-field">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<p class="ww-field__error">{{ error }}</p>{% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div class="ww-btns">
+                    <button type="submit" class="ww-btn">Save changes</button>
+                    <a href="{% url 'dashboard:show_profile' %}" class="ww-btn ww-btn--outline">Cancel</a>
+                </div>
+            </form>
+
+            <div style="max-width: 640px; margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--ww-line);">
+                <p class="ww-eyebrow ww-eyebrow--soft">Delete account</p>
+                <p style="margin: 8px 0 20px; color: var(--ww-ink-soft);">Permanently remove your account and your wardrobe. This can't be undone.</p>
+                <a href="{% url 'dashboard:delete_account' %}" class="ww-btn ww-btn--outline">Delete my account</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock content %}
