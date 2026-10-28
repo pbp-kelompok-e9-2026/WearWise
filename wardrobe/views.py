@@ -13,7 +13,7 @@ from .forms import ClothingItemForm
 def show_wardrobe(request):
     context = {
         'form': ClothingItemForm(),
-        'username': request.user.username
+        'username': request.user.username if request.user.is_authenticated else ''
     }
     return render(request, 'wardrobe.html', context)
 
@@ -56,12 +56,12 @@ def add_clothing_ajax(request):
 @login_required
 @require_POST
 def increment_wear_ajax(request, item_id):
-    item = get_object_or_404(ClothingItemForm, id=item_id, user=request.user)
+    item = get_object_or_404(ClothingItem, id=item_id, user=request.user)
     item.wear_count += 1
     item.save()
     return JsonResponse({
         "message": "Jumlah pemakaian diperbarui!",
-        "new_wear_count": item_wear_count,
+        "new_wear_count": item.wear_count,
         "new_cpw": item.calculate_cost_per_wear(),
     })
 

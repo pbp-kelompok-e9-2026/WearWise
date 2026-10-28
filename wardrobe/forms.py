@@ -7,7 +7,6 @@ class ClothingItemForm(forms.ModelForm):
         model = ClothingItem
         fields = ['name', 'category', 'material', 
                   'price', 'purchase_date', 'image_url', 
-                  'wear_count',
                 ]
 
     def clean_name(self):
