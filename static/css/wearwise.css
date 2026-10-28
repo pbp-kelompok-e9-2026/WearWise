@@ -928,3 +928,27 @@ body.ww {
   background: #a84343;
   color: #fff;
 }
+
+/* ==========================================================================
+   Modal Popover (Tambah Pakaian)
+   ========================================================================== */
+.ww-modal {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  z-index: 9999;
+  padding: 32px;
+  background: var(--ww-ivory, #f4efe6);
+  border: 1px solid var(--ww-ink, #1b1a17);
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+}
+
+.ww-modal::backdrop {
+  background-color: rgba(27, 26, 23, 0.5);
+  backdrop-filter: blur(4px);
+}

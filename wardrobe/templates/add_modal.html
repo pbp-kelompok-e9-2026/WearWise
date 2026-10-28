@@ -1,0 +1,38 @@
+<div id="add-modal" popover class="ww-modal">
+    <h2 class="ww-title" style="font-size: 28px; margin-bottom: 24px;">Tambah Pakaian</h2>
+    <form id="add-wardrobe-form" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
+        {% csrf_token %}
+        <div>
+            <label class="ww-eyebrow">Nama Pakaian</label>
+            <input type="text" name="name" required class="ww-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div>
+            <label class="ww-eyebrow">Kategori</label>
+            <select name="category" required class="ww-select" style="width: 100%; margin-top: 4px;">
+                <option value="">Semua Kategori</option>
+                <option value="TOP">Atasan</option>
+                <option value="BOTTOM">Bawahan</option>
+                <option value="OUTER">Outerwear</option>
+                <option value="DRESS">Dress</option>
+                <option value="SHOES">Sepatu</option>
+                <option value="ACCESSORY">Aksesoris</option>
+            </select>
+        </div>
+        <div>
+            <label class="ww-eyebrow">Material/Bahan</label>
+            <input type="text" name="material" placeholder="Misal: Linen, Katun" required class="ww-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div>
+            <label class="ww-eyebrow">Harga (Rp)</label>
+            <input type="number" name="price" required class="ww-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div>
+            <label class="ww-eyebrow">Tanggal Beli</label>
+            <input type="date" name="purchase_date" required class="ww-input" style="width: 100%; margin-top: 4px;">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+            <button type="button" popovertarget="add-modal" popovertargetaction="hide" class="ww-btn ww-btn--outline">Batal</button>
+            <button type="submit" class="ww-btn ww-btn--solid">Simpan</button>
+        </div>
+    </form>  
+</div>
