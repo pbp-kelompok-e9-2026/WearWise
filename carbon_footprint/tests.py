@@ -50,7 +50,7 @@ def fake_response(payload):
 class OfflineTestCase(TestCase):
     """Dasar untuk test yang tidak boleh memakai API key asli atau menyentuh jaringan.
 
-    API key dikosongkan walau environment-mu memilikinya, dan setiap panggilan
+    API key dikosongkan walau environment memilikinya, dan setiap panggilan
     requests.post yang lolos akan membuat test gagal. Test yang butuh jalur
     Climatiq memakai override_settings dan mock sendiri.
     """
