@@ -64,7 +64,9 @@
       <p class="ww-nav__label">Account</p>
       <ul class="ww-nav">
         <li><a class="ww-nav__link{% if u_profile and request.path == u_profile %} is-active{% endif %}" href="{% firstof u_profile '#' %}">Edit Profile</a></li>
+        {% if user.is_staff %}
         <li><a class="ww-nav__link" href="{% firstof u_settings '#' %}">Settings</a></li>
+        {% endif %}
       </ul>
       {% endif %}
     </nav>
