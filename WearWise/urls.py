@@ -23,6 +23,6 @@ urlpatterns = [
     path('wardrobe/', include('wardrobe.urls')),
     path('worth-to-buy/', include('worth_to_buy_analyzer.urls')),  # Modul 2
     path('carbon/', include('carbon_footprint.urls')),           # Modul 3
-    # path('lifecycle/', include('lifecycle.urls')),               # Modul 4
+    path('lifecycle/', include('lifecycle.urls')),               # Modul 4
     path('dashboard/', include('dashboard.urls')),
 ]

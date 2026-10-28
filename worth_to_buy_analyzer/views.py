@@ -1,12 +1,13 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from .forms import DecisionForm, PurchaseAnalysisForm
-from .models import PurchaseAnalysis
+from .models import ClothingReference, PurchaseAnalysis
+from .roles import purchase_user_required
 from .services import RULE_VERSION, analyze, refresh_carbon_snapshot
 
 
@@ -14,7 +15,7 @@ def _owned_analysis(request, pk):
     return get_object_or_404(PurchaseAnalysis, pk=pk, owner=request.user)
 
 
-@login_required
+@purchase_user_required
 @require_GET
 def analyzer(request):
     items = PurchaseAnalysis.objects.filter(owner=request.user).order_by("-created_at", "-pk")
@@ -22,9 +23,16 @@ def analyzer(request):
     return render(request, "worth_to_buy_analyzer/analyzer.html", {"page_obj": page})
 
 
-def _save_form(request, item=None):
+def _save_form(request, item=None, reference=None):
     item = item or PurchaseAnalysis(owner=request.user)
-    form = PurchaseAnalysisForm(request.POST if request.method == "POST" else None, instance=item)
+    initial = None
+    if reference:
+        initial = {name: getattr(reference, name) for name in (
+            "clothing_name", "category", "brand", "product_url", "price", "material", "weight_kg",
+        )}
+    form = PurchaseAnalysisForm(
+        request.POST if request.method == "POST" else None, instance=item, initial=initial,
+    )
     if request.method == "POST" and form.is_valid():
         is_new = item.pk is None
         obj = form.save(commit=False)
@@ -42,17 +50,28 @@ def _save_form(request, item=None):
         messages.success(request, "Analisis berhasil disimpan.")
         return redirect("worth_to_buy_analyzer:detail", pk=obj.pk)
     return render(request, "worth_to_buy_analyzer/form.html", {
-        "form": form, "item": item, "mode": "update" if item.pk else "create",
+        "form": form, "item": item, "mode": "update" if item.pk else "create", "reference": reference,
     })
 
 
-@login_required
+@purchase_user_required
 @require_http_methods(["GET", "POST"])
 def create(request):
-    return _save_form(request)
+    reference = None
+    # References only prefill a new form; later catalogue edits never alter a
+    # user's saved inputs or prevent submission of an already-open form.
+    if request.method == "GET" and request.GET.get("reference"):
+        try:
+            pk = int(request.GET["reference"])
+        except ValueError:
+            raise Http404 from None
+        if not 0 < pk <= 9223372036854775807:
+            raise Http404
+        reference = get_object_or_404(ClothingReference, pk=pk, is_published=True)
+    return _save_form(request, reference=reference)
 
 
-@login_required
+@purchase_user_required
 @require_GET
 def detail(request, pk):
     item = _owned_analysis(request, pk)
@@ -61,13 +80,13 @@ def detail(request, pk):
     })
 
 
-@login_required
+@purchase_user_required
 @require_http_methods(["GET", "POST"])
 def update(request, pk):
     return _save_form(request, _owned_analysis(request, pk))
 
 
-@login_required
+@purchase_user_required
 @require_http_methods(["GET", "POST"])
 def delete(request, pk):
     item = _owned_analysis(request, pk)
@@ -78,7 +97,7 @@ def delete(request, pk):
     return render(request, "worth_to_buy_analyzer/confirm_delete.html", {"item": item})
 
 
-@login_required
+@purchase_user_required
 @require_POST
 def decide(request, pk):
     item = _owned_analysis(request, pk)
@@ -98,7 +117,7 @@ def decide(request, pk):
     })
 
 
-@login_required
+@purchase_user_required
 @require_POST
 def refresh_carbon(request, pk):
     item = _owned_analysis(request, pk)

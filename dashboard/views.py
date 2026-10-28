@@ -1,9 +1,10 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Sum
 from django.shortcuts import render, redirect
-from django.contrib.auth import login
-from dashboard.forms import RegisterForm
-
+from django.contrib.auth import login, logout
+from dashboard.forms import RegisterForm, ProfileForm, ProfileDetailForm, DeleteAccountForm
+ 
 from dashboard.models import Profile
 from wardrobe.models import ClothingItem
 
@@ -40,3 +41,44 @@ def show_profile(request):
         'sustainability_score': score,
     }
     return render(request, 'dashboard/profile.html', context)
+
+@login_required
+def edit_profile(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+ 
+    if request.method == 'POST':
+        user_form = ProfileForm(request.POST, instance=request.user)
+        detail_form = ProfileDetailForm(request.POST, instance=profile)
+        if user_form.is_valid() and detail_form.is_valid():
+            user_form.save()
+            detail_form.save()
+            messages.success(request, 'Profile updated.')
+            return redirect('dashboard:show_profile')
+    else:
+        user_form = ProfileForm(instance=request.user)
+        detail_form = ProfileDetailForm(instance=profile)
+ 
+    return render(request, 'dashboard/edit_profile.html', {
+        'user_form': user_form,
+        'detail_form': detail_form,
+    })
+
+@login_required
+def delete_account(request):
+    item_count = ClothingItem.objects.filter(user=request.user).count()
+ 
+    if request.method == 'POST':
+        form = DeleteAccountForm(request.POST, user=request.user)
+        if form.is_valid():
+            user = request.user
+            logout(request)
+            user.delete()  # Profile dan ClothingItem ikut terhapus (on_delete=CASCADE)
+            messages.success(request, 'Your account has been deleted.')
+            return redirect('main:show_main')
+    else:
+        form = DeleteAccountForm(user=request.user)
+ 
+    return render(request, 'dashboard/delete_account.html', {
+        'form': form,
+        'item_count': item_count,
+    })

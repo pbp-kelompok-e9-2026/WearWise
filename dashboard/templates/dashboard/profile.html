@@ -20,13 +20,12 @@
       <dl class="ww-defs">
         <div><dt>Name</dt><dd>{{ user.get_full_name|default:user.username|default:"User" }}</dd></div>
         <div><dt>Email</dt><dd>{{ user.email|default:"user@email.com" }}</dd></div>
-        <div><dt>Phone Number</dt><dd>{{ profile.phone|default:"+62 000 0000 0000" }}</dd></div>
-        <div><dt>Address</dt><dd>{{ profile.address|default:"Street, City, Country" }}</dd></div>
+        <div><dt>Phone Number</dt><dd>{{ profile.phone|default:"Not Set" }}</dd></div>
+        <div><dt>Address</dt><dd>{{ profile.address|default:"Not Set" }}</dd></div>
       </dl>
 
       <div class="ww-btns">
-        <a href="#" class="ww-btn">Edit Profile</a>
-        <a href="#" class="ww-btn ww-btn--outline">Settings</a>
+        <a href="{% url 'dashboard:edit_profile' %}" class="ww-btn ww-btn--outline">Edit</a>
       </div>
     </div>
   </div>

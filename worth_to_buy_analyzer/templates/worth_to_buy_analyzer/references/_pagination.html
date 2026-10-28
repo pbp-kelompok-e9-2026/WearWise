@@ -1,0 +1,7 @@
+{% if page_obj.has_other_pages %}
+<nav class="wtb-pagination" aria-label="Halaman katalog">
+    {% if page_obj.has_previous %}<a href="?{{ filter_query }}&amp;page={{ page_obj.previous_page_number }}">← Sebelumnya</a>{% endif %}
+    <span>Halaman {{ page_obj.number }} dari {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}<a href="?{{ filter_query }}&amp;page={{ page_obj.next_page_number }}">Berikutnya →</a>{% endif %}
+</nav>
+{% endif %}

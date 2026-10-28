@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     'wardrobe',        # Modul 1
     'worth_to_buy_analyzer.apps.WorthToBuyAnalyzerConfig',    # Modul 2
     'carbon_footprint', # Modul 3
-    # 'lifecycle',       # Modul 4
+    'lifecycle',       # Modul 4
     'dashboard',       # Modul 5
 ]
 
