@@ -9,6 +9,7 @@
 <div class="wtb-form-layout">
 <form method="post" class="wtb-form" id="wtb-analysis-form" novalidate>
     {% csrf_token %}
+    {% if reference %}<p class="wtb-notice">Menggunakan referensi <strong>{{ reference.clothing_name }}</strong> dari {{ reference.source_name }}. Kamu bisa menyesuaikan harga dan spesifikasinya sebelum menyimpan.</p>{% endif %}
     {% if form.errors %}
     <div class="wtb-alert" role="alert" tabindex="-1" id="wtb-errors">
         <strong>Ada isian yang perlu dicek.</strong>

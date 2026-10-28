@@ -2,7 +2,7 @@
 .wtb-page { max-width: 1440px; margin: 0 auto; padding: 28px clamp(20px, 4vw, 64px) 72px; }
 .wtb-page *, .wtb-page *::before, .wtb-page *::after { box-sizing: border-box; }
 .wtb-page { --wtb-muted: var(--ww-ink-soft); --wtb-border: var(--ww-line); }
-.wtb-nav { display: flex; gap: 28px; border-bottom: 1px solid var(--wtb-border); margin-bottom: 40px; }
+.wtb-nav { display: flex; flex-wrap: wrap; gap: 0 28px; border-bottom: 1px solid var(--wtb-border); margin-bottom: 40px; }
 .wtb-nav a { padding: 10px 0 14px; text-decoration: none; font-size: .875rem; color: var(--wtb-muted); border-bottom: 2px solid transparent; }
 .wtb-nav a[aria-current] { border-color: var(--ww-ink); color: var(--ww-ink); }
 .wtb-nav a:hover { color: var(--ww-ink); }

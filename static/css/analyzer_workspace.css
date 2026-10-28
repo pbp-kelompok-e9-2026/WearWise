@@ -1,0 +1,16 @@
+/* Analyzer workspace only; shared tokens and wtb components stay reusable. */
+.ref-workspace .ref-stats { padding: 24px 28px 0; background: var(--ww-ivory-deep); border-radius: 8px; }
+.ref-workspace .ref-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 20px; margin-bottom: 12px; }
+.ref-workspace .ref-filters .wtb-field { flex: 1; min-width: 150px; margin: 0; }
+.ref-workspace .ref-filters .wtb-field:first-child { flex: 2; }
+.ref-workspace .ref-form { max-width: 900px; }
+.ref-workspace .ref-publication { padding: 20px; border: 1px solid var(--ww-line); border-radius: 6px; margin: 24px 0; background: var(--ww-ivory-deep); }
+.ref-workspace .ref-publication label { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.ref-workspace .ref-publication input { width: 20px; height: 20px; accent-color: var(--ww-olive); }
+.ref-workspace .ref-published { background: var(--ww-sage); border-color: var(--ww-sage); }
+.ref-workspace .ref-notes { white-space: normal; overflow-wrap: anywhere; margin: 24px 0; }
+@media (max-width: 700px) {
+  .ref-workspace .ref-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 16px 16px 0; }
+  .ref-workspace .ref-stats .wtb-eyebrow { font-size: .56rem; letter-spacing: .08em; }
+  .ref-workspace .ref-stats .wtb-metric-value { font-size: 2rem; }
+}

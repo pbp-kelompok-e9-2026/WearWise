@@ -1,0 +1,29 @@
+{% extends 'worth_to_buy_analyzer/_layout.html' %}
+{% block analyzer_content %}
+<header class="wtb-heading">
+    <p class="wtb-eyebrow">Worth to Buy / Referensi pakaian</p>
+    <h1 class="wtb-title">Mulai dari referensi.<br><em>Sesuaikan untuk dirimu.</em></h1>
+    <p class="wtb-intro">Pilih data pakaian yang telah diterbitkan Analyzer. Kebutuhan, budget, dan rencana pemakaiannya tetap kamu yang menentukan.</p>
+</header>
+<form method="get" class="wtb-grid">
+    <div class="wtb-field"><label for="catalogue-query">Cari nama, merek, atau sumber</label><input id="catalogue-query" name="q" value="{{ query }}" maxlength="100"></div>
+    <div class="wtb-field"><label for="catalogue-category">Kategori</label><select id="catalogue-category" name="category"><option value="">Semua kategori</option>{% for value,label in categories %}<option value="{{ value }}"{% if category == value %} selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    <div class="wtb-actions"><button class="wtb-button wtb-button--outline" type="submit">Cari referensi</button><a class="wtb-text-link" href="{% url 'worth_to_buy_analyzer:create' %}">Isi sendiri ↗</a></div>
+</form>
+{% for item in page_obj %}
+<article class="wtb-history-item">
+    <div class="wtb-item-mark" aria-hidden="true">{{ item.clothing_name|slice:':1'|upper }}</div>
+    <div class="wtb-item-main">
+        <p class="wtb-eyebrow">{{ item.get_category_display }}{% if item.brand %} · {{ item.brand }}{% endif %}</p>
+        <h2 class="wtb-item-title">{{ item.clothing_name }}</h2>
+        <p class="wtb-help">Rp{{ item.price|floatformat:'2g' }}{% if item.material %} · {{ item.get_material_display }} · {{ item.weight_kg }} kg{% endif %}<br>Sumber: {{ item.source_name }}</p>
+        {% if item.notes %}<p class="wtb-help">{{ item.notes }}</p>{% endif %}
+        {% if item.product_url %}<a class="wtb-subtle-link" href="{{ item.product_url }}" rel="noopener noreferrer">Lihat produk ↗</a>{% endif %}
+    </div>
+    <a class="wtb-button" href="{% url 'worth_to_buy_analyzer:create' %}?reference={{ item.pk }}">Gunakan referensi ↗</a>
+</article>
+{% empty %}
+<div class="wtb-empty"><h2 class="wtb-subtitle">{% if query or category %}Belum ada yang cocok.{% else %}Referensi sedang disiapkan.{% endif %}</h2><p class="wtb-intro">Kamu tetap bisa menganalisis pakaian dengan mengisi detailnya sendiri.</p><a class="wtb-button" href="{% url 'worth_to_buy_analyzer:create' %}">Buat analisis sendiri ↗</a></div>
+{% endfor %}
+{% include 'worth_to_buy_analyzer/references/_pagination.html' %}
+{% endblock %}

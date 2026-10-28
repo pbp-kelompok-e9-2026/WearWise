@@ -1,7 +1,7 @@
 from django import forms
 from django.core.validators import MaxValueValidator
 
-from .models import PurchaseAnalysis
+from .models import ClothingReference, PurchaseAnalysis
 
 
 class PurchaseAnalysisForm(forms.ModelForm):
@@ -75,3 +75,27 @@ class DecisionForm(forms.ModelForm):
         model = PurchaseAnalysis
         fields = ("decision", "decision_note")
         widgets = {"decision_note": forms.Textarea(attrs={"rows": 3})}
+
+
+class ClothingReferenceForm(forms.ModelForm):
+    class Meta:
+        model = ClothingReference
+        fields = (
+            "clothing_name", "category", "brand", "product_url", "price",
+            "material", "weight_kg", "source_name", "notes", "is_published",
+        )
+        widgets = {"notes": forms.Textarea(attrs={"rows": 3})}
+        help_texts = {
+            "source_name": "Contoh: label produk, katalog merek, atau halaman toko. Cantumkan asal datanya.",
+            "price": "Harga acuan; user tetap bisa mengubahnya saat membuat analisis.",
+            "is_published": "Jika belum dicentang, data disimpan sebagai draft dan tidak terlihat oleh user.",
+            "weight_kg": "Isi bersama bahan utama, atau kosongkan keduanya. Contoh: 500 gram = 0.50 kg.",
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get("material") and cleaned.get("weight_kg") is None and "weight_kg" not in self.errors:
+            self.add_error("weight_kg", "Isi berat pakaian atau kosongkan bahan utama.")
+        if cleaned.get("weight_kg") is not None and not cleaned.get("material") and "material" not in self.errors:
+            self.add_error("material", "Pilih bahan utama atau kosongkan berat pakaian.")
+        return cleaned

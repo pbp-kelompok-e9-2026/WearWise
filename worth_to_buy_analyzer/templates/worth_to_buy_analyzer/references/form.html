@@ -1,0 +1,33 @@
+{% extends 'worth_to_buy_analyzer/references/_layout.html' %}
+{% block workspace_content %}
+<header class="wtb-heading">
+    <p class="wtb-eyebrow">Analyzer / {% if item %}Edit{% else %}Tambah{% endif %} referensi</p>
+    <h1 class="wtb-title">{% if item %}Perbarui referensinya.{% else %}Satu referensi baru.<br><em>Banyak pilihan lebih baik.</em>{% endif %}</h1>
+    <p class="wtb-intro">Gunakan data produk yang jelas sumbernya. Harga dan spesifikasi ini menjadi isian awal yang bisa disesuaikan oleh user.</p>
+</header>
+<form method="post" class="wtb-form ref-form" novalidate>
+    {% csrf_token %}
+    {% if form.errors %}<div class="wtb-alert" role="alert"><strong>Referensi belum disimpan.</strong><p>Periksa kolom yang ditandai di bawah. Isianmu tetap ada.</p>{{ form.non_field_errors }}</div>{% endif %}
+    <fieldset class="wtb-section">
+        <legend><span class="wtb-step">01</span> Identitas pakaian</legend>
+        <div class="wtb-grid">
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.clothing_name %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.category %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.brand %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.price %}
+        </div>
+    </fieldset>
+    <fieldset class="wtb-section">
+        <legend><span class="wtb-step">02</span> Bahan &amp; sumber data</legend>
+        <div class="wtb-grid">
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.material %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.weight_kg %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.source_name %}
+            {% include 'worth_to_buy_analyzer/_field.html' with field=form.product_url %}
+        </div>
+    </fieldset>
+    {% include 'worth_to_buy_analyzer/_field.html' with field=form.notes %}
+    <div class="ref-publication"><label for="{{ form.is_published.id_for_label }}">{{ form.is_published }} {{ form.is_published.label }}</label><p class="wtb-help">{{ form.is_published.help_text }}</p>{{ form.is_published.errors }}</div>
+    <div class="wtb-actions"><button class="wtb-button" type="submit">Simpan referensi ↗</button><a class="wtb-text-link" href="{% if item %}{% url 'worth_to_buy_analyzer:reference_detail' item.pk %}{% else %}{% url 'worth_to_buy_analyzer:reference_list' %}{% endif %}">Batal</a></div>
+</form>
+{% endblock %}

@@ -106,3 +106,45 @@ class PurchaseAnalysis(models.Model):
 
     def __str__(self):
         return self.clothing_name
+
+
+class ClothingReference(models.Model):
+    """Shared catalogue maintained by Analyzers, separate from private analyses."""
+
+    clothing_name = models.CharField("Nama pakaian", max_length=150)
+    category = models.CharField("Kategori", max_length=20, choices=PurchaseAnalysis.Category.choices)
+    brand = models.CharField("Merek", max_length=100, blank=True)
+    product_url = models.URLField(
+        "Link produk", max_length=500, blank=True,
+        validators=[URLValidator(schemes=["http", "https"])],
+    )
+    price = models.DecimalField(
+        "Harga referensi (Rp)", max_digits=12, decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    material = models.CharField("Bahan utama", max_length=30, choices=MATERIAL_CHOICES, blank=True)
+    weight_kg = models.DecimalField(
+        "Berat pakaian (kg)", max_digits=6, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(Decimal("0.01"))],
+    )
+    source_name = models.CharField("Sumber data", max_length=200)
+    notes = models.TextField("Catatan referensi", max_length=1000, blank=True)
+    is_published = models.BooleanField("Tampilkan di katalog user", default=False)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        related_name="created_clothing_references", editable=False,
+    )
+    updated_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL,
+        related_name="updated_clothing_references", editable=False,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-updated_at", "-pk"]
+        verbose_name = "Referensi pakaian"
+        verbose_name_plural = "Referensi pakaian"
+
+    def __str__(self):
+        return self.clothing_name

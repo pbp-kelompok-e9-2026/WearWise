@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% load static i18n %}
+{% block title %}Ruang Analyzer - WearWise{% endblock %}
+{% block page_title %}Ruang Analyzer{% endblock %}
+{% block extra_css %}{{ block.super }}
+<link rel="stylesheet" href="{% static 'css/worth_to_buy.css' %}">
+<link rel="stylesheet" href="{% static 'css/analyzer_workspace.css' %}">
+{% endblock %}
+{% block sidebar %}
+<aside class="ww-sidebar" id="ww-sidebar">
+    <a class="ww-logo" href="{% url 'worth_to_buy_analyzer:reference_list' %}">WearWise</a>
+    <p class="ww-nav__label">Ruang Analyzer</p>
+    <nav aria-label="Menu Analyzer">
+        <ul class="ww-nav">
+            <li><a class="ww-nav__link{% if request.resolver_match.url_name != 'reference_create' %} is-active{% endif %}" href="{% url 'worth_to_buy_analyzer:reference_list' %}">Referensi pakaian</a></li>
+            <li><a class="ww-nav__link{% if request.resolver_match.url_name == 'reference_create' %} is-active{% endif %}" href="{% url 'worth_to_buy_analyzer:reference_create' %}">Tambah referensi ↗</a></li>
+            {% if user.is_superuser %}<li><a class="ww-nav__link" href="{% url 'admin:index' %}">Administrasi akun</a></li>{% endif %}
+        </ul>
+    </nav>
+    <div class="ww-sidebar__foot">
+        <form method="post" action="{% url 'main:logout' %}">{% csrf_token %}<button type="submit" class="ww-nav__link">Logout</button></form>
+    </div>
+</aside>
+{% endblock %}
+{% block topbar_tools %}
+<div class="ww-user"><span class="ww-avatar">{{ user.get_username|slice:':1'|upper }}</span><span class="ww-user__text"><span class="ww-user__name">{{ user.get_username }}</span><span class="ww-user__role">{% if user.is_superuser %}Admin{% else %}Analyzer{% endif %}</span></span></div>
+{% endblock %}
+{% block content %}
+{% language 'id' %}
+<section class="ww-page wtb-page ref-workspace" aria-label="Ruang Analyzer">
+    <nav class="wtb-nav" aria-label="Navigasi referensi">
+        <a href="{% url 'worth_to_buy_analyzer:reference_list' %}">Semua referensi</a>
+        <a href="{% url 'worth_to_buy_analyzer:reference_create' %}">Tambah referensi ↗</a>
+    </nav>
+    {% block workspace_content %}{% endblock %}
+</section>
+{% endlanguage %}
+{% endblock %}
