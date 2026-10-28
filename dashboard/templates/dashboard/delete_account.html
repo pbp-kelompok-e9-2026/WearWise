@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete account - WearWise{% endblock title %}
+{% block page_title %}Delete account{% endblock page_title %}
+
+{% block content %}
+<div class="ww-page">
+    <div style="max-width: 640px;">
+        <p class="ww-eyebrow ww-eyebrow--soft">My Account</p>
+        <h1 class="ww-profile__hello">Delete your account?</h1>
+
+        <p class="ww-lede" style="max-width: 36rem; margin-bottom: 32px;">
+            This permanently deletes your profile{% if item_count %} and
+            {{ item_count }} wardrobe item{{ item_count|pluralize }}{% endif %}.
+            You will be signed out right away and can't get any of it back.
+        </p>
+
+        <form method="post" class="ww-form" novalidate>
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="ww-field">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% for error in field.errors %}<p class="ww-field__error">{{ error }}</p>{% endfor %}
+                </div>
+            {% endfor %}
+
+            <div class="ww-btns">
+                <button type="submit" class="ww-btn ww-btn--danger">Delete my account</button>
+                <a href="{% url 'dashboard:edit_profile' %}" class="ww-btn ww-btn--outline">Keep my account</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}

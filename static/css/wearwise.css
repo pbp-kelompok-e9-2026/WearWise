@@ -574,6 +574,8 @@ body.ww {
   line-height: 1.05;
   letter-spacing: -0.02em;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ww-stat__label {
