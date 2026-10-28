@@ -1,0 +1,8 @@
+{% extends 'worth_to_buy_analyzer/references/_layout.html' %}
+{% block workspace_content %}
+<div class="wtb-empty">
+    <p class="wtb-eyebrow">Analyzer / Referensi pakaian</p><h1 class="wtb-title">Hapus referensi ini?</h1>
+    <p class="wtb-intro"><strong>{{ item.clothing_name }}</strong> akan dihapus dari database referensi. Analisis user yang sudah disimpan tetap utuh. Penghapusan referensi tidak bisa dibatalkan.</p>
+    <form method="post" class="wtb-actions">{% csrf_token %}<button class="wtb-button wtb-button--danger" type="submit">Ya, hapus referensi</button><a class="wtb-text-link" href="{% url 'worth_to_buy_analyzer:reference_detail' item.pk %}">Batal</a></form>
+</div>
+{% endblock %}

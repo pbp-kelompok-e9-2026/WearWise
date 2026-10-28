@@ -17,6 +17,10 @@
 - **Read:** Melihat hasil analisis dan riwayat pengecekan calon barang
 - **Update:** Mengubah data input atau estimasi pemakaian untuk menghitung ulang purchase score
 - **Delete:** Menghapus calon barang dan hasil analisisnya
+- **Role Analyzer:** Mengelola database referensi pakaian melalui ruang khusus
+  setelah login: tambah, lihat, edit, hapus, serta simpan sebagai draft atau
+  terbitkan ke katalog user. Referensi terbit dapat digunakan sebagai isian awal
+  analisis pribadi user.
 
 ### 3. Carbon Footprint & Sustainability
 
@@ -36,7 +40,7 @@
 - **Update:** Memperbarui kondisi pakaian dan status tindak lanjut rekomendasi
 - **Delete:** Menghapus catatan kondisi dan rekomendasi
 
-### 5. Dashboard, Profile, & Modul Analyzer
+### 5. Dashboard, Profile, & Eco Challenge
 
 **Penanggung jawab:** Brigitta Elissa Rebecca Simanjuntak (2506601855)
 
@@ -63,7 +67,10 @@
 - Menyimpan wardrobe
 
 ### 2. Analyzer
-- Input database untuk dianalisis
+- Akun khusus untuk mengelola referensi pakaian, berbeda dari user yang melakukan analisis pribadi.
+- Mengisi identitas, harga, bahan/berat, dan sumber referensi; mengelola draft serta publikasi.
+- Role diberikan admin melalui grup `Analyzer`, bukan dipilih saat registrasi.
+- Setelah login diarahkan ke `/worth-to-buy/workspace/`.
 
 ### 3. Admin
 - Mengelola data user

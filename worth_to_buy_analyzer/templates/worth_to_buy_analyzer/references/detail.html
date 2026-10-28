@@ -1,0 +1,14 @@
+{% extends 'worth_to_buy_analyzer/references/_layout.html' %}
+{% block workspace_content %}
+<header class="wtb-heading wtb-heading--split">
+    <div><p class="wtb-eyebrow">Analyzer / {{ item.get_category_display }}</p><h1 class="wtb-title">{{ item.clothing_name }}</h1><span class="wtb-pill{% if item.is_published %} ref-published{% endif %}">{% if item.is_published %}Terbit di katalog user{% else %}Draft · hanya terlihat oleh Analyzer{% endif %}</span></div>
+    <div class="wtb-actions"><a class="wtb-button" href="{% url 'worth_to_buy_analyzer:reference_update' item.pk %}">Edit referensi ↗</a><a class="wtb-subtle-link" href="{% url 'worth_to_buy_analyzer:reference_delete' item.pk %}">Hapus</a></div>
+</header>
+<div class="wtb-metrics">
+    <div class="wtb-metric"><p class="wtb-eyebrow">Harga referensi</p><p class="wtb-metric-value">Rp{{ item.price|floatformat:'2g' }}</p></div>
+    <div class="wtb-metric"><p class="wtb-eyebrow">Merek</p><p class="wtb-metric-value">{{ item.brand|default:'—' }}</p></div>
+    <div class="wtb-metric"><p class="wtb-eyebrow">Bahan &amp; berat</p><p class="wtb-metric-value">{% if item.material %}{{ item.get_material_display }} <small>· {{ item.weight_kg }} kg</small>{% else %}Belum diisi{% endif %}</p></div>
+</div>
+<div class="wtb-panel"><h2 class="wtb-subtitle">Asal referensi</h2><p>{{ item.source_name }}</p>{% if item.product_url %}<a class="wtb-text-link" href="{{ item.product_url }}" rel="noopener noreferrer">Lihat sumber produk ↗</a>{% endif %}{% if item.notes %}<p class="ref-notes">{{ item.notes|linebreaksbr }}</p>{% endif %}<p class="wtb-help">Ditambahkan oleh {{ item.created_by.username|default:'akun yang sudah dihapus' }} · {{ item.created_at|date:'d M Y H:i' }}<br>Terakhir diperbarui oleh {{ item.updated_by.username|default:'akun yang sudah dihapus' }} · {{ item.updated_at|date:'d M Y H:i' }}</p></div>
+<p class="wtb-help">Perubahan referensi berlaku untuk penggunaan berikutnya. Analisis pribadi user yang sudah disimpan tidak ikut berubah.</p>
+{% endblock %}

@@ -50,8 +50,9 @@
 
 Template khusus modul berada di `worth_to_buy_analyzer/templates/worth_to_buy_analyzer/`.
 Semua mewarisi `_layout.html`, yang mewarisi `base.html` kelompok. Selector baru
-memakai awalan `wtb-`; belum ada CSS baru atau Tailwind. Silakan terapkan desain
-Figma pada template ini, pertahankan nama field, named URL, error form, dan CSRF.
+memakai awalan `wtb-` dengan CSS khusus `static/css/worth_to_buy.css` tanpa
+Tailwind. Saat menyelaraskan desain, pertahankan nama field, named URL, error
+form, dan CSRF. Ruang Analyzer memakai layout khusus dan CSS tambahan terpisah.
 
 Namespace semua URL: `worth_to_buy_analyzer`.
 
@@ -84,7 +85,9 @@ Namespace semua URL: `worth_to_buy_analyzer`.
 - Keputusan pengguna terpisah dari rekomendasi otomatis. Form keputusan hanya
   menerima `decision` dan `decision_note`. Perubahan isian analisis mereset
   status keputusan/timestamp agar ditinjau ulang, tetapi mempertahankan catatan.
-- Semua endpoint perlu login. ID milik pengguna lain menghasilkan 404; semua
+- Semua endpoint analisis pribadi perlu login sebagai user biasa (atau admin).
+  Akun Analyzer memakai ruang referensi dan ditolak dari alur analisis pribadi.
+  ID milik pengguna lain menghasilkan 404; semua
   mutasi perlu POST dengan `{% csrf_token %}`. Refresh karbon tidak dilakukan
   saat GET detail atau riwayat.
 
@@ -186,3 +189,42 @@ nilai material yang sudah tersimpan tidak dihapus atau diganti otomatis.
   analyzer yang belum dimigrasikan. Perubahan `dashboard.Profile.user` masih
   dilaporkan oleh pemeriksaan migrasi global dan perlu ditangani pemilik modul.
 - Koreksi ini tidak mengubah CSS maupun template frontend kelompok.
+
+## Tampilan Worth to Buy, 26 Oktober 2026
+
+- Template modul kini membagi form menjadi tiga bagian: identitas pakaian,
+  kebutuhan, dan rencana biaya/pemakaian. Merek, link produk, frekuensi bulanan,
+  dan data karbon disimpan dalam bagian opsional yang bisa dibuka.
+- CSS khusus ada di `static/css/worth_to_buy.css`; seluruh selector berawalan
+  `wtb-` dan menggunakan token warna/font dari `wearwise.css`. Tidak memakai
+  Tailwind, tidak mengubah CSS bersama atau tampilan modul lain.
+- `static/js/worth_to_buy.js` hanya menampilkan perkiraan biaya per pakai dengan
+  pembulatan half-up. Hasil akhir, validasi, rekomendasi, dan penyimpanan tetap
+  dihitung Django. Form tetap dapat disimpan tanpa JavaScript.
+- Saat validasi gagal, isian tetap ada dan bagian opsional terkait otomatis
+  terbuka. Ringkasan error mengarahkan pengguna ke kolom yang perlu diperbaiki.
+  Pesan sukses/gagal menggunakan pesan dari template dasar agar tidak muncul dua kali.
+- Halaman hasil, riwayat, keputusan, dan konfirmasi hapus memakai komponen modul
+  yang sama. Angka rupiah memakai format Indonesia. Tidak ada perubahan model,
+  migrasi, skema database, atau rumus skor dalam pembaruan tampilan ini.
+- Verifikasi: 53 tes analyzer dan karbon lulus. Pengujian browser menggunakan
+  akun/database sementara yang terpisah dari database pengguna: preview biaya,
+  penyimpanan analisis, data karbon offline, validasi pasangan bahan/berat,
+  penyimpanan keputusan, serta form dan hasil pada layar 390px.
+
+## Role Analyzer, 27 Oktober 2026
+
+Konfirmasi pembagian terbaru: role Analyzer terpisah dari user biasa dan menjadi
+bagian Modul-2. Ruang Analyzer mengelola `ClothingReference` dengan draft,
+publikasi, sumber data, serta pencatatan pembuat/pengubah. User memakai katalog
+referensi terbit untuk mengisi awal form analisis pribadinya.
+
+Panduan aktivasi akun, batas akses, URL, dan verifikasi ada di
+[ANALYZER_ROLE.md](ANALYZER_ROLE.md). Login bersama tetap dipakai; tujuan setelah
+login mengikuti role. Perubahan integrasi bersama ada di `main/views.py` untuk
+redirect tersebut; CSS/template modul lain tidak diubah.
+
+Migrasi `0004` dan `0005` sudah diterapkan pada database lokal pengembang. Role
+akun yang sudah ada tidak diubah otomatis. Jalankan migrasi setelah integrasi
+di lingkungan anggota kelompok/PWS. Verifikasi terbaru: 70 tes analyzer dan
+karbon lulus, alur browser Analyzer → referensi terbit → user → analisis berhasil.

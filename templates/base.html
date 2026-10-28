@@ -39,7 +39,7 @@
 {% url 'wardrobe:index' as u_wardrobe %}
 {% url 'dashboard:show_profile' as u_profile %}{% if not u_profile %}{% url 'main:profile' as u_profile %}{% endif %}
 {% url 'dashboard:discover' as u_discover %}
-{% url 'dashboard:worth_to_buy' as u_worth %}
+{% url 'worth_to_buy_analyzer:analyzer' as u_worth %}
 {% url 'dashboard:lifecycle' as u_lifecycle %}
 {% url 'admin:index' as u_settings %}
 
@@ -54,7 +54,7 @@
       <ul class="ww-nav">
         <li><a class="ww-nav__link{% if request.path == u_home %} is-active{% endif %}" href="{% firstof u_home '/' %}">Home</a></li>
         <li><a class="ww-nav__link{% if u_discover and request.path == u_discover %} is-active{% endif %}" href="{% firstof u_discover '#' %}">Discover</a></li>
-        <li><a class="ww-nav__link{% if u_worth and request.path == u_worth %} is-active{% endif %}" href="{% firstof u_worth '#' %}">Worth to Buy</a></li>
+        <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'worth_to_buy_analyzer' %} is-active{% endif %}" href="{{ u_worth }}">Worth to Buy</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'carbon_footprint' %} is-active{% endif %}" href="{% firstof u_numbers '#' %}">Numbers</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'wardrobe' %} is-active{% endif %}" href="{% firstof u_wardrobe '#' %}">Wardrobe</a></li>
         <li><a class="ww-nav__link{% if u_lifecycle and request.path == u_lifecycle %} is-active{% endif %}" href="{% firstof u_lifecycle '#' %}">Lifecycle</a></li>
