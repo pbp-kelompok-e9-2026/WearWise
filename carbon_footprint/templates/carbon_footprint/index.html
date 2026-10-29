@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Numbers - WearWise{% endblock title %}
+{% block title %}Numbers - WiseFit{% endblock title %}
 {% block page_title %}Numbers{% endblock page_title %}
 
 {% block extra_css %}
@@ -17,8 +17,61 @@
     <p class="cf-lede">Sustainability data, set like a fashion editorial instead of a spreadsheet.</p>
   </header>
 
-  <div id="cf-numbers" class="cf-swap" aria-live="polite">
-    {% include 'carbon_footprint/_numbers.html' %}
+  {% if stats %}
+  <div class="cf-stats">
+
+    <article class="cf-stat">
+      <p class="cf-stat__value">{{ stats.wears }}</p>
+      <p class="cf-stat__label">Estimated wears</p>
+      <div class="cf-dots" aria-hidden="true">
+        {% for on in stats.dots %}<span class="cf-dot{% if on %} is-on{% endif %}"></span>{% endfor %}
+      </div>
+    </article>
+
+    <article class="cf-stat">
+      {% if stats.cost_per_wear is not None %}
+      {% with cost=stats.cost_per_wear|floatformat:"0g" %}
+      <p class="cf-stat__value{% if cost|length > 9 %} cf-stat__value--xl{% elif cost|length > 6 %} cf-stat__value--long{% endif %}"><span class="cf-stat__unit">{{ currency }}</span>{{ cost }}</p>
+      {% endwith %}
+      {% else %}
+      <p class="cf-stat__value">—</p>
+      {% endif %}
+      <p class="cf-stat__label">Cost per wear</p>
+      <div class="cf-bar cf-bar--cost" aria-hidden="true">
+        <span class="cf-bar__fill" style="width: {{ stats.cost_pct }}%"></span>
+      </div>
+    </article>
+
+    <article class="cf-stat">
+      <p class="cf-stat__value">{{ stats.carbon_kg|floatformat:"1u" }} kg</p>
+      <p class="cf-stat__label">CO₂e</p>
+      <div class="cf-bar cf-bar--carbon" aria-hidden="true">
+        <span class="cf-bar__fill" style="width: {{ stats.carbon_pct }}%"></span>
+      </div>
+    </article>
+
+    <article class="cf-stat">
+      <p class="cf-stat__value">{{ stats.score }}</p>
+      <p class="cf-stat__label">Sustainability score</p>
+      <div class="cf-bar cf-bar--score" aria-hidden="true">
+        <span class="cf-bar__fill" style="width: {{ stats.score_pct }}%"></span>
+      </div>
+    </article>
+
   </div>
+
+  <p class="cf-meta">
+    {{ item.name }}
+    <span class="cf-meta__sep">/</span>
+    <a class="cf-link" href="{% url 'carbon_footprint:update' item.pk %}">Edit</a>
+    <a class="cf-link" href="{% url 'carbon_footprint:list' %}">All estimates →</a>
+  </p>
+  {% include 'carbon_footprint/_source_note.html' %}
+  {% else %}
+  <div>
+    <p class="cf-empty">No estimates yet. Add a piece to see its numbers here.</p>
+    <p class="cf-meta"><a class="cf-link" href="{% url 'carbon_footprint:create' %}">New estimate →</a></p>
+  </div>
+  {% endif %}
 </section>
 {% endblock %}

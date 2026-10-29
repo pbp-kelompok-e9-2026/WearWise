@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Estimate - WearWise{% endblock title %}
+{% block title %}Estimate - WiseFit{% endblock title %}
 {% block page_title %}Numbers{% endblock page_title %}
 
 {% block extra_css %}
@@ -9,7 +9,7 @@
 
 {% block content %}
 
-<section class="cf cf--top" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<section class="cf cf--top">
   <p class="cf-eyebrow">03 — Wear</p>
 
   <header class="cf-head">
@@ -17,8 +17,7 @@
     <p class="cf-lede">Add a price and we calculate the footprint with Climatiq. Without one, weight and material give a rougher estimate.</p>
   </header>
 
-  <form method="post" class="cf-form" novalidate
-        hx-post="{% url 'carbon_footprint:preview' %}" hx-trigger="input delay:300ms, change, load" hx-target="#cf-preview" hx-swap="innerHTML" hx-indicator="#cf-preview">
+  <form method="post" class="cf-form" novalidate>
     {% csrf_token %}
 
     {% if form.non_field_errors %}
@@ -36,13 +35,10 @@
       {% endfor %}
     </div>
 
-    <div id="cf-preview" class="cf-preview" aria-live="polite"></div>
-
     <p class="cf-meta">
       <button class="cf-btn" type="submit">{% if mode == 'update' %}Save changes{% else %}Calculate &amp; save{% endif %}</button>
       <a class="cf-link" href="{% url 'carbon_footprint:list' %}">Cancel</a>
     </p>
   </form>
 </section>
-{{ weights|json_script:"cf-weights" }}
 {% endblock %}
