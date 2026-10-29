@@ -126,3 +126,51 @@ class LifecycleViewTest(TestCase):
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["item"], "Kemeja Linen")
         self.assertEqual(data[0]["condition_display"], "Rusak ringan")
+
+    def test_halaman_list_menyediakan_form_tambah(self):
+        response = self.client.get(reverse("lifecycle:index"))
+        self.assertIn("form", response.context)
+        self.assertContains(response, 'id="lc-create-form"')
+
+    def test_create_ajax_berhasil(self):
+        response = self.client.post(reverse("lifecycle:create_ajax"), {
+            "item": self.item.pk, "condition": "good", "status": "pending",
+        })
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.json()["record"]["recommendation"], "reuse")
+        self.assertTrue(ConditionRecord.objects.filter(condition="good", user=self.user).exists())
+
+    def test_create_ajax_tidak_valid(self):
+        response = self.client.post(reverse("lifecycle:create_ajax"), {"item": self.item.pk, "status": "pending"})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("condition", response.json()["errors"])
+
+    def test_create_ajax_harus_post(self):
+        response = self.client.get(reverse("lifecycle:create_ajax"))
+        self.assertEqual(response.status_code, 405)
+
+    def test_status_ajax_mengubah_status(self):
+        response = self.client.post(reverse("lifecycle:status_ajax", args=[self.record.pk]), {"status": "done"})
+        self.assertEqual(response.status_code, 200)
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.status, "done")
+
+    def test_status_ajax_menolak_status_tidak_valid(self):
+        response = self.client.post(reverse("lifecycle:status_ajax", args=[self.record.pk]), {"status": "asal"})
+        self.assertEqual(response.status_code, 400)
+        self.record.refresh_from_db()
+        self.assertEqual(self.record.status, "pending")
+
+    def test_delete_ajax_menghapus(self):
+        response = self.client.post(reverse("lifecycle:delete_ajax", args=[self.record.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(ConditionRecord.objects.filter(pk=self.record.pk).exists())
+
+    def test_ajax_user_lain_mendapat_404(self):
+        self.client.logout()
+        self.client.login(username="lain", password="pass12345")
+        status_url = reverse("lifecycle:status_ajax", args=[self.record.pk])
+        delete_url = reverse("lifecycle:delete_ajax", args=[self.record.pk])
+        self.assertEqual(self.client.post(status_url, {"status": "done"}).status_code, 404)
+        self.assertEqual(self.client.post(delete_url).status_code, 404)
+        self.assertTrue(ConditionRecord.objects.filter(pk=self.record.pk).exists())
