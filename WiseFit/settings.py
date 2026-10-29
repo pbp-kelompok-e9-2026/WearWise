@@ -49,7 +49,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'WearWise.urls'
+ROOT_URLCONF = 'WiseFit.urls'
 
 TEMPLATES = [
     {
@@ -66,7 +66,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'WearWise.wsgi.application'
+WSGI_APPLICATION = 'WiseFit.wsgi.application'
 
 
 # Database
