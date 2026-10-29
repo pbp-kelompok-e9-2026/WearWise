@@ -39,8 +39,9 @@
 {% url 'carbon_footprint:list' as u_numbers_list %}
 {% url 'wardrobe:show_wardrobe' as u_wardrobe %}{% if not u_wardrobe %}{% url 'wardrobe:index' as u_wardrobe %}{% endif %}
 {% url 'dashboard:discover' as u_discover %}
-{% url 'dashboard:worth_to_buy' as u_worth %}
-{% url 'dashboard:lifecycle' as u_lifecycle %}
+{% url 'dashboard:show_profile' as u_profile %}{% if not u_profile %}{% url 'main:profile' as u_profile %}{% endif %}
+{% url 'worth_to_buy_analyzer:analyzer' as u_worth %}
+{% url 'lifecycle:index' as u_lifecycle %}
 {% url 'admin:index' as u_settings %}
 
 <body class="ww {% block body_class %}{% endblock body_class %}">
