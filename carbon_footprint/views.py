@@ -1,8 +1,15 @@
+import json
+from decimal import Decimal, InvalidOperation
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+from django.views.decorators.vary import vary_on_headers
 
-from .constants import PRICE_CURRENCY_LABEL
+from . import services
+from .constants import CATEGORY_CHOICES, MATERIAL_CHOICES, PRICE_CURRENCY_LABEL
 from .forms import CarbonEstimateForm
 from .models import CarbonEstimate
 
@@ -38,7 +45,85 @@ def _user_estimates(request):
     return CarbonEstimate.objects.filter(user=request.user)
 
 
+# ---------- Bantuan untuk HTMX ----------
+# Aturan umum: permintaan HTMX mendapat potongan HTML (parsial) yang mengganti satu bagian halaman,
+# sedangkan permintaan biasa (tanpa JavaScript, atau buka lewat URL) tetap mendapat halaman penuh.
+
+SORTS = {
+    "newest": ("-updated_at", "-pk"),
+    "co2e_desc": ("-co2e_kg",),
+    "co2e_asc": ("co2e_kg",),
+    "name": ("name",),
+}
+SORT_CHOICES = [("newest", "Newest"), ("co2e_desc", "Highest CO\u2082e"), ("co2e_asc", "Lowest CO\u2082e"), ("name", "Name A\u2013Z")]
+
+
+def is_htmx(request):
+    """True untuk permintaan HTMX biasa. Pemulihan riwayat (tombol Back) butuh halaman penuh."""
+    return request.headers.get("HX-Request") == "true" and not request.headers.get("HX-History-Restore-Request")
+
+
+def toast_header(response, message):
+    """Minta browser menampilkan notifikasi kecil (ditangani static/carbon_footprint/js/cf.js)."""
+    response["HX-Trigger"] = json.dumps({"cf:toast": {"message": message}})
+    return response
+
+
+def _filtered_rows(request, params):
+    """Daftar estimasi milik user setelah dicari, difilter, dan diurutkan, beserta panjang batangnya."""
+    qs = _user_estimates(request)
+    q = params.get("q", "").strip()
+    material = params.get("material", "")
+    sort = params.get("sort", "newest")
+    if q:
+        qs = qs.filter(name__icontains=q)
+    if material in dict(MATERIAL_CHOICES):
+        qs = qs.filter(material=material)
+    else:
+        material = ""
+    if sort not in SORTS:
+        sort = "newest"
+    estimates = list(qs.order_by(*SORTS[sort]))
+    peak = max((float(e.co2e_kg) for e in estimates), default=0)
+    for e in estimates:
+        e.bar_pct = round(float(e.co2e_kg) / peak * 100) if peak else 0
+    return {
+        "estimates": estimates,
+        "filters": {"q": q, "material": material, "sort": sort},
+        "filtered": bool(q or material),
+    }
+
+
+def _parse_preview(data):
+    """Baca isi form untuk pratinjau. Kembalikan None kalau belum cukup atau tidak valid."""
+    material, category = data.get("material", ""), data.get("category", "")
+    if material not in dict(MATERIAL_CHOICES) or category not in dict(CATEGORY_CHOICES):
+        return None
+    try:
+        raw_weight = (data.get("weight_kg") or "").strip()
+        weight = Decimal(raw_weight) if raw_weight else Decimal(str(services.category_weight(category)))
+        raw_price = (data.get("price") or "").strip()
+        price = Decimal(raw_price) if raw_price else None
+        wears = int(data.get("estimated_wears") or 30)
+    except (InvalidOperation, ValueError):
+        return None
+    if not (0 < weight <= 1000) or (price is not None and not (0 <= price <= 10**10)) or not (1 <= wears <= 100000):
+        return None
+    # Pratinjau selalu offline (tanpa memanggil Climatiq) supaya mengetik tidak menghabiskan kuota API.
+    co2e, _source = services.compute_co2e(material, weight, None)
+    return {
+        "co2e": float(co2e),
+        "weight": weight,
+        "wears": wears,
+        "cost_per_wear": float(price) / wears if price else None,
+        "score": services.sustainability_score(co2e, wears),
+        "will_use_climatiq": bool(price) and bool(getattr(settings, "CLIMATIQ_API_KEY", "")),
+        "currency": PRICE_CURRENCY_LABEL,
+    }
+
+
 @login_required
+@vary_on_headers("HX-Request")
 def index(request):
     """Read: halaman Numbers untuk satu item (default: yang terbaru, atau ?item=<id>)."""
     estimates = _user_estimates(request)
@@ -54,18 +139,36 @@ def index(request):
             carbon_kg=float(item.co2e_kg),
             score=item.score,
         )
-    context = {"stats": stats, "item": item, "currency": PRICE_CURRENCY_LABEL}
-    return render(request, "carbon_footprint/index.html", context)
+    context = {
+        "stats": stats,
+        "item": item,
+        "items": list(estimates.values("pk", "name")),   # untuk pemilih item
+        "currency": PRICE_CURRENCY_LABEL,
+        # "is_analyzer": is_analyzer(request.user),
+    }
+    template = "carbon_footprint/_numbers.html" if is_htmx(request) else "carbon_footprint/index.html"
+    return render(request, template, context)
 
 
 @login_required
+@vary_on_headers("HX-Request")
 def estimate_list(request):
-    """Read: daftar semua estimasi, sekaligus perbandingan emisi antar item."""
-    estimates = list(_user_estimates(request))
-    peak = max((float(e.co2e_kg) for e in estimates), default=0)
-    for e in estimates:
-        e.bar_pct = round(float(e.co2e_kg) / peak * 100) if peak else 0
-    return render(request, "carbon_footprint/list.html", {"estimates": estimates})
+    """Read: daftar estimasi dengan pencarian, filter material, dan urutan."""
+    context = _filtered_rows(request, request.GET)
+    context.update({
+        # "is_analyzer": is_analyzer(request.user),
+        "material_choices": MATERIAL_CHOICES,
+        "sort_choices": SORT_CHOICES,
+    })
+    template = "carbon_footprint/_rows.html" if is_htmx(request) else "carbon_footprint/list.html"
+    return render(request, template, context)
+
+
+@login_required
+@require_POST
+def estimate_preview(request):
+    """Pratinjau hasil saat user mengisi form (dipanggil HTMX, tidak menyimpan apa pun)."""
+    return render(request, "carbon_footprint/_preview.html", {"p": _parse_preview(request.POST)})
 
 
 @login_required
@@ -75,7 +178,7 @@ def estimate_create(request):
         obj = form.save()
         messages.success(request, f"{obj.name} added.")
         return redirect("carbon_footprint:list")
-    return render(request, "carbon_footprint/form.html", {"form": form, "mode": "create"})
+    return render(request, "carbon_footprint/form.html", {"form": form, "mode": "create", "weights": services.current_category_weights()})
 
 
 @login_required
@@ -86,7 +189,7 @@ def estimate_update(request, pk):
         obj = form.save()
         messages.success(request, f"{obj.name} updated.")
         return redirect("carbon_footprint:list")
-    return render(request, "carbon_footprint/form.html", {"form": form, "mode": "update", "item": obj})
+    return render(request, "carbon_footprint/form.html", {"form": form, "mode": "update", "item": obj, "weights": services.current_category_weights()})
 
 
 @login_required
@@ -95,6 +198,10 @@ def estimate_delete(request, pk):
     if request.method == "POST":
         name = obj.name
         obj.delete()
+        if is_htmx(request):
+            # Kirim ulang daftar (dengan filter yang sedang aktif) dan tampilkan notifikasi.
+            context = _filtered_rows(request, request.POST)
+            return toast_header(render(request, "carbon_footprint/_rows.html", context), f"{name} removed.")
         messages.success(request, f"{name} removed.")
         return redirect("carbon_footprint:list")
     return render(request, "carbon_footprint/confirm_delete.html", {"item": obj})

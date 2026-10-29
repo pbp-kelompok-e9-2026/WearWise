@@ -1,7 +1,10 @@
+import json
 from decimal import Decimal
 from unittest import mock
 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
@@ -50,7 +53,7 @@ def fake_response(payload):
 class OfflineTestCase(TestCase):
     """Dasar untuk test yang tidak boleh memakai API key asli atau menyentuh jaringan.
 
-    API key dikosongkan walau environment memilikinya, dan setiap panggilan
+    API key dikosongkan walau environment-mu memilikinya, dan setiap panggilan
     requests.post yang lolos akan membuat test gagal. Test yang butuh jalur
     Climatiq memakai override_settings dan mock sendiri.
     """
@@ -222,3 +225,168 @@ class CrudTests(OfflineTestCase):
     def test_numbers_page_empty_state(self):
         resp = self.client.get(reverse("carbon_footprint:index"))
         self.assertContains(resp, "No estimates yet")
+
+
+
+HX = {"HTTP_HX_REQUEST": "true"}
+
+
+class HtmxTests(OfflineTestCase):
+    """Permintaan HTMX mendapat potongan HTML; permintaan biasa tetap mendapat halaman penuh."""
+
+    def setUp(self):
+        super().setUp()
+        self.user = User.objects.create_user("zidan", password="pw")
+        self.other = User.objects.create_user("budi", password="pw")
+        self.client.force_login(self.user)
+        self.shirt = self.make("Linen Shirt", "cotton", "shirt", "1.5")
+        self.jacket = self.make("Wool Jacket", "wool", "jacket", "4.0")
+        self.theirs = CarbonEstimate.objects.create(
+            user=self.other, name="Secret Dress", category="dress", material="silk",
+            weight_kg=Decimal("0.3"), co2e_kg=Decimal("2"))
+
+    def make(self, name, material, category, co2e):
+        return CarbonEstimate.objects.create(
+            user=self.user, name=name, category=category, material=material,
+            weight_kg=Decimal("0.5"), co2e_kg=Decimal(co2e))
+
+    def names(self, resp):
+        return [e.name for e in resp.context["estimates"]]
+
+    # ----- daftar -----
+
+    def test_list_returns_full_page_without_htmx(self):
+        resp = self.client.get(reverse("carbon_footprint:list"))
+        self.assertTemplateUsed(resp, "carbon_footprint/list.html")
+        self.assertContains(resp, 'id="cf-filters"')
+
+    def test_list_returns_only_rows_for_htmx(self):
+        resp = self.client.get(reverse("carbon_footprint:list"), **HX)
+        self.assertTemplateUsed(resp, "carbon_footprint/_rows.html")
+        self.assertTemplateNotUsed(resp, "carbon_footprint/list.html")
+        self.assertNotContains(resp, "<html")
+        self.assertContains(resp, "Wool Jacket")
+
+    def test_history_restore_gets_full_page(self):
+        resp = self.client.get(reverse("carbon_footprint:list"), HTTP_HX_REQUEST="true", HTTP_HX_HISTORY_RESTORE_REQUEST="true")
+        self.assertTemplateUsed(resp, "carbon_footprint/list.html")
+
+    def test_list_varies_on_hx_request_header(self):
+        resp = self.client.get(reverse("carbon_footprint:list"))
+        self.assertIn("HX-Request", resp["Vary"])
+
+    def test_search_filters_by_name_case_insensitive(self):
+        resp = self.client.get(reverse("carbon_footprint:list"), {"q": "WOOL"}, **HX)
+        self.assertEqual(self.names(resp), ["Wool Jacket"])
+
+    def test_filter_by_material(self):
+        resp = self.client.get(reverse("carbon_footprint:list"), {"material": "cotton"}, **HX)
+        self.assertEqual(self.names(resp), ["Linen Shirt"])
+
+    def test_unknown_material_and_sort_are_ignored(self):
+        resp = self.client.get(reverse("carbon_footprint:list"), {"material": "unobtainium", "sort": "'; drop"}, **HX)
+        self.assertEqual(len(self.names(resp)), 2)
+        self.assertEqual(resp.context["filters"], {"q": "", "material": "", "sort": "newest"})
+
+    def test_sorting(self):
+        url = reverse("carbon_footprint:list")
+        self.assertEqual(self.names(self.client.get(url, {"sort": "co2e_desc"}, **HX)), ["Wool Jacket", "Linen Shirt"])
+        self.assertEqual(self.names(self.client.get(url, {"sort": "co2e_asc"}, **HX)), ["Linen Shirt", "Wool Jacket"])
+        self.assertEqual(self.names(self.client.get(url, {"sort": "name"}, **HX)), ["Linen Shirt", "Wool Jacket"])
+        self.assertEqual(self.names(self.client.get(url, {"sort": "newest"}, **HX)), ["Wool Jacket", "Linen Shirt"])
+
+    def test_list_never_shows_other_users_items(self):
+        resp = self.client.get(reverse("carbon_footprint:list"), {"q": "Secret"}, **HX)
+        self.assertEqual(self.names(resp), [])
+        self.assertContains(resp, "No estimate matches this search")
+
+    def test_bar_is_relative_to_largest_visible_item(self):
+        resp = self.client.get(reverse("carbon_footprint:list"), {"sort": "co2e_desc"}, **HX)
+        self.assertEqual([e.bar_pct for e in resp.context["estimates"]], [100, 38])   # 1.5 / 4.0
+
+    # ----- hapus -----
+
+    def test_htmx_delete_returns_rows_and_toast(self):
+        url = reverse("carbon_footprint:delete", args=[self.jacket.pk])
+        resp = self.client.post(url, **HX)
+        self.assertEqual(resp.status_code, 200)
+        self.assertFalse(CarbonEstimate.objects.filter(pk=self.jacket.pk).exists())
+        self.assertTemplateUsed(resp, "carbon_footprint/_rows.html")
+        self.assertEqual(json.loads(resp["HX-Trigger"]), {"cf:toast": {"message": "Wool Jacket removed."}})
+        self.assertNotContains(resp, "Wool Jacket")
+        self.assertContains(resp, "Linen Shirt")
+
+    def test_htmx_delete_keeps_active_filters(self):
+        url = reverse("carbon_footprint:delete", args=[self.jacket.pk])
+        resp = self.client.post(url, {"material": "cotton"}, **HX)
+        self.assertEqual(self.names(resp), ["Linen Shirt"])
+
+    def test_htmx_delete_other_users_item_is_404(self):
+        resp = self.client.post(reverse("carbon_footprint:delete", args=[self.theirs.pk]), **HX)
+        self.assertEqual(resp.status_code, 404)
+        self.assertTrue(CarbonEstimate.objects.filter(pk=self.theirs.pk).exists())
+
+    def test_plain_delete_still_redirects_with_message(self):
+        resp = self.client.post(reverse("carbon_footprint:delete", args=[self.jacket.pk]))
+        self.assertRedirects(resp, reverse("carbon_footprint:list"))
+        self.assertNotIn("HX-Trigger", resp)
+
+    def test_htmx_delete_requires_login(self):
+        self.client.logout()
+        resp = self.client.post(reverse("carbon_footprint:delete", args=[self.jacket.pk]), **HX)
+        self.assertEqual(resp.status_code, 302)
+        self.assertTrue(CarbonEstimate.objects.filter(pk=self.jacket.pk).exists())
+
+    # ----- Numbers -----
+
+    def test_index_full_page_and_partial(self):
+        url = reverse("carbon_footprint:index")
+        self.assertTemplateUsed(self.client.get(url), "carbon_footprint/index.html")
+        resp = self.client.get(url, **HX)
+        self.assertTemplateUsed(resp, "carbon_footprint/_numbers.html")
+        self.assertTemplateNotUsed(resp, "carbon_footprint/index.html")
+        self.assertIn("HX-Request", resp["Vary"])
+
+    def test_index_item_picker_switches_item(self):
+        url = reverse("carbon_footprint:index")
+        resp = self.client.get(url, {"item": self.shirt.pk}, **HX)
+        self.assertEqual(resp.context["item"], self.shirt)
+        self.assertEqual([i["name"] for i in resp.context["items"]], ["Wool Jacket", "Linen Shirt"])
+
+    def test_index_ignores_other_users_item_id(self):
+        resp = self.client.get(reverse("carbon_footprint:index"), {"item": self.theirs.pk}, **HX)
+        self.assertNotEqual(resp.context["item"].user, self.other)
+        self.assertNotContains(resp, "Secret Dress")
+
+    # ----- pratinjau -----
+
+    def test_preview_is_post_only(self):
+        self.assertEqual(self.client.get(reverse("carbon_footprint:preview")).status_code, 405)
+
+    def test_preview_requires_login(self):
+        self.client.logout()
+        resp = self.client.post(reverse("carbon_footprint:preview"), FORM)
+        self.assertEqual(resp.status_code, 302)
+
+    def test_preview_computes_offline_without_saving(self):
+        with mock.patch("requests.post", side_effect=AssertionError("pratinjau tidak boleh memanggil jaringan")):
+            resp = self.client.post(reverse("carbon_footprint:preview"), {**FORM, "weight_kg": "1"})
+        self.assertEqual(resp.status_code, 200)
+        p = resp.context["p"]
+        self.assertAlmostEqual(p["co2e"], float(fallback_co2e("cotton", 1)), places=1)
+        self.assertEqual(p["cost_per_wear"], 12500)                 # 300000 / 24
+        self.assertEqual(CarbonEstimate.objects.filter(name=FORM["name"]).count(), 0)
+
+    def test_preview_uses_category_weight_when_weight_blank(self):
+        resp = self.client.post(reverse("carbon_footprint:preview"), FORM)
+        self.assertEqual(resp.context["p"]["weight"], Decimal(str(services.category_weight("shirt"))))
+
+    
+
+   
+    # ----- form -----
+
+    def test_form_page_embeds_category_weights_for_placeholder(self):
+        resp = self.client.get(reverse("carbon_footprint:create"))
+        self.assertContains(resp, 'id="cf-weights"')
+        self.assertContains(resp, 'hx-post="%s"' % reverse("carbon_footprint:preview"))

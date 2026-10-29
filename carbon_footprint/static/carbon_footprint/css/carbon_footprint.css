@@ -334,3 +334,126 @@
 
 .cf-stat__value--long { font-size: clamp(2.75rem, 4.6vw, 5.5rem); }
 .cf-stat__value--xl { font-size: clamp(2rem, 3.4vw, 4rem); }
+
+/* ---------- Halaman Analyzer ---------- */
+
+.cf-stats--sm { --cf-value-size: clamp(2.25rem, 4vw, 4.25rem); }
+
+.cf-h2 {
+  margin: 0 0 var(--space-2, 16px);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--cf-muted);
+}
+
+.cf-split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4, 32px);
+}
+
+.cf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+
+.cf-table th {
+  padding: 0 0 8px;
+  border-bottom: 1px solid var(--cf-ink);
+  color: var(--cf-muted);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.cf-table td { padding: 12px 8px 12px 0; border-bottom: 1px solid var(--cf-track); }
+.cf-table th.cf-num, .cf-table td.cf-num { text-align: right; white-space: nowrap; }
+.cf-table th.cf-num { padding-left: 8px; }
+.cf-table td.cf-num { padding-left: 8px; padding-right: 0; }
+.cf-table__bar { height: 4px; margin-top: 8px; }
+
+.cf-check { margin: var(--space-3, 24px) 0 var(--space-2, 16px); font-size: 0.9375rem; }
+.cf-check label { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; }
+
+/* ---------- Interaksi (HTMX + cf.js) ---------- */
+
+/* Bagian halaman yang diganti HTMX: redup selama permintaan berjalan */
+.cf-swap { transition: opacity 0.15s; }
+.cf-swap.htmx-request { opacity: 0.5; pointer-events: none; }
+
+/* Baris dan statistik baru masuk dengan halus */
+.cf-row, .cf-stats { animation: cf-in 0.25s ease both; }
+@keyframes cf-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* Filter daftar */
+.cf-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+  gap: var(--space-2, 16px) var(--space-3, 24px);
+  align-items: end;
+}
+
+.cf-picker { max-width: 22rem; }
+
+/* Pratinjau di form */
+.cf-preview {
+  margin: var(--space-3, 24px) 0;
+  padding: var(--space-2, 16px) 0;
+  border-top: 1px solid var(--cf-ink);
+  min-height: 7.5rem;
+  transition: opacity 0.15s;
+}
+
+.cf-preview.htmx-request { opacity: 0.5; }
+
+.cf-preview__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-2, 16px) var(--space-3, 24px);
+}
+
+.cf-preview__value {
+  margin: 0;
+  font-family: var(--cf-font-display);
+  font-size: 2.5rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.cf-preview__bar { margin-top: var(--space-2, 16px); }
+
+/* Notifikasi */
+.cf-toasts {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cf-toast {
+  margin: 0;
+  padding: 12px 18px;
+  background: var(--cf-ink);
+  color: var(--color-background, #f4efe6);
+  font-size: 0.9375rem;
+  animation: cf-in 0.25s ease both;
+  transition: opacity 0.3s;
+}
+
+.cf-toast.is-leaving { opacity: 0; }
+
+@media (max-width: 640px) {
+  .cf-filters { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-row, .cf-stats, .cf-toast { animation: none; }
+}
