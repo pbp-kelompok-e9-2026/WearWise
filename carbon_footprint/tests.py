@@ -626,3 +626,126 @@ class AnalyzerTests(OfflineTestCase):
         call_command("setup_analyzer", stdout=mock.Mock())          # aman dijalankan ulang
         with self.assertRaises(Exception):
             call_command("setup_analyzer", "tidak-ada", stdout=mock.Mock())
+
+
+class AnalyzerHtmxTests(OfflineTestCase):
+    """HTMX di ruang Analyzer: filter analisis dan form faktor tanpa muat ulang halaman."""
+
+    def setUp(self):
+        super().setUp()
+        self.user = User.objects.create_user("zidan", password="pw")
+        self.analyst = User.objects.create_user("sari", password="pw")
+        self.analyst.groups.add(Group.objects.get_or_create(name=ANALYZER_GROUP)[0])
+        self.client.force_login(self.analyst)
+        self.analysis_url = reverse("carbon_footprint:analyzer")
+        self.factors_url = reverse("carbon_footprint:factors")
+        self.make("cotton", "shirt", "3.0", "fallback")
+        self.make("wool", "jacket", "9.0", "fallback")
+        self.make("wool", "sweater", "6.0", "climatiq")
+
+    def make(self, material, category, co2e, source):
+        return CarbonEstimate.objects.create(
+            user=self.user, name="rahasia", category=category, material=material,
+            weight_kg=Decimal("0.5"), co2e_kg=Decimal(co2e), estimated_wears=30, source=source)
+
+    def factors_post(self, **overrides):
+        data = {f"material_{k}": str(v) for k, v in FALLBACK_KG_CO2E_PER_KG.items()}
+        data.update({f"category_{k}": str(v) for k, v in CATEGORY_WEIGHT_KG.items()})
+        data.update({k: str(v) for k, v in overrides.items()})
+        return data
+
+    # ----- analisis -----
+
+    def test_full_page_vs_partial(self):
+        page = self.client.get(self.analysis_url)
+        self.assertTemplateUsed(page, "carbon_footprint/analyzer.html")
+        self.assertContains(page, 'id="cf-afilters"')
+        part = self.client.get(self.analysis_url, **HX)
+        self.assertTemplateUsed(part, "carbon_footprint/_analysis.html")
+        self.assertTemplateNotUsed(part, "carbon_footprint/analyzer.html")
+        self.assertNotContains(part, "<html")
+        self.assertIn("HX-Request", part["Vary"])
+
+    def test_history_restore_gets_full_page(self):
+        resp = self.client.get(self.analysis_url, HTTP_HX_REQUEST="true", HTTP_HX_HISTORY_RESTORE_REQUEST="true")
+        self.assertTemplateUsed(resp, "carbon_footprint/analyzer.html")
+
+    def test_filters_narrow_the_analysis(self):
+        wool = self.client.get(self.analysis_url, {"material": "wool"}, **HX).context["a"]
+        self.assertEqual(wool["total"], 2)
+        self.assertEqual([g["label"] for g in wool["by_material"]], ["Wool"])
+        both = self.client.get(self.analysis_url, {"material": "wool", "source": "climatiq"}, **HX).context["a"]
+        self.assertEqual(both["total"], 1)
+        jacket = self.client.get(self.analysis_url, {"category": "jacket"}, **HX).context["a"]
+        self.assertEqual((jacket["total"], jacket["avg_co2e"]), (1, 9.0))
+
+    def test_unknown_filter_values_are_ignored(self):
+        resp = self.client.get(self.analysis_url, {"material": "unobtainium", "source": "x", "category": "'; drop"}, **HX)
+        self.assertEqual(resp.context["a"]["total"], 3)
+        self.assertFalse(resp.context["filtered"])
+
+    def test_empty_results_say_nothing_matches(self):
+        resp = self.client.get(self.analysis_url, {"material": "silk"}, **HX)
+        self.assertContains(resp, "Tidak ada yang cocok")
+        self.assertNotContains(resp, "Belum ada estimasi.<")
+
+    def test_filtered_analysis_still_hides_private_names(self):
+        resp = self.client.get(self.analysis_url, {"material": "wool"}, **HX)
+        self.assertNotContains(resp, "rahasia")
+        self.assertNotContains(resp, "zidan")
+
+    def test_regular_user_cannot_use_htmx_analysis(self):
+        self.client.force_login(self.user)
+        self.assertEqual(self.client.get(self.analysis_url, **HX).status_code, 403)
+
+    # ----- faktor -----
+
+    def test_htmx_save_returns_form_and_toast(self):
+        resp = self.client.post(self.factors_url, self.factors_post(material_cotton="25.00"), **HX)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "carbon_footprint/_factors_form.html")
+        self.assertTemplateNotUsed(resp, "carbon_footprint/factors.html")
+        self.assertEqual(json.loads(resp["HX-Trigger"])["cf:toast"]["message"], "Faktor berhasil disimpan.")
+        self.assertEqual(MaterialFactor.objects.get().kg_co2e_per_kg, Decimal("25.00"))
+        self.assertContains(resp, "is-changed")                 # nilai tersimpan ditandai "diubah"
+        self.assertEqual(resp.context["form"].material_rows[0]["changed"], True)
+
+    def test_htmx_save_reports_recalculated_count(self):
+        resp = self.client.post(self.factors_url, {**self.factors_post(material_cotton="10.00"), "recalculate": "on"}, **HX)
+        self.assertIn("dihitung ulang", json.loads(resp["HX-Trigger"])["cf:toast"]["message"])
+
+    def test_htmx_invalid_keeps_input_and_shows_errors_without_saving(self):
+        resp = self.client.post(self.factors_url, self.factors_post(material_wool="-1"), **HX)
+        self.assertEqual(resp.status_code, 200)
+        self.assertTemplateUsed(resp, "carbon_footprint/_factors_form.html")
+        self.assertContains(resp, "wtb-alert")
+        self.assertContains(resp, 'value="-1"')
+        self.assertNotIn("HX-Trigger", resp)
+        self.assertEqual(MaterialFactor.objects.count(), 0)
+
+    def test_htmx_reset(self):
+        MaterialFactor.objects.create(material="wool", kg_co2e_per_kg=Decimal("99"))
+        resp = self.client.post(self.factors_url, {"reset": "1"}, **HX)
+        self.assertEqual(MaterialFactor.objects.count(), 0)
+        self.assertTemplateUsed(resp, "carbon_footprint/_factors_form.html")
+        self.assertEqual(json.loads(resp["HX-Trigger"])["cf:toast"]["message"], "Faktor dikembalikan ke nilai bawaan.")
+        self.assertNotContains(resp, "is-changed")
+
+    def test_plain_post_still_redirects(self):
+        resp = self.client.post(self.factors_url, self.factors_post(material_cotton="25.00"))
+        self.assertRedirects(resp, self.factors_url)
+        self.assertNotIn("HX-Trigger", resp)
+
+    def test_form_marks_saved_overrides_and_counts_offline_estimates(self):
+        MaterialFactor.objects.create(material="cotton", kg_co2e_per_kg=Decimal("25.00"))
+        resp = self.client.get(self.factors_url)
+        self.assertEqual(resp.context["offline_count"], 2)         # 2 estimasi offline, 1 dari Climatiq
+        self.assertContains(resp, 'data-default="')
+        changed = [r["field"].name for r in resp.context["form"].material_rows if r["changed"]]
+        self.assertEqual(changed, ["material_cotton"])
+
+    def test_regular_user_cannot_post_factors_via_htmx(self):
+        self.client.force_login(self.user)
+        resp = self.client.post(self.factors_url, self.factors_post(material_cotton="25.00"), **HX)
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(MaterialFactor.objects.count(), 0)

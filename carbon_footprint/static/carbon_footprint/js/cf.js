@@ -30,8 +30,14 @@
   });
 
   /* Kegagalan jaringan atau server: beri tahu user, jangan diam saja. */
-  document.addEventListener("htmx:responseError", function () { toast("Something went wrong. Please try again."); });
-  document.addEventListener("htmx:sendError", function () { toast("Could not reach the server."); });
+  /* Ruang Analyzer berbahasa Indonesia, halaman user berbahasa Inggris. */
+  function inWorkspace() { return !!document.querySelector(".cf--ws"); }
+  document.addEventListener("htmx:responseError", function () {
+    toast(inWorkspace() ? "Terjadi kesalahan. Coba lagi." : "Something went wrong. Please try again.");
+  });
+  document.addEventListener("htmx:sendError", function () {
+    toast(inWorkspace() ? "Server tidak terjangkau." : "Could not reach the server.");
+  });
 
   /* ---------- Form: placeholder berat mengikuti kategori ---------- */
   function initWeightHint() {
@@ -60,6 +66,18 @@
       }
     });
   }
+
+  /* ---------- Form faktor (Analyzer): tandai kolom yang berbeda dari nilai bawaan ----------
+     Server sudah menandai nilai tersimpan (class "is-changed"); di sini penandanya ikut berubah saat mengetik.
+     Delegasi event di document supaya tetap jalan setelah HTMX mengganti form. */
+  document.addEventListener("input", function (e) {
+    var el = e.target;
+    if (!el.matches || !el.matches("input[data-default]")) return;
+    var field = el.closest(".wtb-field");
+    if (!field) return;
+    var value = parseFloat(el.value), base = parseFloat(el.dataset["default"]);
+    field.classList.toggle("is-changed", !isNaN(value) && Math.abs(value - base) > 0.0000001);
+  });
 
   function init() {
     initWeightHint();

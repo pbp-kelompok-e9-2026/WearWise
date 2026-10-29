@@ -441,8 +441,10 @@
 .cf-toast {
   margin: 0;
   padding: 12px 18px;
-  background: var(--cf-ink);
-  color: var(--color-background, #f4efe6);
+  /* Toast ditempel ke <body>, di luar .cf, jadi variabel --cf-* tidak tersedia di sini. */
+  background: var(--ww-ink, var(--color-text, #1b1a17));
+  color: var(--ww-ivory, var(--color-background, #f4efe6));
+  border-radius: 4px;
   font-size: 0.9375rem;
   animation: cf-in 0.25s ease both;
   transition: opacity 0.3s;
@@ -470,3 +472,8 @@
 .cf--ws .wtb-heading { margin-bottom: 0; }
 .cf--ws .wtb-metrics { margin: 0; }
 .cf--ws .wtb-form { display: block; }
+
+/* Kolom faktor yang berbeda dari nilai bawaan */
+.cf--ws .wtb-field.is-changed input { border-color: var(--ww-olive, #6b6a45); box-shadow: inset 3px 0 0 var(--ww-olive, #6b6a45); }
+.cf--ws .wtb-field.is-changed .wtb-help::after { content: " · diubah"; color: var(--ww-olive, #6b6a45); font-weight: 600; }
+.cf--ws form[hx-post].htmx-request { opacity: 0.6; }

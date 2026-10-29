@@ -94,9 +94,10 @@ class FactorsForm(forms.Form):
                 max_digits=max_digits,
                 decimal_places=2,
                 initial=_dec(current.get(key, defaults.get(key, FALLBACK_DEFAULT_KG_CO2E_PER_KG))),
-                widget=forms.NumberInput(attrs={"step": "0.01", "min": "0.01"}),   # gaya field dari .wtb-field (ruang Analyzer)
+                widget=forms.NumberInput(attrs={"step": "0.01", "min": "0.01", "data-default": str(default)}),   # gaya field dari .wtb-field (ruang Analyzer)
             )
-            rows.append({"key": key, "field": self[name], "default": default})
+            current_value = _dec(current.get(key, defaults.get(key, FALLBACK_DEFAULT_KG_CO2E_PER_KG)))
+            rows.append({"key": key, "field": self[name], "default": default, "changed": current_value != default})
         return rows
 
     def save(self, user):

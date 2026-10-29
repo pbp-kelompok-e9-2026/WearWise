@@ -8,7 +8,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.vary import vary_on_headers
 
 from .access import analyzer_required, can_open_analyzer, user_pages_only
-from .analysis import build_analysis
+from .analysis import SOURCE_CHOICES, build_analysis, clean_filters
 from . import services
 from .constants import CATEGORY_CHOICES, MATERIAL_CHOICES, PRICE_CURRENCY_LABEL
 from .forms import CarbonEstimateForm, FactorsForm, reset_factors
@@ -211,16 +211,36 @@ def estimate_delete(request, pk):
 # ---------- Peran Analyzer ----------
 
 @analyzer_required
+@vary_on_headers("HX-Request")
 def analyzer(request):
-    """Analisis gabungan seluruh data (tanpa nama user atau nama item): ringkasan, per material dan kategori."""
-    return render(request, "carbon_footprint/analyzer.html", {"a": build_analysis()})
+    """Analisis gabungan seluruh data (tanpa nama user atau nama item), dengan filter bahan, kategori, dan sumber."""
+    filters = clean_filters(request.GET)
+    context = {
+        "a": build_analysis(**filters),
+        "filters": filters,
+        "filtered": any(filters.values()),
+        "material_choices": MATERIAL_CHOICES,
+        "category_choices": CATEGORY_CHOICES,
+        "source_choices": SOURCE_CHOICES,
+    }
+    template = "carbon_footprint/_analysis.html" if is_htmx(request) else "carbon_footprint/analyzer.html"
+    return render(request, template, context)
+
+
+def _factors_context(form):
+    return {"form": form, "offline_count": CarbonEstimate.objects.filter(source=services.SOURCE_FALLBACK).count()}
 
 
 @analyzer_required
 def factors(request):
     """Atur faktor emisi per material dan berat per kategori yang dipakai perhitungan."""
+    htmx = is_htmx(request)
+
     if request.method == "POST" and "reset" in request.POST:
         reset_factors()
+        if htmx:
+            response = render(request, "carbon_footprint/_factors_form.html", _factors_context(FactorsForm()))
+            return toast_header(response, "Faktor dikembalikan ke nilai bawaan.")
         messages.success(request, "Faktor dikembalikan ke nilai bawaan.")
         return redirect("carbon_footprint:factors")
 
@@ -230,6 +250,10 @@ def factors(request):
         msg = "Faktor berhasil disimpan."
         if form.cleaned_data["recalculate"]:
             msg += f" {updated} estimasi offline dihitung ulang."
+        if htmx:
+            # Form baru supaya nilai, penanda "diubah", dan jumlah estimasi offline mengikuti database.
+            return toast_header(render(request, "carbon_footprint/_factors_form.html", _factors_context(FactorsForm())), msg)
         messages.success(request, msg)
         return redirect("carbon_footprint:factors")
-    return render(request, "carbon_footprint/factors.html", {"form": form})
+    template = "carbon_footprint/_factors_form.html" if htmx and request.method == "POST" else "carbon_footprint/factors.html"
+    return render(request, template, _factors_context(form))

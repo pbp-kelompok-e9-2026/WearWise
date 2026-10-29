@@ -9,49 +9,5 @@
   <p class="wtb-intro">Estimasi offline dihitung dari berat dikali faktor bahan. Nilai yang diubah di sini berlaku untuk estimasi baru, termasuk di modul Worth to Buy. Hasil Climatiq tidak terpengaruh.</p>
 </header>
 
-<form method="post" class="wtb-form ref-form" novalidate>
-  {% csrf_token %}
-  {% if form.errors %}<div class="wtb-alert" role="alert"><strong>Faktor belum disimpan.</strong><p>Periksa kolom yang ditandai di bawah. Isianmu tetap ada.</p>{{ form.non_field_errors }}</div>{% endif %}
-
-  <fieldset class="wtb-section">
-    <legend><span class="wtb-step">01</span> Faktor emisi per bahan</legend>
-    <p class="wtb-section-copy">Satuan: kg CO₂e per kg bahan.</p>
-    <div class="wtb-grid">
-      {% for row in form.material_rows %}
-      <div class="wtb-field{% if row.field.errors %} wtb-field--error{% endif %}">
-        <label for="{{ row.field.id_for_label }}">{{ row.field.label }}</label>
-        {{ row.field }}
-        <p class="wtb-help">Bawaan {{ row.default|floatformat:"2" }}</p>
-        {{ row.field.errors }}
-      </div>
-      {% endfor %}
-    </div>
-  </fieldset>
-
-  <fieldset class="wtb-section">
-    <legend><span class="wtb-step">02</span> Berat rata-rata per kategori</legend>
-    <p class="wtb-section-copy">Satuan: kg. Dipakai saat user tidak mengisi berat sendiri.</p>
-    <div class="wtb-grid">
-      {% for row in form.category_rows %}
-      <div class="wtb-field{% if row.field.errors %} wtb-field--error{% endif %}">
-        <label for="{{ row.field.id_for_label }}">{{ row.field.label }}</label>
-        {{ row.field }}
-        <p class="wtb-help">Bawaan {{ row.default|floatformat:"2" }}</p>
-        {{ row.field.errors }}
-      </div>
-      {% endfor %}
-    </div>
-  </fieldset>
-
-  <div class="ref-publication">
-    <label for="{{ form.recalculate.id_for_label }}">{{ form.recalculate }} {{ form.recalculate.label }}</label>
-    <p class="wtb-help">Hanya estimasi yang dihitung offline. Hasil Climatiq tidak diubah.</p>
-  </div>
-
-  <div class="wtb-actions">
-    <button class="wtb-button" type="submit">Simpan faktor ↗</button>
-    <button class="wtb-button wtb-button--outline" type="submit" name="reset" value="1" formnovalidate
-            onclick="return confirm('Kembalikan semua faktor ke nilai bawaan?')">Kembalikan ke bawaan</button>
-  </div>
-</form>
+{% include 'carbon_footprint/_factors_form.html' %}
 {% endblock %}

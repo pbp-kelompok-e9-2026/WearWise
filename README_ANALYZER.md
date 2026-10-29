@@ -20,3 +20,11 @@ Catatan teknis:
 - `compute_co2e` membaca tabel itu, jadi perubahan faktor juga berlaku untuk snapshot karbon di Worth to Buy. Akibatnya tes yang memanggil `compute_co2e` harus memakai `TestCase`, bukan `SimpleTestCase`.
 - Opsi "Hitung ulang" memperbarui estimasi offline yang sudah ada. Hasil Climatiq tidak diubah.
 - Halaman Analyzer memakai `worth_to_buy_analyzer/references/_layout.html` (sidebar, topbar, CSS ruang Analyzer). Tautan "Analisis karbon" dan "Faktor emisi" di sidebar itu muncul otomatis bila modul karbon terpasang.
+
+#### Interaktivitas HTMX di ruang Analyzer
+Aturannya sama dengan halaman user: permintaan HTMX (`HX-Request: true`) mendapat potongan HTML, permintaan biasa tetap mendapat halaman penuh, jadi semuanya tetap jalan tanpa JavaScript.
+
+| Halaman | Perilaku |
+|---|---|
+| Analisis karbon | Filter bahan, kategori, dan sumber data mengganti seluruh analisis tanpa muat ulang. URL ikut berubah (bisa di-bookmark, tombol Back jalan). Potongan: `_analysis.html` |
+| Faktor emisi | Simpan dan "Kembalikan ke bawaan" mengganti form di tempat (`_factors_form.html`), muncul toast, error validasi tampil tanpa kehilangan isian. Kolom yang berbeda dari bawaan diberi penanda "diubah" (langsung saat mengetik) |
