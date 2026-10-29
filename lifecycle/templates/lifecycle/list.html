@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
-{% block title %}Lifecycle - WearWise{% endblock title %}
+{% load static %}
+{% block title %}Lifecycle - WiseFit{% endblock title %}
 {% block page_title %}Lifecycle{% endblock page_title %}
 
 {% block content %}
@@ -7,54 +8,53 @@
   <p class="ww-eyebrow">05 — After the purchase</p>
   <h1 class="ww-title">Riwayat kondisi pakaian</h1>
 
-  <p><a href="{% url 'lifecycle:create' %}">+ Catat kondisi pakaian</a></p>
+  <h2>Catat kondisi pakaian</h2>
+  <form id="lc-create-form" method="post" action="{% url 'lifecycle:create' %}" data-ajax-url="{% url 'lifecycle:create_ajax' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Simpan</button>
+  </form>
 
-  <form method="get">
-    <select name="recommendation">
+  <p id="lc-message" role="status"></p>
+
+  <form id="lc-filter" method="get">
+    <select name="recommendation" aria-label="Filter rekomendasi">
       <option value="">Semua rekomendasi</option>
       {% for value, label in recommendation_choices %}
         <option value="{{ value }}" {% if value == selected_recommendation %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <select name="status">
+    <select name="status" aria-label="Filter status">
       <option value="">Semua status</option>
       {% for value, label in status_choices %}
         <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
-    <button type="submit">Filter</button>
   </form>
 
-  {% if records %}
-    <table>
-      <thead>
-        <tr>
-          <th>Pakaian</th>
-          <th>Kondisi</th>
-          <th>Kerusakan</th>
-          <th>Rekomendasi</th>
-          <th>Status</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for record in records %}
-          <tr>
-            <td>{{ record.item.name }}</td>
-            <td>{{ record.get_condition_display }}</td>
-            <td>{{ record.damage_description|default:"-" }}</td>
-            <td>{{ record.get_recommendation_display }}</td>
-            <td>{{ record.get_status_display }}</td>
-            <td>
-              <a href="{% url 'lifecycle:update' record.pk %}">Edit</a>
-              <a href="{% url 'lifecycle:delete' record.pk %}">Hapus</a>
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>Belum ada catatan kondisi.</p>
-  {% endif %}
+  <table id="lc-table" hidden
+         data-json-url="{% url 'lifecycle:json' %}"
+         data-edit-url="{% url 'lifecycle:update' '00000000-0000-0000-0000-000000000000' %}"
+         data-status-url="{% url 'lifecycle:status_ajax' '00000000-0000-0000-0000-000000000000' %}"
+         data-delete-url="{% url 'lifecycle:delete_ajax' '00000000-0000-0000-0000-000000000000' %}">
+    <thead>
+      <tr>
+        <th>Pakaian</th>
+        <th>Kondisi</th>
+        <th>Kerusakan</th>
+        <th>Rekomendasi</th>
+        <th>Status</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="lc-rows"></tbody>
+  </table>
+  <p id="lc-empty" hidden>Belum ada catatan kondisi.</p>
+
+  {{ status_choices|json_script:"lc-status-choices" }}
 </section>
 {% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'lifecycle/js/lifecycle.js' %}"></script>
+{% endblock extra_js %}
