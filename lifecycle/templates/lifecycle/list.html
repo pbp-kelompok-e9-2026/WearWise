@@ -52,6 +52,20 @@
   <p id="lc-empty" hidden>Belum ada catatan kondisi.</p>
 
   {{ status_choices|json_script:"lc-status-choices" }}
+  <h2>Repair guide</h2>
+  <div class="lc-guides">
+    {% for guide in guides %}
+      <article class="lc-guide" id="guide-{{ guide.recommendation }}">
+        <h3>{{ guide.title }}</h3>
+        <p>{{ guide.summary }}</p>
+        <ul>
+          {% for step in guide.steps %}
+            <li>{{ step }}</li>
+          {% endfor %}
+        </ul>
+      </article>
+    {% endfor %}
+  </div>
 </section>
 {% endblock content %}
 
