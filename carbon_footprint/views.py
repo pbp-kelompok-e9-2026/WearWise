@@ -3,14 +3,15 @@ from decimal import Decimal, InvalidOperation
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 from django.views.decorators.vary import vary_on_headers
 
+from .access import analyzer_required, can_open_analyzer, user_pages_only
+from .analysis import build_analysis
 from . import services
 from .constants import CATEGORY_CHOICES, MATERIAL_CHOICES, PRICE_CURRENCY_LABEL
-from .forms import CarbonEstimateForm
+from .forms import CarbonEstimateForm, FactorsForm, reset_factors
 from .models import CarbonEstimate
 
 # Skala untuk elemen visual di halaman "Numbers" (mengikuti desain Figma).
@@ -122,7 +123,7 @@ def _parse_preview(data):
     }
 
 
-@login_required
+@user_pages_only
 @vary_on_headers("HX-Request")
 def index(request):
     """Read: halaman Numbers untuk satu item (default: yang terbaru, atau ?item=<id>)."""
@@ -144,19 +145,19 @@ def index(request):
         "item": item,
         "items": list(estimates.values("pk", "name")),   # untuk pemilih item
         "currency": PRICE_CURRENCY_LABEL,
-        # "is_analyzer": is_analyzer(request.user),
+        "is_analyzer": can_open_analyzer(request.user),
     }
     template = "carbon_footprint/_numbers.html" if is_htmx(request) else "carbon_footprint/index.html"
     return render(request, template, context)
 
 
-@login_required
+@user_pages_only
 @vary_on_headers("HX-Request")
 def estimate_list(request):
     """Read: daftar estimasi dengan pencarian, filter material, dan urutan."""
     context = _filtered_rows(request, request.GET)
     context.update({
-        # "is_analyzer": is_analyzer(request.user),
+        "is_analyzer": can_open_analyzer(request.user),
         "material_choices": MATERIAL_CHOICES,
         "sort_choices": SORT_CHOICES,
     })
@@ -164,14 +165,14 @@ def estimate_list(request):
     return render(request, template, context)
 
 
-@login_required
+@user_pages_only
 @require_POST
 def estimate_preview(request):
     """Pratinjau hasil saat user mengisi form (dipanggil HTMX, tidak menyimpan apa pun)."""
     return render(request, "carbon_footprint/_preview.html", {"p": _parse_preview(request.POST)})
 
 
-@login_required
+@user_pages_only
 def estimate_create(request):
     form = CarbonEstimateForm(request.POST or None, instance=CarbonEstimate(user=request.user))
     if request.method == "POST" and form.is_valid():
@@ -181,7 +182,7 @@ def estimate_create(request):
     return render(request, "carbon_footprint/form.html", {"form": form, "mode": "create", "weights": services.current_category_weights()})
 
 
-@login_required
+@user_pages_only
 def estimate_update(request, pk):
     obj = get_object_or_404(_user_estimates(request), pk=pk)
     form = CarbonEstimateForm(request.POST or None, instance=obj)
@@ -192,7 +193,7 @@ def estimate_update(request, pk):
     return render(request, "carbon_footprint/form.html", {"form": form, "mode": "update", "item": obj, "weights": services.current_category_weights()})
 
 
-@login_required
+@user_pages_only
 def estimate_delete(request, pk):
     obj = get_object_or_404(_user_estimates(request), pk=pk)
     if request.method == "POST":
@@ -205,3 +206,30 @@ def estimate_delete(request, pk):
         messages.success(request, f"{name} removed.")
         return redirect("carbon_footprint:list")
     return render(request, "carbon_footprint/confirm_delete.html", {"item": obj})
+
+
+# ---------- Peran Analyzer ----------
+
+@analyzer_required
+def analyzer(request):
+    """Analisis gabungan seluruh data (tanpa nama user atau nama item): ringkasan, per material dan kategori."""
+    return render(request, "carbon_footprint/analyzer.html", {"a": build_analysis()})
+
+
+@analyzer_required
+def factors(request):
+    """Atur faktor emisi per material dan berat per kategori yang dipakai perhitungan."""
+    if request.method == "POST" and "reset" in request.POST:
+        reset_factors()
+        messages.success(request, "Faktor dikembalikan ke nilai bawaan.")
+        return redirect("carbon_footprint:factors")
+
+    form = FactorsForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        updated = form.save(request.user)
+        msg = "Faktor berhasil disimpan."
+        if form.cleaned_data["recalculate"]:
+            msg += f" {updated} estimasi offline dihitung ulang."
+        messages.success(request, msg)
+        return redirect("carbon_footprint:factors")
+    return render(request, "carbon_footprint/factors.html", {"form": form})

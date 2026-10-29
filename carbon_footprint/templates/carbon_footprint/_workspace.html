@@ -1,0 +1,25 @@
+{% extends 'worth_to_buy_analyzer/references/_layout.html' %}
+{% load i18n %}
+{# Ruang Analyzer untuk modul karbon. Sidebar, topbar, dan CSS dasar ruang Analyzer dipakai bersama
+   dengan modul Worth to Buy (references/_layout.html), jadi kedua modul tampil sebagai satu ruang kerja. #}
+
+{% block title %}{% block carbon_title %}Analisis karbon{% endblock %} - WearWise{% endblock %}
+
+{% block extra_css %}{{ block.super }}
+{% include 'carbon_footprint/_assets.html' %}
+{% endblock %}
+
+{% block content %}
+{% language 'id' %}
+<section class="ww-page wtb-page ref-workspace" aria-label="Ruang Analyzer">
+    <nav class="wtb-nav" aria-label="Navigasi Analyzer">
+        <a href="{% url 'worth_to_buy_analyzer:reference_list' %}">Semua referensi</a>
+        <a href="{% url 'carbon_footprint:analyzer' %}"{% if request.resolver_match.url_name == 'analyzer' %} aria-current="page"{% endif %}>Analisis karbon</a>
+        <a href="{% url 'carbon_footprint:factors' %}"{% if request.resolver_match.url_name == 'factors' %} aria-current="page"{% endif %}>Faktor emisi</a>
+    </nav>
+    <div class="cf cf--ws">
+        {% block carbon_content %}{% endblock %}
+    </div>
+</section>
+{% endlanguage %}
+{% endblock %}

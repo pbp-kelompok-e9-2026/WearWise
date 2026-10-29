@@ -457,3 +457,16 @@
 @media (prefers-reduced-motion: reduce) {
   .cf-row, .cf-stats, .cf-toast { animation: none; }
 }
+
+/* ---------- Di dalam ruang Analyzer (dipakai bersama modul Worth to Buy) ---------- */
+/* Judul, metrik, form, dan tombol memakai gaya wtb-* / ref-* dari worth_to_buy.css dan analyzer_workspace.css.
+   Di sini hanya jarak antarbagian, dan tabel serta batang tetap memakai gaya cf-*. */
+.cf--ws {
+  min-height: 0;
+  padding: 0;
+  justify-content: flex-start;
+  gap: 40px;
+}
+.cf--ws .wtb-heading { margin-bottom: 0; }
+.cf--ws .wtb-metrics { margin: 0; }
+.cf--ws .wtb-form { display: block; }

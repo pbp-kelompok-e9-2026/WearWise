@@ -20,7 +20,9 @@ from .constants import (
     MONEY_FACTOR_ID,
     SCORE_MAX_CO2E_PER_WEAR,
 )
-from .models import CarbonEstimate
+from .access import ANALYZER_GROUP, can_open_analyzer, is_analyzer
+from .analysis import build_analysis
+from .models import CarbonEstimate, CategoryWeight, MaterialFactor
 
 User = get_user_model()
 
@@ -381,12 +383,246 @@ class HtmxTests(OfflineTestCase):
         resp = self.client.post(reverse("carbon_footprint:preview"), FORM)
         self.assertEqual(resp.context["p"]["weight"], Decimal(str(services.category_weight("shirt"))))
 
-    
+    def test_preview_without_price_has_no_cost_per_wear(self):
+        resp = self.client.post(reverse("carbon_footprint:preview"), {**FORM, "price": ""})
+        self.assertIsNone(resp.context["p"]["cost_per_wear"])
 
-   
+    def test_preview_with_incomplete_or_bad_input_shows_hint(self):
+        url = reverse("carbon_footprint:preview")
+        for data in (
+            {},
+            {**FORM, "material": ""},
+            {**FORM, "category": "spaceship"},
+            {**FORM, "weight_kg": "abc"},
+            {**FORM, "weight_kg": "-2"},
+            {**FORM, "estimated_wears": "0"},
+            {**FORM, "price": "-5"},
+        ):
+            resp = self.client.post(url, data)
+            self.assertEqual(resp.status_code, 200, data)
+            self.assertIsNone(resp.context["p"], data)
+            self.assertContains(resp, "Choose a category and material")
+
     # ----- form -----
 
     def test_form_page_embeds_category_weights_for_placeholder(self):
         resp = self.client.get(reverse("carbon_footprint:create"))
         self.assertContains(resp, 'id="cf-weights"')
         self.assertContains(resp, 'hx-post="%s"' % reverse("carbon_footprint:preview"))
+
+
+@override_settings(PASSWORD_HASHERS=["django.contrib.auth.hashers.MD5PasswordHasher"])   # supaya test cepat
+class AnalyzerTests(OfflineTestCase):
+    def setUp(self):
+        super().setUp()
+        self.user = User.objects.create_user("zidan", password="pw")
+        self.other = User.objects.create_user("budi", password="pw")
+        self.analyst = User.objects.create_user("sari", password="pw")
+        self.analyst.groups.add(Group.objects.get_or_create(name=ANALYZER_GROUP)[0])   # grup juga dibuat oleh migrasi worth_to_buy_analyzer
+        self.urls = [reverse("carbon_footprint:analyzer"), reverse("carbon_footprint:factors")]
+
+    def make(self, user, material="cotton", category="shirt", co2e="3.2", wears=24, source="fallback", weight="0.25"):
+        return CarbonEstimate.objects.create(
+            user=user, name=f"{material} item", category=category, material=material,
+            weight_kg=Decimal(weight), co2e_kg=Decimal(co2e), estimated_wears=wears, source=source,
+        )
+
+    # --- akses ---
+    def test_anonymous_is_redirected_to_login(self):
+        for url in self.urls:
+            self.assertEqual(self.client.get(url).status_code, 302)
+
+    def test_regular_user_gets_403(self):
+        self.client.force_login(self.user)
+        for url in self.urls:
+            self.assertEqual(self.client.get(url).status_code, 403)
+        self.assertEqual(self.client.post(self.urls[1], {"reset": "1"}).status_code, 403)
+
+    def test_analyzer_and_superuser_allowed(self):
+        admin = User.objects.create_superuser("root", password="pw")
+        for user in (self.analyst, admin):
+            self.assertTrue(can_open_analyzer(user))
+            self.client.force_login(user)
+            for url in self.urls:
+                self.assertEqual(self.client.get(url).status_code, 200)
+        self.assertTrue(is_analyzer(self.analyst))
+        self.assertFalse(is_analyzer(self.user))           # definisi bersama: superuser bukan "akun Analyzer"
+        self.assertFalse(can_open_analyzer(self.user))
+
+    def test_staff_without_role_gets_403(self):
+        staff = User.objects.create_user("staf", password="pw", is_staff=True)
+        self.client.force_login(staff)
+        for url in self.urls:
+            self.assertEqual(self.client.get(url).status_code, 403)
+
+    def test_analyzer_account_is_kept_out_of_personal_pages(self):
+        """Sama seperti Worth to Buy: akun Analyzer memakai ruang Analyzer, bukan halaman pribadi user."""
+        mine = self.make(self.user)
+        self.client.force_login(self.analyst)
+        for name, args in (("index", []), ("list", []), ("create", []), ("update", [mine.pk]), ("delete", [mine.pk])):
+            self.assertEqual(self.client.get(reverse(f"carbon_footprint:{name}", args=args)).status_code, 403, name)
+        self.assertEqual(self.client.post(reverse("carbon_footprint:preview"), FORM).status_code, 403)
+        self.assertEqual(self.client.post(reverse("carbon_footprint:create"), FORM).status_code, 403)
+        self.assertEqual(self.client.post(reverse("carbon_footprint:delete", args=[mine.pk])).status_code, 403)
+        self.assertTrue(CarbonEstimate.objects.filter(pk=mine.pk).exists())
+
+    def test_superuser_can_still_use_personal_pages(self):
+        admin = User.objects.create_superuser("root", password="pw")
+        self.client.force_login(admin)
+        self.assertEqual(self.client.get(reverse("carbon_footprint:index")).status_code, 200)
+
+    def test_link_only_visible_to_superuser_on_personal_pages(self):
+        self.client.force_login(self.user)
+        self.assertNotContains(self.client.get(reverse("carbon_footprint:index")), "Analyzer")
+        admin = User.objects.create_superuser("root", password="pw")
+        self.client.force_login(admin)
+        self.assertContains(self.client.get(reverse("carbon_footprint:index")), "Analyzer")
+
+    def test_pages_use_the_shared_analyzer_workspace(self):
+        self.client.force_login(self.analyst)
+        for url in self.urls:
+            page = self.client.get(url)
+            self.assertTemplateUsed(page, "worth_to_buy_analyzer/references/_layout.html")
+            self.assertContains(page, "Menu Analyzer")                                         # sidebar bersama
+            self.assertContains(page, reverse("worth_to_buy_analyzer:reference_list"))        # tautan ke Referensi pakaian
+            self.assertContains(page, "Faktor emisi")
+            self.assertContains(page, "wtb-page")
+            self.assertContains(page, "Analisis karbon")
+
+    def test_shared_sidebar_marks_only_the_current_carbon_page(self):
+        self.client.force_login(self.analyst)
+        page = self.client.get(self.urls[0]).content.decode()
+        self.assertNotRegex(page, r'is-active"[^>]*href="%s"' % reverse("worth_to_buy_analyzer:reference_list"))
+
+    # --- analisis ---
+    def test_analysis_aggregates_all_users(self):
+        self.make(self.user, "cotton", co2e="4.0", wears=20, source="climatiq")
+        self.make(self.other, "cotton", co2e="2.0", wears=10)
+        self.make(self.other, "wool", category="jacket", co2e="9.0", wears=30)
+        a = build_analysis()
+        self.assertEqual((a["total"], a["users"]), (3, 2))
+        self.assertAlmostEqual(a["avg_co2e"], 5.0)
+        self.assertEqual((a["climatiq_pct"], a["fallback_pct"]), (33, 67))
+        by_material = {g["label"]: g for g in a["by_material"]}
+        self.assertEqual(by_material["Cotton"]["count"], 2)
+        self.assertAlmostEqual(by_material["Cotton"]["avg_co2e"], 3.0)
+        self.assertEqual(a["by_material"][0]["label"], "Wool")          # rata-rata tertinggi di atas
+        self.assertEqual((a["top"][0]["category_label"], a["top"][0]["material_label"]), ("Jacket", "Wool"))   # 9.0 / 30 wears = 0.30 per wear, tertinggi
+        self.assertNotIn("name", a["top"][0])                           # tanpa nama item
+        self.assertNotIn("user", a["top"][0])                           # tanpa pemilik
+        self.assertEqual(a["score_low"] + a["score_mid"] + a["score_high"], 3)
+
+    def test_analysis_empty_state(self):
+        self.client.force_login(self.analyst)
+        resp = self.client.get(self.urls[0])
+        self.assertContains(resp, "Belum ada estimasi")
+
+    def test_analyzer_page_renders_with_data(self):
+        self.make(self.user)
+        self.client.force_login(self.analyst)
+        resp = self.client.get(self.urls[0])
+        self.assertContains(resp, "Per bahan")
+        self.assertContains(resp, "Emisi per pemakaian tertinggi")
+
+    def test_analyzer_page_never_shows_private_names(self):
+        CarbonEstimate.objects.create(user=self.user, name="Jaket Rahasia Zidan", category="shirt", material="cotton",
+                                      weight_kg=Decimal("0.3"), co2e_kg=Decimal("3"))
+        self.client.force_login(self.analyst)
+        page = self.client.get(self.urls[0])
+        self.assertContains(page, "Shirt")
+        self.assertNotContains(page, "Jaket Rahasia")
+        self.assertNotContains(page, "zidan")
+
+    # --- faktor ---
+    def factors_post(self, **overrides):
+        data = {f"material_{k}": str(v) for k, v in FALLBACK_KG_CO2E_PER_KG.items()}
+        data.update({f"category_{k}": str(v) for k, v in CATEGORY_WEIGHT_KG.items()})
+        data.update({k: str(v) for k, v in overrides.items()})
+        return data
+
+    def test_defaults_used_when_tables_empty(self):
+        self.assertEqual(services.material_rate("cotton"), FALLBACK_KG_CO2E_PER_KG["cotton"])
+        self.assertEqual(services.category_weight("shirt"), CATEGORY_WEIGHT_KG["shirt"])
+
+    def test_saving_only_stores_changed_values(self):
+        self.client.force_login(self.analyst)
+        resp = self.client.post(self.urls[1], self.factors_post(material_cotton="25.00"))
+        self.assertRedirects(resp, self.urls[1])
+        self.assertEqual(MaterialFactor.objects.count(), 1)
+        row = MaterialFactor.objects.get()
+        self.assertEqual((row.material, row.kg_co2e_per_kg, row.updated_by), ("cotton", Decimal("25.00"), self.analyst))
+
+    def test_changed_factor_is_used_for_new_estimates(self):
+        self.client.force_login(self.analyst)
+        self.client.post(self.urls[1], self.factors_post(material_cotton="25.00", category_shirt="0.50"))
+        co2e, source = services.compute_co2e("cotton", 1, None)
+        self.assertEqual((co2e, source), (Decimal("25.00"), services.SOURCE_FALLBACK))
+        self.client.force_login(self.user)                        # analyzer tidak memakai halaman pribadi
+        self.client.post(reverse("carbon_footprint:create"), {**FORM, "price": "", "weight_kg": ""})
+        obj = CarbonEstimate.objects.get()
+        self.assertEqual(obj.weight_kg, Decimal("0.50"))          # berat kategori dari analyzer
+        self.assertEqual(obj.co2e_kg, Decimal("12.50"))           # 0.50 kg x 25.00
+
+    def test_value_back_to_default_removes_row(self):
+        self.client.force_login(self.analyst)
+        self.client.post(self.urls[1], self.factors_post(material_cotton="25.00"))
+        self.client.post(self.urls[1], self.factors_post())
+        self.assertEqual(MaterialFactor.objects.count(), 0)
+
+    def test_invalid_values_are_rejected(self):
+        self.client.force_login(self.analyst)
+        for bad in ("0", "-3", "abc"):
+            resp = self.client.post(self.urls[1], self.factors_post(material_cotton=bad))
+            self.assertEqual(resp.status_code, 200)
+        self.assertEqual(MaterialFactor.objects.count(), 0)
+
+    def test_recalculate_updates_only_offline_estimates(self):
+        offline = self.make(self.user, "cotton", co2e="1.00", weight="2.00")
+        online = self.make(self.user, "cotton", co2e="7.77", weight="2.00", source="climatiq")
+        self.client.force_login(self.analyst)
+        self.client.post(self.urls[1], {**self.factors_post(material_cotton="10.00"), "recalculate": "on"})
+        offline.refresh_from_db(); online.refresh_from_db()
+        self.assertEqual(offline.co2e_kg, Decimal("20.00"))      # 2 kg x 10
+        self.assertEqual(online.co2e_kg, Decimal("7.77"))         # hasil Climatiq tidak disentuh
+
+    def test_without_recalculate_existing_estimates_stay(self):
+        offline = self.make(self.user, "cotton", co2e="1.00", weight="2.00")
+        self.client.force_login(self.analyst)
+        self.client.post(self.urls[1], self.factors_post(material_cotton="10.00"))
+        offline.refresh_from_db()
+        self.assertEqual(offline.co2e_kg, Decimal("1.00"))
+
+    def test_messages_are_in_indonesian(self):
+        self.client.force_login(self.analyst)
+        resp = self.client.post(self.urls[1], {**self.factors_post(material_cotton="25.00"), "recalculate": "on"}, follow=True)
+        self.assertContains(resp, "Faktor berhasil disimpan.")
+        resp = self.client.post(self.urls[1], {"reset": "1"}, follow=True)
+        self.assertContains(resp, "Faktor dikembalikan ke nilai bawaan.")
+
+    def test_factor_changes_reach_worth_to_buy(self):
+        """Satu tabel faktor untuk dua modul: perubahan Analyzer ikut ke snapshot karbon Worth to Buy."""
+        from worth_to_buy_analyzer.models import PurchaseAnalysis
+        from worth_to_buy_analyzer.services import refresh_carbon_snapshot
+
+        self.client.force_login(self.analyst)
+        self.client.post(self.urls[1], self.factors_post(material_cotton="10.00"))
+        item = PurchaseAnalysis(clothing_name="Kemeja", material="cotton", weight_kg=Decimal("2.00"), price=Decimal("100000"))
+        self.assertEqual(refresh_carbon_snapshot(item), "")
+        self.assertEqual(item.carbon_kg_co2e, Decimal("20.0000"))     # 2 kg x 10.00, jalur offline
+
+    def test_reset_restores_defaults(self):
+        MaterialFactor.objects.create(material="wool", kg_co2e_per_kg=Decimal("99"))
+        CategoryWeight.objects.create(category="jeans", weight_kg=Decimal("3"))
+        self.client.force_login(self.analyst)
+        self.client.post(self.urls[1], {"reset": "1"})
+        self.assertEqual((MaterialFactor.objects.count(), CategoryWeight.objects.count()), (0, 0))
+        self.assertEqual(services.material_rate("wool"), FALLBACK_KG_CO2E_PER_KG["wool"])
+
+    # --- perintah setup ---
+    def test_setup_analyzer_command(self):
+        Group.objects.all().delete()
+        call_command("setup_analyzer", "zidan", stdout=mock.Mock())
+        self.assertTrue(is_analyzer(User.objects.get(username="zidan")))
+        call_command("setup_analyzer", stdout=mock.Mock())          # aman dijalankan ulang
+        with self.assertRaises(Exception):
+            call_command("setup_analyzer", "tidak-ada", stdout=mock.Mock())
