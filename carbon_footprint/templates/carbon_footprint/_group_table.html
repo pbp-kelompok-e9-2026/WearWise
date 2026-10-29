@@ -1,0 +1,16 @@
+<table class="cf-table">
+  <thead><tr><th></th><th class="cf-num">Item</th><th class="cf-num">Rata-rata CO₂e</th><th class="cf-num">Per pemakaian</th></tr></thead>
+  <tbody>
+    {% for g in groups %}
+    <tr>
+      <td>
+        {{ g.label }}
+        <div class="cf-bar cf-bar--carbon cf-table__bar" aria-hidden="true"><span class="cf-bar__fill" style="width: {{ g.bar_pct }}%"></span></div>
+      </td>
+      <td class="cf-num">{{ g.count }}</td>
+      <td class="cf-num">{{ g.avg_co2e|floatformat:"1" }} kg</td>
+      <td class="cf-num">{{ g.avg_per_wear|floatformat:"2" }} kg</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
