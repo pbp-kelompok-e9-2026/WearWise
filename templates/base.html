@@ -28,7 +28,6 @@
   {% block extra_css %}{% endblock extra_css %}
 </head>
 
-{# Nama URL di bawah adalah tebakan; kalau nama di proyekmu beda, link jatuh ke "#" tanpa error #}
 {% url 'main:show_main' as u_home %}
 {% url 'main:about' as u_about %}
 {% url 'dashboard:profile' as u_profile %}{% if not u_profile %}{% url 'main:profile' as u_profile %}{% endif %}
