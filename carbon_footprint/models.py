@@ -38,3 +38,37 @@ class CarbonEstimate(models.Model):
     @property
     def score(self):
         return sustainability_score(self.co2e_kg, self.estimated_wears)
+
+
+class MaterialFactor(models.Model):
+    """Faktor emisi per material (kg CO2e per kg kain) yang diatur analyzer.
+
+    Kalau baris untuk sebuah material tidak ada, aplikasi memakai nilai bawaan
+    di constants.py. Jadi tabel ini hanya berisi nilai yang diubah analyzer.
+    """
+
+    material = models.CharField(max_length=30, choices=MATERIAL_CHOICES, unique=True)
+    kg_co2e_per_kg = models.DecimalField(max_digits=7, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["material"]
+
+    def __str__(self):
+        return f"{self.material}: {self.kg_co2e_per_kg} kg CO2e/kg"
+
+
+class CategoryWeight(models.Model):
+    """Berat rata-rata per kategori pakaian (kg) yang diatur analyzer."""
+
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, unique=True)
+    weight_kg = models.DecimalField(max_digits=6, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["category"]
+
+    def __str__(self):
+        return f"{self.category}: {self.weight_kg} kg"

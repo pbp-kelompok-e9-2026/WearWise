@@ -1,0 +1,28 @@
+  {% if estimates %}
+  <ul class="cf-rows">
+    {% for e in estimates %}
+    <li class="cf-row">
+      <div class="cf-row__main">
+        <a class="cf-row__name" href="{% url 'carbon_footprint:index' %}?item={{ e.pk }}">{{ e.name }}</a>
+        <p class="cf-row__meta">{{ e.get_category_display }} · {{ e.get_material_display }} · {{ e.weight_kg|floatformat:"2u" }} kg</p>
+      </div>
+      <div class="cf-row__figure">
+        <p class="cf-row__value">{{ e.co2e_kg|floatformat:"1u" }} kg</p>
+        <p class="cf-stat__label">CO₂e{% if e.source == 'fallback' %} · estimate{% endif %}</p>
+      </div>
+      <div class="cf-bar cf-bar--carbon cf-row__bar" aria-hidden="true">
+        <span class="cf-bar__fill" style="width: {{ e.bar_pct }}%"></span>
+      </div>
+      <div class="cf-row__actions">
+        <a class="cf-link" href="{% url 'carbon_footprint:update' e.pk %}">Edit</a>
+        <a class="cf-link cf-link--danger" href="{% url 'carbon_footprint:delete' e.pk %}"
+           hx-post="{% url 'carbon_footprint:delete' e.pk %}" hx-include="#cf-filters" hx-target="#cf-rows" hx-swap="innerHTML"
+           hx-indicator="#cf-rows" hx-confirm="Remove {{ e.name }}?">Delete</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  {% include 'carbon_footprint/_source_note.html' %}
+  {% else %}
+  <p class="cf-empty">{% if filtered %}No estimate matches this search.{% else %}No estimates yet. Add your first piece to start comparing.{% endif %}</p>
+  {% endif %}

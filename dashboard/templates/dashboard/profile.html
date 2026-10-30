@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Profile - WearWise{% endblock title %}
+{% block title %}Profile - WiseFit{% endblock title %}
 {% block page_title %}Profile{% endblock page_title %}
 
 {% block content %}
@@ -20,8 +20,8 @@
       <dl class="ww-defs">
         <div><dt>Name</dt><dd>{{ user.get_full_name|default:user.username|default:"User" }}</dd></div>
         <div><dt>Email</dt><dd>{{ user.email|default:"user@email.com" }}</dd></div>
-        <div><dt>Phone Number</dt><dd>{{ profile.phone|default:"Not Set" }}</dd></div>
-        <div><dt>Address</dt><dd>{{ profile.address|default:"Not Set" }}</dd></div>
+        <div><dt>Phone Number</dt><dd>{{ phone|default:"+62 000 0000 0000" }}</dd></div>
+        <div><dt>Address</dt><dd>{{ address|default:"Street, City, Country" }}</dd></div>
       </dl>
 
       <div class="ww-btns">
@@ -32,15 +32,15 @@
 
   <div class="ww-stats ww-stats--lg">
     <div class="ww-stat">
-      <p class="ww-stat__value">{{ wears_logged }}</p>
+      <p class="ww-stat__value">{{ wears_logged|default:"128" }}</p>
       <p class="ww-stat__label">Wears logged</p>
     </div>
     <div class="ww-stat">
-      <p class="ww-stat__value">Rp{{ avg_cost_per_wear|floatformat:"0g" }}</p>
+      <p class="ww-stat__value">${{ avg_cost_per_wear|default:"3.20" }}</p>
       <p class="ww-stat__label">Avg. cost per wear</p>
     </div>
     <div class="ww-stat">
-      <p class="ww-stat__value">{{ sustainability_score }}</p>
+      <p class="ww-stat__value">{{ sustainability_score|default:"82" }}</p>
       <p class="ww-stat__label">Sustainability score</p>
     </div>
   </div>

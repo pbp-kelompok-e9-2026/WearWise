@@ -1,0 +1,13 @@
+{% extends 'carbon_footprint/_workspace.html' %}
+
+{% block carbon_title %}Faktor emisi{% endblock %}
+
+{% block carbon_content %}
+<header class="wtb-heading">
+  <p class="wtb-eyebrow">Analyzer / Karbon</p>
+  <h1 class="wtb-title">Faktor di balik<br><em>angka karbon.</em></h1>
+  <p class="wtb-intro">Estimasi offline dihitung dari berat dikali faktor bahan. Nilai yang diubah di sini berlaku untuk estimasi baru, termasuk di modul Worth to Buy. Hasil Climatiq tidak terpengaruh.</p>
+</header>
+
+{% include 'carbon_footprint/_factors_form.html' %}
+{% endblock %}

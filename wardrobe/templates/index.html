@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class= "ww-profile">
+    <!--MAIN WARDROBE KAMI-->
+
+    <main class="ww-main">
+        <header class="ww-top">
+            <div class="ww-crumb">
+                WARDROBE
+            </div>
+            <div class="ww-top-right">
+                <div class="ww-account">
+                    <div class="ww-chip">
+
+                    </div>
+                    <div class="ww-account-text">
+                        <span class="ww-account-name"></span>
+                        <span class="ww-account-sub"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div class="ww-content">
+            <!--Section Header-->
+            <div class="wardrobe-header">
+                <div>
+                    <p class="ww-eyebrow">WARDROBE</p>
+                    <h1 class="ww-title">Your wardrobe is already a collection</h1>
+                </div>
+                <p class="ww-wardrobe-intro">
+                    See what you wear, what you don't, and deserves another chance
+                </p>
+            </div>
+            <!-- Control Bar, FIlter and Add Button-->
+            <div class="ww-wardrobe-controls">
+                <select id="category-filter" class="ww-select">
+                    <option value="">Semua Kategori</option>
+                    <option value="TOP">Atasan</option>
+                    <option value="BOTTOM">BAWAHAN</option>
+                    <option value="OUTER">Outerwear</option>
+                    <option value="DRESS">Dress</option>
+                    <option value="SHOES">Sepatu</option>
+                    <option value="ACCESSORY">Aksesoris</option>
+                </select>
+
+                <button type="button" popovertarget="add-modal" class="ww-btn ww-btn--solid">
+                    +Tambah Pakaian
+                </button>
+            </div>
+
+            <!--WARDROBE ITEMS-->
+            <div id="loading" class="ww-card-meta">Memuat koleksi pakaian...</div>
+            <div id="empty" class="ww-card-meta" style="display: none;">Belum ada pakaian</div>
+            <div id="wardrobe-grid" class="ww-wardrobe-grid"></div>
+        </div>
+    </main>
+    
+</div>
+    <!-- Modal Popover Tambah Pakaian-->
+    <div id="add-modal" popover class="ww-profile" style="padding: 32px; background: var(--ww-bg); border: 1px solid var(--ww-ink); max-width: 480px; width: 100%; border-radius: 16px;">
+        <h2 class="ww-title" style="font-size:36px; margin-bottom: 24px;">Tambah Pakaian</h2>
+        <form id="add-wardrobe-form" method="POST" style="display: flex; flex-direction: column; gap: 16px;">
+            {% csrf_token %}
+            <div>
+                <label class="ww-eyebrow">Nama Pakaian</label>
+                <input type="text" name="name" required style="width: 100%; padding: 10px; border: 1px solid var(--ww-line); background: #ffff; margin-top: 4px;"></input>
+            </div>
+            <div>
+                <label class="ww-eyebrow">Kategori</label>
+                <select name="category" required style="width: 100%; padding: 10px; border: 1px solid var(--ww-line); background: #ffff; margin-top: 4px;">
+                    <option value="">Semua Kategori</option>
+                    <option value="TOP">Atasan</option>
+                    <option value="BOTTOM">BAWAHAN</option>
+                    <option value="OUTER">Outerwear</option>
+                    <option value="DRESS">Dress</option>
+                    <option value="SHOES">Sepatu</option>
+                    <option value="ACCESSORY">Aksesoris</option>
+                </select>
+            </div>
+            <div>
+                <label class="ww-eyebrow">Material/Bahan</label>
+                <input type="text" name="material" placeholder="Misal: Linen, Katun" required style="width: 100%; padding: 10px; border: 1px solid var(--ww-line); background: #fff; margin-top: 4px;"></input>
+            </div>
+            <div>
+                <label class="ww-eyebrow">Harga (Rp)</label>
+                <input type="text" name="price" required style="width: 100%; padding: 10px; border: 1px solid var(--ww-line); background: #fff; margin-top: 4px;">
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 16px;">
+                <button type="button" popovertarget="add-modal" popovertargetaction="hide" class="ww-btn ww-btn--ghost">Batal</button>
+                <button type="submit" class="ww-btn ww-btn--solid">Simpan</button>
+            </div>
+        </form>  
+
+
+    </div>
+    <script>
+        const GET_JSON_URL = "{% url 'wardrobe:get_wardrobe_json' %}";
+        const ADD_AJAX_URL = "{% url 'wardrobe:get_wardrobe_json' %}";
+
+        function getCookie(name){
+            let cookieValue = null;
+            if (document.cookie && document.cookie!==''){
+                const cookies = document.cookie.split(';');
+                for(let i=0;i< cookies.length;i++){
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length+1) === (name + '=')){
+                        cookieValue = decodeURIComponent(cookie.substring(name.length+1));
+                        break;
+                    }
+
+                }
+
+            }
+            return cookieValue;
+        }
+
+        async function fecthWardrobe(category='') {
+            const grid = document.getElementById('wardrobe-grid');
+            const loading = document.getElementById('loading');
+            const empty = document.getElementById('empty');
+
+            loading.style.display = 'block';
+            empty.style.display = 'none';
+            grid.innerHTML = '';
+
+            try {
+                const url = category ? '${GET_JSON_URL}?category=${category}' : GET_JSON_URL;
+                const res = await fetch(url);
+                const items = await res.json();
+                loading.style.display = 'none';
+                if(items.length === 0){
+                    empty.style.display = 'block';
+                }
+                else {
+                    items.forEach(item =>{
+                        grid.appendChild(createCardElement(item));
+                    })
+                }
+            } catch (err){
+                console.error(err);
+            }
+        }
+
+        function createCardElement(item){
+            const p = item.fields || item;
+            const id = item.pk || item.id;
+
+            const card = document.createElement('div');
+            card.className= 'ww-card';
+
+            const bgColors = ['#a3b19b', '#e2beb4', '#d0c8b8', '#888f70'];
+            const randomBg = bgColors[Math.floor(Math.random() * bgColors.length)];
+
+            card.innerHTML = `
+                <div class="ww-card-media" style="background-color: ${randomBg};"></div>
+                <h3 class="ww-card-title">${p.name}</h3>
+                <div class="ww-card-meta"><span id="wear-${id}">${p.wear_count}</span> wears · ${p.material}</div>
+                <div class="ww-card-price" id="cpw-${id}">Rp ${Number(p.price).toLocaleString('id-ID')} / wear</div>
+                <div class="ww-card-actions">
+                    <button onclick="incrementWear('${id}')" class="ww-btn-sm">+ Pakai Hari Ini</button>
+                    <button onclick="deleteItem('${id}')" class="ww-btn-sm ww-btn-danger">Hapus</button>
+                </div>
+            `;
+            return card;
+        }
+
+        async function incrementWear(id) {
+            const res = await fetch('/wardrobe/increment-wear/${id}/', {
+                method: 'POST',
+                headers: {'X-CSRF-TOKEN': getCookie('csrrftoken')}
+            });
+            if(res.ok){
+                fecthWardrobe(document.getElementById('category-filter').value);
+            }
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('Hapus pakaian ini dari koleksi wardrobe?')) return;
+            const res = await fetch('/wardrobe/delete-ajax/${id}/', {
+                method: 'POST',
+                headers: { 'X-CSRFToken' : getCookie('csrftoken')}
+            });
+            if (res.ok){
+                fecthWardrobe(document.getElementById('categpry-filter'),value);
+            }
+
+        }
+
+        document.getElementById('category-filter').addEventListener('change', (e) => {
+            fecthWardrobe(e.target.value);
+        })
+
+        document.getElementById('add-wardrobe-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const res = await fetch(ADD_AJAX_URL, {
+                method: 'POST',
+                headers: {'X-CSRFTOken': getCookie('csrftoken')},
+                body: formData
+            });
+            if (res.ok){
+                this.reset();
+                document.getElementById('add-modal').hidePopover();
+                fecthWardrobe(document.getElementById('category-filter').value);
+            }
+        }); 
+
+        fecthWardrobe();
+
+    </script>
+    {% endblock %}
