@@ -28,7 +28,7 @@
   {% block extra_css %}{% endblock extra_css %}
 </head>
 
-{# Gunakan rute yang terdaftar; Discover hanya ditampilkan ketika modulnya tersedia. #}
+{# Gunakan rute navigasi yang terdaftar. #}
 {% url 'main:show_main' as u_home %}
 {% url 'main:about' as u_about %}
 {% url 'main:login' as u_login %}
@@ -39,7 +39,6 @@
 {% url 'wardrobe:show_wardrobe' as u_wardrobe %}
 {% url 'dashboard:show_profile' as u_profile %}
 {% url 'dashboard:edit_profile' as u_edit_profile %}
-{% url 'dashboard:discover' as u_discover %}
 {% url 'worth_to_buy_analyzer:analyzer' as u_worth %}
 {% url 'lifecycle:index' as u_lifecycle %}
 {% url 'admin:index' as u_settings %}
@@ -54,7 +53,6 @@
     <nav aria-label="Menu utama">
       <ul class="ww-nav">
         <li><a class="ww-nav__link{% if request.path == u_home %} is-active{% endif %}" href="{{ u_home }}">Home</a></li>
-        {% if u_discover %}<li><a class="ww-nav__link{% if request.path == u_discover %} is-active{% endif %}" href="{{ u_discover }}">Discover</a></li>{% endif %}
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'worth_to_buy_analyzer' %} is-active{% endif %}" href="{{ u_worth }}">Worth to Buy</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'carbon_footprint' %} is-active{% endif %}" href="{{ u_numbers }}">Numbers</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'wardrobe' %} is-active{% endif %}" href="{{ u_wardrobe }}">Wardrobe</a></li>
