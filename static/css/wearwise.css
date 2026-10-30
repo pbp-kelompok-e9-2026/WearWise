@@ -220,7 +220,7 @@ body.ww {
 .ww-toggle {
   position: absolute;
   top: 50%;
-  left: 20px;
+  left: 10px;
   display: grid;
   place-items: center;
   width: 40px;
