@@ -8,29 +8,11 @@
     </div>
     <a class="wtb-button" href="{% url 'worth_to_buy_analyzer:reference_create' %}">Tambah referensi ↗</a>
 </header>
-<div class="wtb-metrics ref-stats">
-    <div class="wtb-metric"><p class="wtb-eyebrow">Total referensi</p><p class="wtb-metric-value">{{ total_count }}</p></div>
-    <div class="wtb-metric"><p class="wtb-eyebrow">Terbit di katalog</p><p class="wtb-metric-value">{{ published_count }}</p></div>
-    <div class="wtb-metric"><p class="wtb-eyebrow">Draft</p><p class="wtb-metric-value">{{ draft_count }}</p></div>
-</div>
-<form method="get" class="ref-filters">
+<form id="reference-filters" method="get" class="ref-filters" hx-get="{% url 'worth_to_buy_analyzer:reference_list' %}" hx-target="#reference-results" hx-swap="outerHTML" hx-push-url="true" hx-trigger="submit, input changed delay:350ms from:#ref-query, change from:#ref-status" hx-sync="this:replace" hx-indicator="#reference-loading">
     <div class="wtb-field"><label for="ref-query">Cari referensi</label><input id="ref-query" name="q" value="{{ query }}" placeholder="Nama, merek, atau sumber data" maxlength="100"></div>
-    <div class="wtb-field"><label for="ref-status">Status</label><select id="ref-status" name="status"><option value="">Semua status</option value="draft"{% if status == 'draft' %} selected{% endif %}>Draft</option><option value="published"{% if status == 'published' %} selected{% endif %}>Terbit</option></select></div>
+    <div class="wtb-field"><label for="ref-status">Status</label><select id="ref-status" name="status"><option value="">Semua status</option><option value="draft"{% if status == 'draft' %} selected{% endif %}>Draft</option><option value="published"{% if status == 'published' %} selected{% endif %}>Terbit</option></select></div>
     <button class="wtb-button wtb-button--outline" type="submit">Cari</button>
 </form>
-{% for item in page_obj %}
-<article class="wtb-history-item">
-    <div class="wtb-item-mark" aria-hidden="true">{{ item.clothing_name|slice:':1'|upper }}</div>
-    <div class="wtb-item-main">
-        <p class="wtb-eyebrow">{{ item.get_category_display }}{% if item.brand %} · {{ item.brand }}{% endif %}</p>
-        <h2 class="wtb-item-title"><a href="{% url 'worth_to_buy_analyzer:reference_detail' item.pk %}">{{ item.clothing_name }}</a></h2>
-        <p class="wtb-help">Rp{{ item.price|floatformat:'2g' }} · Sumber: {{ item.source_name }}</p>
-        <span class="wtb-pill{% if item.is_published %} ref-published{% endif %}">{% if item.is_published %}Terbit{% else %}Draft{% endif %}</span>
-    </div>
-    <div class="wtb-item-actions"><a class="wtb-text-link" href="{% url 'worth_to_buy_analyzer:reference_update' item.pk %}">Edit ↗</a><a class="wtb-subtle-link" href="{% url 'worth_to_buy_analyzer:reference_delete' item.pk %}">Hapus</a></div>
-</article>
-{% empty %}
-<div class="wtb-empty"><p class="wtb-eyebrow">Database referensi</p><h2 class="wtb-subtitle">{% if query or status %}Belum ada yang cocok.{% else %}Mulai dari satu pakaian.{% endif %}</h2><p class="wtb-intro">{% if query or status %}Coba kata pencarian atau status lainnya.{% else %}Tambahkan data pakaian dan asal datanya agar user punya acuan saat menganalisis.{% endif %}</p><a class="wtb-button" href="{% url 'worth_to_buy_analyzer:reference_create' %}">Tambah referensi ↗</a></div>
-{% endfor %}
-{% include 'worth_to_buy_analyzer/references/_pagination.html' %}
+<p id="reference-loading" class="wtb-loading" role="status">Mencari referensi…</p>
+{% include 'worth_to_buy_analyzer/references/_results.html' %}
 {% endblock %}

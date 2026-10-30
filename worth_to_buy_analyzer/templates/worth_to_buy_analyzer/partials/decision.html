@@ -1,0 +1,9 @@
+{% load i18n %}{% language 'id' %}
+<section id="decision-panel" class="wtb-decision wtb-panel" aria-labelledby="wtb-decision-title">
+    {% if notice %}<p class="{% if notice_warning %}wtb-notice{% else %}wtb-success{% endif %}" role="status">{{ notice }}</p>{% endif %}
+    <p class="wtb-eyebrow">Langkah berikutnya</p><h2 class="wtb-subtitle" id="wtb-decision-title">Pilihan akhirnya tetap di kamu.</h2><p class="wtb-help">Simpan keputusan dan alasanmu agar mudah diingat nanti.</p>
+    {% if item.decided_at %}<p class="wtb-help">Diputuskan pada {{ item.decided_at|date:'d M Y H:i' }}.</p>{% endif %}
+    {% if decision_form.errors %}<div class="wtb-alert" role="alert">Keputusan belum tersimpan. Periksa isian di bawah.</div>{% endif %}
+    <form hx-post="{% url 'worth_to_buy_analyzer:decide' item.pk %}" hx-target="#decision-panel" hx-swap="outerHTML" hx-disabled-elt="find button" method="post" class="wtb-form" action="{% url 'worth_to_buy_analyzer:decide' item.pk %}" novalidate>{% csrf_token %}{% include 'worth_to_buy_analyzer/_fields.html' with form=decision_form %}<button class="wtb-button" type="submit">Simpan keputusan <span aria-hidden="true">↗</span></button></form>
+</section>
+{% endlanguage %}
