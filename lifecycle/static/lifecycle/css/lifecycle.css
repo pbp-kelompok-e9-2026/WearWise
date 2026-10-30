@@ -1,0 +1,135 @@
+/* Gaya khusus halaman Lifecycle (Modul 4). Warna dan font memakai token --ww-* dari wearwise.css */
+
+.lc-section { margin-top: 64px; }
+.lc-section__title {
+  margin: 0 0 24px;
+  font-family: var(--ww-font-display);
+  font-size: 2.25rem;
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* Form tambah catatan */
+.lc-panel {
+  padding: 32px;
+  border: 1px solid var(--ww-line);
+  background: var(--ww-ivory);
+}
+.lc-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 32px;
+}
+.lc-form .ww-field--wide { grid-column: 1 / -1; }
+.lc-form textarea { resize: vertical; }
+.lc-form__actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+
+.lc-message { min-height: 1.5em; margin: 16px 0 0; color: var(--ww-sage-deep); font-size: 0.9375rem; }
+.lc-message.is-error { color: var(--ww-clay); }
+
+/* Filter */
+.lc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 32px;
+  margin-bottom: 24px;
+}
+.lc-filter { display: flex; flex-wrap: wrap; gap: 16px 24px; }
+.lc-filter .ww-field { margin: 0; min-width: 200px; }
+
+/* Tabel riwayat */
+.lc-table-wrap { overflow-x: auto; }
+.lc-table { width: 100%; border-collapse: collapse; font-size: 0.9375rem; }
+.lc-table th {
+  padding: 0 16px 12px 0;
+  border-bottom: 1px solid var(--ww-ink);
+  color: var(--ww-ink-soft);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-align: left;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.lc-table td { padding: 16px 16px 16px 0; border-bottom: 1px solid var(--ww-line); vertical-align: middle; }
+.lc-table td:first-child { font-family: var(--ww-font-display); font-size: 1.375rem; line-height: 1.1; }
+.lc-table select { min-width: 180px; padding: 6px 0; border: 0; border-bottom: 1px solid var(--ww-ink); background: transparent; color: var(--ww-ink); font: inherit; }
+.lc-empty { margin: 0; padding: 32px 0; border-bottom: 1px solid var(--ww-line); color: var(--ww-ink-soft); }
+
+.lc-actions { display: flex; gap: 16px; align-items: center; white-space: nowrap; }
+.lc-action {
+  padding: 0 0 2px;
+  border: 0;
+  border-bottom: 1px solid currentColor;
+  background: none;
+  color: var(--ww-ink);
+  font: inherit;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.lc-action:hover { opacity: 0.7; }
+.lc-action--danger { color: var(--ww-clay); }
+
+/* Badge rekomendasi */
+.lc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: var(--ww-radius-pill);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.lc-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.lc-badge--repair { background: var(--ww-clay-soft); color: var(--ww-clay); }
+.lc-badge--reuse { background: var(--ww-sage); color: var(--ww-ink); }
+.lc-badge--recycle { background: var(--ww-olive); color: var(--ww-ivory); }
+
+/* Repair guide: tiga kartu seperti alur Lifecycle di Figma */
+.lc-guides {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr) 44px minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+.lc-guides .ww-arrow { align-self: center; }
+.lc-guide { padding: 24px; border: 1px solid var(--ww-line); }
+.lc-guide .ww-eyebrow { margin-bottom: 16px; }
+.lc-guide .ww-img { height: 140px; margin-bottom: 18px; }
+.lc-guide__steps { margin: 16px 0 0; padding-left: 18px; color: var(--ww-ink-soft); line-height: 1.6; }
+.lc-guide__steps li + li { margin-top: 6px; }
+
+/* Halaman form edit dan konfirmasi hapus */
+.lc-narrow { max-width: 720px; }
+
+@media (max-width: 1280px) {
+  .lc-guides { grid-template-columns: 1fr; }
+  .lc-guides .ww-arrow { display: none; }
+}
+
+@media (max-width: 900px) {
+  .lc-panel { padding: 24px; }
+  .lc-form { grid-template-columns: 1fr; }
+  .lc-filter .ww-field { min-width: 0; flex: 1 1 160px; }
+
+  /* Tabel jadi kartu bertumpuk di layar kecil */
+  .lc-table thead { display: none; }
+  .lc-table, .lc-table tbody, .lc-table tr, .lc-table td { display: block; width: 100%; }
+  .lc-table tr { padding: 16px 0; border-bottom: 1px solid var(--ww-line); }
+  .lc-table td { padding: 4px 0; border: 0; }
+  .lc-table td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--ww-ink-soft);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .lc-table select { width: 100%; }
+}
