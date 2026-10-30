@@ -13,10 +13,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(d^)%6cdy$%h_rg0k8veqcu2au68-a!q%2a$b7)^woqk0y+s#%'
+SECRET_KEY = os.getenv("SECRET_KEY")
+
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY belum diatur di environment variables")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "zidan-fauzan-wearwise.pws.cs.ui.ac.id"]
 CSRF_TRUSTED_ORIGINS = ["https://zidan-fauzan-wearwise.pws.cs.ui.ac.id"]
@@ -38,6 +41,7 @@ INSTALLED_APPS = [
     'carbon_footprint', # Modul 3
     'lifecycle',       # Modul 4
     'dashboard',       # Modul 5
+    'seed_data',
 ]
 
 MIDDLEWARE = [
