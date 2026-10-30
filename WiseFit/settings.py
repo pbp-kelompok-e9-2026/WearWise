@@ -19,7 +19,7 @@ if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY belum diatur di environment variables")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "zidan-fauzan-wearwise.pws.cs.ui.ac.id"]
 CSRF_TRUSTED_ORIGINS = ["https://zidan-fauzan-wearwise.pws.cs.ui.ac.id"]
@@ -79,7 +79,26 @@ WSGI_APPLICATION = 'WiseFit.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Database configuration
+# Database configuration
 if PRODUCTION:
+
+    required_vars = [
+        'DB_NAME',
+        'DB_USER',
+        'DB_PASSWORD',
+        'DB_HOST',
+    ]
+
+    missing_vars = [
+        var for var in required_vars
+        if not os.getenv(var)
+    ]
+
+    if missing_vars:
+        raise RuntimeError(
+            f"Missing database environment variables: {missing_vars}"
+        )
+
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -87,12 +106,13 @@ if PRODUCTION:
             'USER': os.getenv('DB_USER'),
             'PASSWORD': os.getenv('DB_PASSWORD'),
             'HOST': os.getenv('DB_HOST'),
-            'PORT': os.getenv('DB_PORT'),
+            'PORT': os.getenv('DB_PORT', '5432'),
             'OPTIONS': {
                 'options': f"-c search_path={os.getenv('SCHEMA', 'public')}"
             }
         }
     }
+
 else:
     DATABASES = {
         'default': {
