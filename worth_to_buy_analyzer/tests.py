@@ -113,7 +113,7 @@ class FormValidationTests(SimpleTestCase):
 
 
 @override_settings(CLIMATIQ_API_KEY="")
-class CarbonAdapterTests(SimpleTestCase):
+class CarbonAdapterTests(TestCase):   # TestCase: compute_co2e membaca faktor dari database
     def test_missing_material_never_calls_service(self):
         obj = item()
         with patch("worth_to_buy_analyzer.services.compute_co2e") as compute:

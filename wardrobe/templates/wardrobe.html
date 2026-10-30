@@ -2,53 +2,39 @@
 {% load static %}
 
 {% block content %}
-<div class="ww-profile">
-    <main class="ww-main">
-        <header class="ww-top">
-            <div class="ww-crumb">WARDROBE</div>
-            <div class="ww-top-right">
-                <div class="ww-account">
-                    <div class="ww-chip"></div>
-                    <div class="ww-account-text">
-                        <span class="ww-account-name">{{ username }}</span>
-                        <span class="ww-account-sub"></span>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <div class="ww-content">
-            <div class="wardrobe-header">
-                <div>
-                    <p class="ww-eyebrow">WARDROBE</p>
-                    <h1 class="ww-title">Your wardrobe is already a collection</h1>
-                </div>
-                <p class="ww-wardrobe-intro">
-                    See what you wear, what you don't, and deserves another chance
-                </p>
-            </div>
-
-            <div class="ww-wardrobe-controls">
-                <select id="category-filter" class="ww-select">
-                    <option value="">Semua Kategori</option>
-                    <option value="TOP">Atasan</option>
-                    <option value="BOTTOM">Bawahan</option>
-                    <option value="OUTER">Outerwear</option>
-                    <option value="DRESS">Dress</option>
-                    <option value="SHOES">Sepatu</option>
-                    <option value="ACCESSORY">Aksesoris</option>
-                </select>
-
-                <button type="button" popovertarget="add-modal" class="ww-btn ww-btn--solid">
-                    +Tambah Pakaian
-                </button>
-            </div>
-
-            <div id="loading" class="ww-card-meta">Memuat koleksi pakaian...</div>
-            <div id="empty" class="ww-card-meta" style="display: none;">Belum ada pakaian</div>
-            <div id="wardrobe-grid" class="ww-wardrobe-grid"></div>
+<div class="ww-page">
+    <!-- Section Header -->
+    <div class="ww-wardrobe-header">
+        <div>
+            <p class="ww-eyebrow">WARDROBE</p>
+            <h1 class="ww-title">Your wardrobe is already a collection</h1>
         </div>
-    </main>
+        <p class="ww-wardrobe-intro">
+            See what you wear, what you don't, and deserves another chance
+        </p>
+    </div>
+
+    <!-- Control Bar, Filter and Add Button -->
+    <div class="ww-wardrobe-controls">
+        <select id="category-filter" class="ww-select">
+            <option value="">Semua Kategori</option>
+            <option value="TOP">Atasan</option>
+            <option value="BOTTOM">Bawahan</option>
+            <option value="OUTER">Outerwear</option>
+            <option value="DRESS">Dress</option>
+            <option value="SHOES">Sepatu</option>
+            <option value="ACCESSORY">Aksesoris</option>
+        </select>
+
+        <button type="button" popovertarget="add-modal" class="ww-btn">
+            +Tambah Pakaian
+        </button>
+    </div>
+
+    <!-- WARDROBE ITEMS -->
+    <div id="loading" class="ww-card-meta">Memuat koleksi pakaian...</div>
+    <div id="empty" class="ww-card-meta" style="display: none;">Belum ada pakaian</div>
+    <div id="wardrobe-grid" class="ww-wardrobe-grid"></div>
 </div>
 
 {% include 'add_modal.html' %}
@@ -86,8 +72,6 @@
             const items = await res.json();
 
             loading.style.display = 'none';
-            
-            // Bersihkan grid SEBELUM memasukkan card baru (cegah race condition)
             grid.innerHTML = '';
 
             if (items.length === 0) {
@@ -112,8 +96,12 @@
         const bgColors = ['#a3b19b', '#e2beb4', '#d0c8b8', '#888f70'];
         const randomBg = bgColors[Math.floor(Math.random() * bgColors.length)];
 
+        const mediaElement = p.image_url
+            ? `<img src="${p.image_url}" alt="${p.name}" class="ww-card-media" style="object-fit: cover;">`
+            : `<div class="ww-card-media" style="background-color: ${randomBg};"></div>`;
+
         card.innerHTML = `
-            <div class="ww-card-media" style="background-color: ${randomBg};"></div>
+            ${mediaElement}
             <h3 class="ww-card-title">${p.name}</h3>
             <div class="ww-card-meta"><span id="wear-${id}">${p.wear_count}</span> wears · ${p.material}</div>
             <div class="ww-card-price" id="cpw-${id}">Rp ${Number(p.price).toLocaleString('id-ID')} / wear</div>
@@ -154,9 +142,9 @@
         e.preventDefault();
         
         const submitBtn = this.querySelector('button[type="submit"]');
-        if (submitBtn.disabled) return; // Cegah submit ganda jika sedang diproses
+        if (submitBtn.disabled) return;
         
-        submitBtn.disabled = true; // Kunci tombol
+        submitBtn.disabled = true;
         submitBtn.innerText = 'Menyimpan...';
 
         try {
@@ -179,7 +167,7 @@
         } catch (err) {
             console.error(err);
         } finally {
-            submitBtn.disabled = false; // Buka kunci tombol kembali
+            submitBtn.disabled = false;
             submitBtn.innerText = 'Simpan';
         }
     });

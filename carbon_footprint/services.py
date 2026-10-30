@@ -4,6 +4,7 @@ import requests
 from django.conf import settings
 
 from .constants import (
+    CATEGORY_WEIGHT_KG,
     FALLBACK_DEFAULT_KG_CO2E_PER_KG,
     FALLBACK_KG_CO2E_PER_KG,
     MONEY_FACTOR_ID,
@@ -68,6 +69,32 @@ def _to_decimal(value):
     return Decimal(str(round(value, 2)))
 
 
+def current_material_rates():
+    """{material: kg CO2e per kg}: nilai dari analyzer (database) menimpa nilai bawaan constants.py."""
+    from .models import MaterialFactor  # impor di dalam fungsi: models.py juga mengimpor modul ini
+
+    rates = dict(FALLBACK_KG_CO2E_PER_KG)
+    rates.update({row.material: float(row.kg_co2e_per_kg) for row in MaterialFactor.objects.all()})
+    return rates
+
+
+def current_category_weights():
+    """{kategori: berat kg}: nilai dari analyzer (database) menimpa nilai bawaan constants.py."""
+    from .models import CategoryWeight
+
+    weights = dict(CATEGORY_WEIGHT_KG)
+    weights.update({row.category: float(row.weight_kg) for row in CategoryWeight.objects.all()})
+    return weights
+
+
+def material_rate(material):
+    return current_material_rates().get(material, FALLBACK_DEFAULT_KG_CO2E_PER_KG)
+
+
+def category_weight(category):
+    return current_category_weights().get(category)
+
+
 def compute_co2e(material, weight_kg, price=None):
     """Kembalikan (kg CO2e sebagai Decimal, sumber data).
 
@@ -80,7 +107,7 @@ def compute_co2e(material, weight_kg, price=None):
             return _to_decimal(estimate_money_co2e(MONEY_FACTOR_ID, price, PRICE_CURRENCY)), SOURCE_CLIMATIQ
         except ClimatiqError:
             pass
-    rate = FALLBACK_KG_CO2E_PER_KG.get(material, FALLBACK_DEFAULT_KG_CO2E_PER_KG)
+    rate = material_rate(material)
     return _to_decimal(float(weight_kg) * rate), SOURCE_FALLBACK
 
 

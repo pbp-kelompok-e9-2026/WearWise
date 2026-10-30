@@ -1,0 +1,60 @@
+{# Bagian analisis yang diganti HTMX saat filter berubah. Dipakai juga oleh analyzer.html. #}
+{% if a.total %}
+<div class="wtb-metrics ref-stats">
+  <div class="wtb-metric"><p class="wtb-eyebrow">Estimasi · {{ a.users }} user</p><p class="wtb-metric-value">{{ a.total }}</p></div>
+  <div class="wtb-metric"><p class="wtb-eyebrow">Rata-rata CO₂e</p><p class="wtb-metric-value">{{ a.avg_co2e|floatformat:"1" }} kg</p></div>
+  <div class="wtb-metric"><p class="wtb-eyebrow">Rata-rata skor</p><p class="wtb-metric-value">{{ a.avg_score }}</p></div>
+</div>
+
+<div class="cf-split">
+  <div>
+    <h2 class="cf-h2">Per bahan</h2>
+    {% include 'carbon_footprint/_group_table.html' with groups=a.by_material %}
+  </div>
+  <div>
+    <h2 class="cf-h2">Per kategori</h2>
+    {% include 'carbon_footprint/_group_table.html' with groups=a.by_category %}
+  </div>
+</div>
+
+<div>
+  <h2 class="cf-h2">Sebaran skor</h2>
+  <p class="cf-meta">
+    <span>Rendah (di bawah 40): <strong>{{ a.score_low }}</strong></span>
+    <span>Sedang (40 sampai 69): <strong>{{ a.score_mid }}</strong></span>
+    <span>Tinggi (70 ke atas): <strong>{{ a.score_high }}</strong></span>
+  </p>
+  <p class="cf-meta">
+    <span>Sumber data: <strong>{{ a.climatiq_pct }}%</strong> Climatiq, <strong>{{ a.fallback_pct }}%</strong> tabel offline</span>
+  </p>
+</div>
+
+<div>
+  <h2 class="cf-h2">Emisi per pemakaian tertinggi</h2>
+  <table class="cf-table">
+    <thead><tr><th>Kategori</th><th>Bahan</th><th class="cf-num">CO₂e</th><th class="cf-num">Per pemakaian</th><th class="cf-num">Skor</th></tr></thead>
+    <tbody>
+      {% for r in a.top %}
+      <tr>
+        <td>{{ r.category_label }}</td><td>{{ r.material_label }}</td>
+        <td class="cf-num">{{ r.co2e|floatformat:"1" }} kg</td>
+        <td class="cf-num">{{ r.per_wear|floatformat:"2" }} kg</td>
+        <td class="cf-num">{{ r.score }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% elif filtered %}
+<div class="wtb-empty">
+  <p class="wtb-eyebrow">Analisis karbon</p>
+  <h2 class="wtb-subtitle">Tidak ada yang cocok.</h2>
+  <p class="wtb-intro">Belum ada estimasi dengan kombinasi filter ini. Coba longgarkan salah satu filter.</p>
+</div>
+{% else %}
+<div class="wtb-empty">
+  <p class="wtb-eyebrow">Analisis karbon</p>
+  <h2 class="wtb-subtitle">Belum ada estimasi.</h2>
+  <p class="wtb-intro">Analisis muncul setelah user menambahkan pakaian di halaman Numbers.</p>
+</div>
+{% endif %}

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Estimates - WearWise{% endblock title %}
+{% block title %}Estimates - WiseFit{% endblock title %}
 {% block page_title %}Numbers{% endblock page_title %}
 
 {% block extra_css %}
@@ -9,7 +9,7 @@
 
 {% block content %}
 
-<section class="cf cf--top">
+<section class="cf cf--top" hx-history="false" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   <p class="cf-eyebrow">03 — Wear</p>
 
   <header class="cf-head">
@@ -20,33 +20,34 @@
   <p class="cf-meta">
     <a class="cf-link" href="{% url 'carbon_footprint:create' %}">New estimate →</a>
     <a class="cf-link" href="{% url 'carbon_footprint:index' %}">Numbers</a>
+    {% if is_analyzer %}<a class="cf-link" href="{% url 'carbon_footprint:analyzer' %}">Analyzer</a>{% endif %}
   </p>
 
-  {% if estimates %}
-  <ul class="cf-rows">
-    {% for e in estimates %}
-    <li class="cf-row">
-      <div class="cf-row__main">
-        <a class="cf-row__name" href="{% url 'carbon_footprint:index' %}?item={{ e.pk }}">{{ e.name }}</a>
-        <p class="cf-row__meta">{{ e.get_category_display }} · {{ e.get_material_display }} · {{ e.weight_kg|floatformat:"2u" }} kg</p>
-      </div>
-      <div class="cf-row__figure">
-        <p class="cf-row__value">{{ e.co2e_kg|floatformat:"1u" }} kg</p>
-        <p class="cf-stat__label">CO₂e{% if e.source == 'fallback' %} · estimate{% endif %}</p>
-      </div>
-      <div class="cf-bar cf-bar--carbon cf-row__bar" aria-hidden="true">
-        <span class="cf-bar__fill" style="width: {{ e.bar_pct }}%"></span>
-      </div>
-      <div class="cf-row__actions">
-        <a class="cf-link" href="{% url 'carbon_footprint:update' e.pk %}">Edit</a>
-        <a class="cf-link cf-link--danger" href="{% url 'carbon_footprint:delete' e.pk %}">Delete</a>
-      </div>
-    </li>
-    {% endfor %}
-  </ul>
-  {% include 'carbon_footprint/_source_note.html' %}
-  {% else %}
-  <p class="cf-empty">No estimates yet. Add your first piece to start comparing.</p>
-  {% endif %}
+  <form id="cf-filters" class="cf-filters" method="get" action="{% url 'carbon_footprint:list' %}" role="search"
+        hx-get="{% url 'carbon_footprint:list' %}" hx-trigger="input delay:300ms, search" hx-target="#cf-rows" hx-swap="innerHTML"
+        hx-push-url="true" hx-indicator="#cf-rows">
+    <div class="cf-field">
+      <label class="cf-field__label" for="cf-q">Search</label>
+      <input id="cf-q" class="cf-input" type="search" name="q" value="{{ filters.q }}" placeholder="Item name" autocomplete="off">
+    </div>
+    <div class="cf-field">
+      <label class="cf-field__label" for="cf-material">Material</label>
+      <select id="cf-material" class="cf-input cf-select" name="material">
+        <option value="">All</option>
+        {% for value, label in material_choices %}<option value="{{ value }}"{% if filters.material == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="cf-field">
+      <label class="cf-field__label" for="cf-sort">Sort</label>
+      <select id="cf-sort" class="cf-input cf-select" name="sort">
+        {% for value, label in sort_choices %}<option value="{{ value }}"{% if filters.sort == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+      </select>
+    </div>
+    <noscript><button class="cf-btn" type="submit">Apply</button></noscript>
+  </form>
+
+  <div id="cf-rows" class="cf-swap">
+    {% include 'carbon_footprint/_rows.html' %}
+  </div>
 </section>
 {% endblock %}
