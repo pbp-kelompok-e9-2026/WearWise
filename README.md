@@ -53,6 +53,10 @@
 
 - [Climatiq](https://www.climatiq.io/docs/api-reference)
 
+## Tautan Deployment PWS
+
+- [PWS](https://zidan-fauzan-wearwise.pws.cs.ui.ac.id)
+
 ## Design Plan
 
 - [Figma](https://www.figma.com/design/PVHrNdTOolsl7Ke1kR2Fv8/Untitled?node-id=0-1&p=f&t=FQ7cldO460FBvFS6-0)
