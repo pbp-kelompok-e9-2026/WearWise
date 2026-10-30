@@ -1,16 +1,32 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}{{ title }} - WiseFit{% endblock title %}
 {% block page_title %}Lifecycle{% endblock page_title %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'lifecycle/css/lifecycle.css' %}">
+{% endblock extra_css %}
+
 {% block content %}
 <section class="ww-page">
-  <h1 class="ww-title">{{ title }}</h1>
+  <p class="ww-eyebrow">05 — After the purchase</p>
+  <header class="ww-head">
+    <h1 class="ww-title">{{ title }}</h1>
+  </header>
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Simpan</button>
-    <a href="{% url 'lifecycle:index' %}">Batal</a>
-  </form>
+  <div class="lc-panel lc-narrow">
+    <form class="ww-form lc-form" method="post">
+      {% csrf_token %}
+      {% include 'lifecycle/field.html' with field=form.item %}
+      {% include 'lifecycle/field.html' with field=form.condition %}
+      {% include 'lifecycle/field.html' with field=form.damage_description %}
+      {% include 'lifecycle/field.html' with field=form.status %}
+      {% include 'lifecycle/field.html' with field=form.notes wide=True %}
+      <div class="lc-form__actions">
+        <button type="submit" class="ww-btn">Simpan</button>
+        <a class="ww-btn ww-btn--outline" href="{% url 'lifecycle:index' %}">Batal</a>
+      </div>
+    </form>
+  </div>
 </section>
 {% endblock content %}
