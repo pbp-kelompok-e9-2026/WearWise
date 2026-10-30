@@ -26,9 +26,20 @@
     empty.hidden = !isEmpty;
   }
 
-  function cell(text) {
+  function cell(text, label) {
     const td = document.createElement("td");
     td.textContent = text;
+    if (label) td.dataset.label = label;
+    return td;
+  }
+
+  function badge(record) {
+    const td = document.createElement("td");
+    td.dataset.label = "Rekomendasi";
+    const span = document.createElement("span");
+    span.className = "lc-badge lc-badge--" + record.recommendation;
+    span.textContent = record.recommendation_display;
+    td.append(span);
     return td;
   }
 
@@ -36,9 +47,9 @@
     const tr = document.createElement("tr");
     tr.append(
       cell(record.item),
-      cell(record.condition_display),
-      cell(record.damage_description || "-"),
-      cell(record.recommendation_display)
+      cell(record.condition_display, "Kondisi"),
+      cell(record.damage_description || "-", "Kerusakan"),
+      badge(record)
     );
 
     const select = document.createElement("select");
@@ -51,19 +62,25 @@
       updateStatus(record.id, select);
     });
     const statusCell = document.createElement("td");
+    statusCell.dataset.label = "Status";
     statusCell.append(select);
 
     const edit = document.createElement("a");
+    edit.className = "lc-action";
     edit.href = urlFor(table.dataset.editUrl, record.id);
     edit.textContent = "Edit";
     const remove = document.createElement("button");
     remove.type = "button";
+    remove.className = "lc-action lc-action--danger";
     remove.textContent = "Hapus";
     remove.addEventListener("click", function () {
       deleteRecord(record, tr);
     });
+    const actionGroup = document.createElement("div");
+    actionGroup.className = "lc-actions";
+    actionGroup.append(edit, remove);
     const actions = document.createElement("td");
-    actions.append(edit, " ", remove);
+    actions.append(actionGroup);
 
     tr.append(statusCell, actions);
     return tr;

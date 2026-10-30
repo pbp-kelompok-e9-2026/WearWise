@@ -3,69 +3,104 @@
 {% block title %}Lifecycle - WiseFit{% endblock title %}
 {% block page_title %}Lifecycle{% endblock page_title %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'lifecycle/css/lifecycle.css' %}">
+{% endblock extra_css %}
+
 {% block content %}
 <section class="ww-page">
   <p class="ww-eyebrow">05 — After the purchase</p>
-  <h1 class="ww-title">Riwayat kondisi pakaian</h1>
+  <header class="ww-head">
+    <h1 class="ww-title">Don't let good clothes end too soon.</h1>
+    <p class="ww-lede">Catat kondisi pakaianmu, lalu WiseFit merekomendasikan apakah sebaiknya di-repair, reuse, atau recycle.</p>
+  </header>
 
-  <h2>Catat kondisi pakaian</h2>
-  <form id="lc-create-form" method="post" action="{% url 'lifecycle:create' %}" data-ajax-url="{% url 'lifecycle:create_ajax' %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Simpan</button>
-  </form>
+  <div class="lc-panel">
+    <h2 class="lc-section__title">Catat kondisi pakaian</h2>
+    <form id="lc-create-form" class="ww-form lc-form" method="post" action="{% url 'lifecycle:create' %}" data-ajax-url="{% url 'lifecycle:create_ajax' %}">
+      {% csrf_token %}
+      {% include 'lifecycle/field.html' with field=form.item %}
+      {% include 'lifecycle/field.html' with field=form.condition %}
+      {% include 'lifecycle/field.html' with field=form.damage_description %}
+      {% include 'lifecycle/field.html' with field=form.status %}
+      {% include 'lifecycle/field.html' with field=form.notes wide=True %}
+      <div class="lc-form__actions">
+        <button type="submit" class="ww-btn">Simpan catatan</button>
+      </div>
+    </form>
+    <p id="lc-message" class="lc-message" role="status"></p>
+  </div>
 
-  <p id="lc-message" role="status"></p>
+  <section class="lc-section">
+    <div class="lc-toolbar">
+      <h2 class="lc-section__title">Riwayat kondisi pakaian</h2>
+      <form id="lc-filter" class="ww-form lc-filter" method="get">
+        <div class="ww-field">
+          <label for="lc-filter-recommendation">Rekomendasi</label>
+          <select id="lc-filter-recommendation" name="recommendation">
+            <option value="">Semua rekomendasi</option>
+            {% for value, label in recommendation_choices %}
+              <option value="{{ value }}" {% if value == selected_recommendation %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="ww-field">
+          <label for="lc-filter-status">Status</label>
+          <select id="lc-filter-status" name="status">
+            <option value="">Semua status</option>
+            {% for value, label in status_choices %}
+              <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </form>
+    </div>
 
-  <form id="lc-filter" method="get">
-    <select name="recommendation" aria-label="Filter rekomendasi">
-      <option value="">Semua rekomendasi</option>
-      {% for value, label in recommendation_choices %}
-        <option value="{{ value }}" {% if value == selected_recommendation %}selected{% endif %}>{{ label }}</option>
+    <div class="lc-table-wrap">
+      <table id="lc-table" class="lc-table" hidden
+             data-json-url="{% url 'lifecycle:json' %}"
+             data-edit-url="{% url 'lifecycle:update' '00000000-0000-0000-0000-000000000000' %}"
+             data-status-url="{% url 'lifecycle:status_ajax' '00000000-0000-0000-0000-000000000000' %}"
+             data-delete-url="{% url 'lifecycle:delete_ajax' '00000000-0000-0000-0000-000000000000' %}">
+        <thead>
+          <tr>
+            <th>Pakaian</th>
+            <th>Kondisi</th>
+            <th>Kerusakan</th>
+            <th>Rekomendasi</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="lc-rows"></tbody>
+      </table>
+    </div>
+    <p id="lc-empty" class="lc-empty" hidden>Belum ada catatan kondisi.</p>
+  </section>
+
+  <section class="lc-section">
+    <h2 class="lc-section__title">Repair guide</h2>
+    <div class="lc-guides">
+      {% for guide in guides %}
+        {% if not forloop.first %}
+          <svg class="ww-arrow" viewBox="0 0 44 10" fill="none" stroke="currentColor" aria-hidden="true"><path d="M0 5h43M39 1l4 4-4 4"/></svg>
+        {% endif %}
+        <article class="lc-guide" id="guide-{{ guide.recommendation }}">
+          <p class="ww-eyebrow">0{{ forloop.counter }} — {{ guide.title }}</p>
+          <div class="ww-img {% cycle 'ww-img--clay ww-shape--arch' 'ww-img--olive ww-shape--pill' 'ww-img--sage ww-shape--leaf' %}"></div>
+          <h3 class="ww-step__title">{{ guide.title }}</h3>
+          <p class="ww-step__text">{{ guide.summary }}</p>
+          <ul class="lc-guide__steps">
+            {% for step in guide.steps %}
+              <li>{{ step }}</li>
+            {% endfor %}
+          </ul>
+        </article>
       {% endfor %}
-    </select>
-    <select name="status" aria-label="Filter status">
-      <option value="">Semua status</option>
-      {% for value, label in status_choices %}
-        <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-  </form>
-
-  <table id="lc-table" hidden
-         data-json-url="{% url 'lifecycle:json' %}"
-         data-edit-url="{% url 'lifecycle:update' '00000000-0000-0000-0000-000000000000' %}"
-         data-status-url="{% url 'lifecycle:status_ajax' '00000000-0000-0000-0000-000000000000' %}"
-         data-delete-url="{% url 'lifecycle:delete_ajax' '00000000-0000-0000-0000-000000000000' %}">
-    <thead>
-      <tr>
-        <th>Pakaian</th>
-        <th>Kondisi</th>
-        <th>Kerusakan</th>
-        <th>Rekomendasi</th>
-        <th>Status</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody id="lc-rows"></tbody>
-  </table>
-  <p id="lc-empty" hidden>Belum ada catatan kondisi.</p>
+    </div>
+  </section>
 
   {{ status_choices|json_script:"lc-status-choices" }}
-  <h2>Repair guide</h2>
-  <div class="lc-guides">
-    {% for guide in guides %}
-      <article class="lc-guide" id="guide-{{ guide.recommendation }}">
-        <h3>{{ guide.title }}</h3>
-        <p>{{ guide.summary }}</p>
-        <ul>
-          {% for step in guide.steps %}
-            <li>{{ step }}</li>
-          {% endfor %}
-        </ul>
-      </article>
-    {% endfor %}
-  </div>
 </section>
 {% endblock content %}
 
