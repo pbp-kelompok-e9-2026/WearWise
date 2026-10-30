@@ -54,7 +54,7 @@
     <nav aria-label="Menu utama">
       <ul class="ww-nav">
         <li><a class="ww-nav__link{% if request.path == u_home %} is-active{% endif %}" href="{% firstof u_home '/' %}">Home</a></li>
-        <li><a class="ww-nav__link{% if u_discover and request.path == u_discover %} is-active{% endif %}" href="{% firstof u_discover '#' %}">Discover</a></li>
+        <li><a class="ww-nav__link{% if u_discover and request.path == u_about %} is-active{% endif %}" href="{% firstof u_about '#' %}">About</a></li>
         <li><a class="ww-nav__link{% if u_worth and request.path == u_worth %} is-active{% endif %}" href="{% firstof u_worth '#' %}">Worth to Buy</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'carbon_footprint' %} is-active{% endif %}" href="{% firstof u_numbers '#' %}">Numbers</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'wardrobe' %} is-active{% endif %}" href="{% firstof u_wardrobe '#' %}">Wardrobe</a></li>
@@ -64,8 +64,7 @@
       {% if user.is_authenticated %}
       <p class="ww-nav__label">Account</p>
       <ul class="ww-nav">
-        <li><a class="ww-nav__link{% if u_profile and request.path == u_profile %} is-active{% endif %}" href="{% firstof u_profile '#' %}">Edit Profile</a></li>
-        <li><a class="ww-nav__link" href="{% firstof u_settings '#' %}">Settings</a></li>
+        <li><a class="ww-nav__link{% if u_profile and request.path == u_profile %} is-active{% endif %}" href="{% firstof u_profile '#' %}">Profile</a></li>
       </ul>
       {% endif %}
     </nav>
