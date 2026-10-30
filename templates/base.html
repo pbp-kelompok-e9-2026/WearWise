@@ -53,6 +53,7 @@
     <nav aria-label="Menu utama">
       <ul class="ww-nav">
         <li><a class="ww-nav__link{% if request.path == u_home %} is-active{% endif %}" href="{{ u_home }}">Home</a></li>
+        <li><a class="ww-nav__link{% if request.path == u_about %} is-active{% endif %}" href="{{ u_about }}">About</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'worth_to_buy_analyzer' %} is-active{% endif %}" href="{{ u_worth }}">Worth to Buy</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'carbon_footprint' %} is-active{% endif %}" href="{{ u_numbers }}">Numbers</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'wardrobe' %} is-active{% endif %}" href="{{ u_wardrobe }}">Wardrobe</a></li>
