@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}WiseFit - Wear wisely{% endblock title %}
-{% block page_title %}Home{% endblock page_title %}
+{% block meta %}
+  <title>WiseFit — Wear wisely.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500&family=Instrument+Serif&display=swap" rel="stylesheet">
+{% endblock meta %}
 
 {% block content %}
 {% url 'worth_to_buy_analyzer:analyzer' as analyze_url %}
@@ -23,30 +28,97 @@
     </div>
   </div>
 
-  <div class="ww-hero__art" aria-hidden="true">
-    <div class="ww-hero__block ww-img ww-img--tan"></div>
-    <div class="ww-hero__ring"></div>
+      <h1 class="ww-display">Wise Fit</h1>
 
-    <div class="ww-float ww-float--material">
-      <p class="ww-float__label">Material</p>
-      <p class="ww-float__value">Linen</p>
-      <p class="ww-float__sub">Low impact</p>
-    </div>
-    <div class="ww-float ww-float--wears">
-      <p class="ww-float__value">24×</p>
-      <p class="ww-float__sub">estimated wears</p>
-    </div>
-    <div class="ww-float ww-float--cost">
-      <p class="ww-float__value">Rp4.131</p>
-      <p class="ww-float__sub">cost / wear</p>
-    </div>
+      <div style="display:flex; align-items:flex-start; gap:40px; margin-top:40px;">
+    <p class="ww-hero__lede" style="margin:0; flex:1 1 auto;">
+      WiseFit membantumu membuat keputusan belanja pakaian yang lebih bijak
+    </p>
 
-    <p class="ww-hero__fig">Fig. 01 — Linen shirt, studio light</p>
+    <div style="flex:0 0 auto;">
+      <img src="{% static 'baju.png' %}"
+           alt="Baju"
+           width="500" height="500"
+           style="display:block; width:100%; height:auto; max-width:400px;">
+    </div>
   </div>
 
-  <div class="ww-hero__foot">
-    <span>Scroll</span>
-    <span>Make every wear count.</span>
-  </div>
-</section>
+      <div class="ww-btns">
+        {% if user.is_authenticated %}
+          <a href="{% url 'wardrobe:show_wardrobe' %}" class="ww-btn">Buka Wardrobe</a>
+          <a href="{% url 'main:about' %}" class="ww-btn ww-btn--outline">Tentang Kami</a>
+        {% else %}
+          <a href="{% url 'main:register' %}" class="ww-btn">Mulai sekarang</a>
+          <a href="{% url 'main:login' %}" class="ww-btn ww-btn--outline">Login</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <footer class="ww-hero__foot">
+      <span>Buy less. Wear more. Let the numbers decide.</span>
+      <span>Wear wisely</span>
+    </footer>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="ww-page" style="padding-top: 24px;">
+    <div class="ww-head ww-head--flush">
+      <div>
+        <p class="ww-eyebrow ww-eyebrow--soft">What's inside</p>
+        <h2 class="ww-title" style="margin-top: 12px;">Built for a longer life.</h2>
+      </div>
+      <p class="ww-lede">
+        Empat alat utama untuk memutuskan apa yang layak dibeli dan apa yang
+        layak dipakai lebih lama.
+      </p>
+    </div>
+
+    <ul class="ww-stats" style="margin-top: 40px;">
+      <li class="ww-stat">
+        <p class="ww-stat__value">01</p>
+        <p class="ww-stat__label">Wardrobe</p>
+        <p class="ww-lede" style="margin-top: 12px;">
+          Simpan pakaianmu dan pantau seberapa sering dipakai.
+        </p>
+      </li>
+      <li class="ww-stat">
+        <p class="ww-stat__value">02</p>
+        <p class="ww-stat__label">Worth to Buy</p>
+        <p class="ww-lede" style="margin-top: 12px;">
+          Cek apakah calon pakaian layak dibeli dari harga dan cost per wear.
+        </p>
+      </li>
+      <li class="ww-stat">
+        <p class="ww-stat__value">03</p>
+        <p class="ww-stat__label">Numbers</p>
+        <p class="ww-lede" style="margin-top: 12px;">
+          Estimasi carbon footprint dan skor keberlanjutan tiap pakaian.
+        </p>
+      </li>
+      <li class="ww-stat">
+        <p class="ww-stat__value">04</p>
+        <p class="ww-stat__label">Lifecycle</p>
+        <p class="ww-lede" style="margin-top: 12px;">
+          Rekomendasi repair, reuse, atau recycle agar pakaian tidak cepat dibuang.
+        </p>
+      </li>
+    </ul>
+  </section>
+
+  <!-- CALLOUT -->
+  <section class="ww-page" style="padding-top: 0;">
+    <div class="ww-callout" style="min-height: 320px;">
+      <div class="ww-callout__body">
+        <p class="ww-callout__number">Tahukah Anda?</p>
+        <p class="ww-callout__text">
+          Rata-rata pakaian perlu dipakai 30 kali agar dianggap 100% berkelanjutan.
+        </p>
+      </div>
+      <a href="{% url 'dashboard:show_profile' %}" class="ww-link">
+        Lihat profilmu
+      </a>
+    </div>
+  </section>
+
+</div>
 {% endblock content %}

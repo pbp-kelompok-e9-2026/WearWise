@@ -5,6 +5,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'lifecycle/css/lifecycle.css' %}">
+{% include 'lifecycle/tailwind.html' %}
 {% endblock extra_css %}
 
 {% block content %}
@@ -31,8 +32,8 @@
     <p id="lc-message" class="lc-message" role="status"></p>
   </div>
 
-  <section class="lc-section">
-    <div class="lc-toolbar">
+  <section id="riwayat" class="mt-16">
+    <div class="mb-6 flex flex-wrap items-end justify-between gap-x-8 gap-y-4">
       <h2 class="lc-section__title">Riwayat kondisi pakaian</h2>
       <form id="lc-filter" class="ww-form lc-filter" method="get">
         <div class="ww-field">
@@ -78,23 +79,26 @@
     <p id="lc-empty" class="lc-empty" hidden>Belum ada catatan kondisi.</p>
   </section>
 
-  <section class="lc-section">
+  <section class="mt-16">
     <h2 class="lc-section__title">Repair guide</h2>
-    <div class="lc-guides">
+    <div class="grid grid-cols-1 gap-6 xl:grid-cols-[1fr_44px_1fr_44px_1fr]">
       {% for guide in guides %}
         {% if not forloop.first %}
-          <svg class="ww-arrow" viewBox="0 0 44 10" fill="none" stroke="currentColor" aria-hidden="true"><path d="M0 5h43M39 1l4 4-4 4"/></svg>
+          <svg class="ww-arrow hidden self-center xl:block" viewBox="0 0 44 10" fill="none" stroke="currentColor" aria-hidden="true"><path d="M0 5h43M39 1l4 4-4 4"/></svg>
         {% endif %}
-        <article class="lc-guide" id="guide-{{ guide.recommendation }}">
-          <p class="ww-eyebrow">0{{ forloop.counter }} — {{ guide.title }}</p>
-          <div class="ww-img {% cycle 'ww-img--clay ww-shape--arch' 'ww-img--olive ww-shape--pill' 'ww-img--sage ww-shape--leaf' %}"></div>
+        <article id="guide-{{ guide.recommendation }}" class="flex flex-col border border-t-[3px] border-line p-6 {% if guide.recommendation == 'repair' %}border-t-clay-soft{% elif guide.recommendation == 'reuse' %}border-t-sage{% else %}border-t-olive{% endif %}">
+          <div class="mb-6 flex items-center gap-4">
+            {% include 'lifecycle/guide_icon.html' with kind=guide.recommendation %}
+            <p class="ww-eyebrow !m-0">0{{ forloop.counter }} — {{ guide.title }}</p>
+          </div>
           <h3 class="ww-step__title">{{ guide.title }}</h3>
           <p class="ww-step__text">{{ guide.summary }}</p>
-          <ul class="lc-guide__steps">
+          <ol class="mb-6 mt-5 list-none p-0 leading-relaxed text-ink-soft [counter-reset:step]">
             {% for step in guide.steps %}
-              <li>{{ step }}</li>
+              <li class="relative border-t border-line py-3 pl-9 [counter-increment:step] before:absolute before:left-0 before:top-3 before:text-xs before:tracking-widest before:text-ink before:content-[counter(step,decimal-leading-zero)]">{{ step }}</li>
             {% endfor %}
-          </ul>
+          </ol>
+          <a class="mt-auto self-start border-b border-current pb-0.5 text-sm text-ink no-underline hover:opacity-70" href="?recommendation={{ guide.recommendation }}#riwayat">Lihat pakaian untuk {{ guide.title }}</a>
         </article>
       {% endfor %}
     </div>

@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Daftar — WearWise{% endblock title %}
+
+{% block content %}
+<div class="ww-auth">
+  <div class="ww-auth__card">
+
+    <h1 class="ww-auth__title">Daftar</h1>
+
+    {% if messages %}
+      {% for message in messages %}
+        <p class="ww-error">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" class="ww-form" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <p class="ww-error">{{ form.non_field_errors|join:" " }}</p>
+      {% endif %}
+
+      {% for field in form %}
+        <div class="ww-field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.help_text %}
+            <p class="ww-field__help">{{ field.help_text|safe }}</p>
+          {% endif %}
+          {% for error in field.errors %}
+            <p class="ww-field__error">{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endfor %}
+
+      <div class="ww-btns" style="margin-top: 12px;">
+        <button type="submit" class="ww-btn ww-btn--block">Daftar</button>
+      </div>
+    </form>
+
+    <p class="ww-auth__alt">
+      Sudah punya akun?
+      <a href="{% url 'main:login' %}">Login</a>
+    </p>
+
+  </div>
+</div>
+{% endblock content %}

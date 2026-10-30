@@ -1,0 +1,19 @@
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3"></script>
+<style type="text/tailwindcss">
+  @theme {
+    --color-ink: #1b1a17;
+    --color-ink-soft: #5f5a50;
+    --color-ivory: #f4efe6;
+    --color-line: #d4c7b0;
+    --color-sage: #a8b8a1;
+    --color-sage-deep: #6e8468;
+    --color-clay: #b2624a;
+    --color-clay-soft: #e3c2b5;
+    --color-olive: #6b6a45;
+    --font-display: "Instrument Serif", "Times New Roman", serif;
+  }
+
+  @layer theme, base, components, utilities;
+  @import "tailwindcss/theme" layer(theme);
+  @import "tailwindcss/utilities" layer(utilities);
+</style>
