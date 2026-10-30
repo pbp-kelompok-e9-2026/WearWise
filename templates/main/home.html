@@ -9,24 +9,12 @@
 {% endblock meta %}
 
 {% block content %}
-{% url 'worth_to_buy_analyzer:analyzer' as analyze_url %}
-{% url 'main:about' as about_url %}
-<section class="ww-hero">
-  <div class="ww-hero__text">
-    <ol class="ww-steps ww-eyebrow">
-      <li class="is-current">01 — About</li>
-      <li>02 — Analyze</li>
-      <li>03 — Wear</li>
-    </ol>
+<div class="ww-page">
 
-    <h1 class="ww-display">Wear<br>wisely.</h1>
-    <p class="ww-hero__lede">Fashion choices become smarter when you see the story behind the price.</p>
-
-    <div class="ww-btns">
-      <a class="ww-btn" href="{% firstof about_url '#' %}">Explore WiseFit</a>
-      <a class="ww-btn ww-btn--outline" href="{% firstof analyze_url '#' %}">Analyze an Item</a>
-    </div>
-  </div>
+  <!-- HERO -->
+  <section class="ww-hero">
+    <div class="ww-hero__text">
+      <p class="ww-eyebrow ww-eyebrow--soft">Sustainable fashion · Est. 2026</p>
 
       <h1 class="ww-display">Wise Fit</h1>
 
