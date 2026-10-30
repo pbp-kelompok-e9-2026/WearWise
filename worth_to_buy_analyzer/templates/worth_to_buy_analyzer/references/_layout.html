@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static i18n %}
-{% block title %}Ruang Analyzer - WearWise{% endblock %}
+{% block title %}Ruang Analyzer - WearFit{% endblock %}
 {% block page_title %}Ruang Analyzer{% endblock %}
 {% block extra_css %}{{ block.super }}
 <link rel="stylesheet" href="{% static 'css/worth_to_buy.css' %}">
@@ -8,7 +8,7 @@
 {% endblock %}
 {% block sidebar %}
 <aside class="ww-sidebar" id="ww-sidebar">
-    <a class="ww-logo" href="{% url 'worth_to_buy_analyzer:reference_list' %}">WearWise</a>
+    <a class="ww-logo" href="{% url 'worth_to_buy_analyzer:reference_list' %}">WearFit</a>
     <p class="ww-nav__label">Ruang Analyzer</p>
     <nav aria-label="Menu Analyzer">
         <ul class="ww-nav">

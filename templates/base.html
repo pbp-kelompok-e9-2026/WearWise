@@ -15,7 +15,7 @@
       if (c) document.documentElement.classList.add("ww-collapsed");
     })();
   </script>
-  <title>{% block title %}WearWise{% endblock title %}</title>
+  <title>{% block title %}WearFit{% endblock title %}</title>
 
   {# Font desain: Instrument Serif (judul) + Hanken Grotesk (teks) #}
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -48,7 +48,7 @@
 
   {% block sidebar %}
   <aside class="ww-sidebar" id="ww-sidebar">
-    <a class="ww-logo" href="{% firstof u_home '/' %}">WearWise</a>
+    <a class="ww-logo" href="{% firstof u_home '/' %}">WearFit</a>
 
     <nav aria-label="Menu utama">
       <ul class="ww-nav">
@@ -94,7 +94,7 @@
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/></svg>
       </button>
       {% endblock sidebar_toggle %}
-      <p class="ww-topbar__title">{% block page_title %}WearWise{% endblock page_title %}</p>
+      <p class="ww-topbar__title">{% block page_title %}WearFit{% endblock page_title %}</p>
 
       {% block topbar_tools %}
       <div class="ww-topbar__tools">
