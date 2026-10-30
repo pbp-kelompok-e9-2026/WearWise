@@ -19,15 +19,13 @@
 
       <nav class="ww-side-nav" aria-label="Main">
         <a href="{% url 'main:show_main' %}">Home</a>
-        <a href="#">Discover</a>
         <a href="#">Worth to Buy</a>
         <a href="#">Numbers</a>
         <a href="{% url 'wardrobe:show_wardrobe' %}">Wardrobe</a>
         <a href="#">Lifecycle</a>
 
         <p class="ww-side-label">Account</p>
-        <a href="#" aria-current="page">Edit Profile</a>
-        <a href="#">Settings</a>
+        <a href="{% url 'dashboard:edit_profile' %}" aria-current="page">Edit Profile</a>
       </nav>
 
       <div class="ww-side-foot">
