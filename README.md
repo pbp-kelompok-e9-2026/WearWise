@@ -1,5 +1,4 @@
 # WiseFit
-## Daftar Modul Rencana
 
 ## Deskripsi Aplikasi
 
@@ -7,6 +6,7 @@ WiseFit adalah aplikasi sustainable fashion yang membantu pengguna membuat keput
 
 Sebelum membeli pakaian baru, pengguna dapat mengecek apakah barang tersebut worth to buy berdasarkan harga, estimasi frekuensi pemakaian, cost per wear, material, serta estimasi carbon footprint. Setelah barang dimiliki, pengguna dapat memasukkannya ke dalam digital wardrobe untuk memantau seberapa sering pakaian digunakan. Untuk pakaian lama atau rusak, aplikasi memberikan rekomendasi repair, reuse, atau recycle agar pakaian tidak langsung dibuang.  
 
+## Daftar Modul Rencana
 ### 1. Wardrobe Management
 
 **Penanggung jawab:** Ali Jundi Qowi (2506611585)
