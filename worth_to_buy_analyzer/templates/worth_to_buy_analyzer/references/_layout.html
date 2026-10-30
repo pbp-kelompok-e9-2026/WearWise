@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% load static i18n %}
-{% block title %}Ruang Analyzer - WearWise{% endblock %}
+{% block title %}Ruang Analyzer - WiseFit{% endblock %}
 {% block page_title %}Ruang Analyzer{% endblock %}
-{% block extra_css %}{{ block.super }}
+{% block extra_css %}{{ block.super }}{% include 'worth_to_buy_analyzer/partials/htmx_config.html' %}
 <link rel="stylesheet" href="{% static 'css/worth_to_buy.css' %}">
 <link rel="stylesheet" href="{% static 'css/analyzer_workspace.css' %}">
 {% endblock %}
@@ -10,7 +10,7 @@
 {# Tautan modul karbon: kalau modul carbon_footprint tidak terpasang, {% url ... as %} kosong dan tautannya tidak tampil #}
 {% url 'carbon_footprint:analyzer' as u_carbon %}{% url 'carbon_footprint:factors' as u_factors %}
 <aside class="ww-sidebar" id="ww-sidebar">
-    <a class="ww-logo" href="{% url 'worth_to_buy_analyzer:reference_list' %}">WearWise</a>
+    <a class="ww-logo" href="{% url 'worth_to_buy_analyzer:reference_list' %}">WiseFit</a>
     <p class="ww-nav__label">Ruang Analyzer</p>
     <nav aria-label="Menu Analyzer">
         <ul class="ww-nav">
@@ -31,12 +31,15 @@
 {% endblock %}
 {% block content %}
 {% language 'id' %}
-<section class="ww-page wtb-page ref-workspace" aria-label="Ruang Analyzer">
+<section class="ww-page wtb-page ref-workspace" aria-label="Ruang Analyzer" hx-history="false">
     <nav class="wtb-nav" aria-label="Navigasi referensi">
         <a href="{% url 'worth_to_buy_analyzer:reference_list' %}">Semua referensi</a>
         <a href="{% url 'worth_to_buy_analyzer:reference_create' %}">Tambah referensi ↗</a>
     </nav>
+    {% include 'worth_to_buy_analyzer/partials/request_error.html' %}
     {% block workspace_content %}{% endblock %}
 </section>
 {% endlanguage %}
 {% endblock %}
+
+{% block extra_js %}{{ block.super }}{% include 'worth_to_buy_analyzer/partials/htmx_scripts.html' %}{% endblock %}

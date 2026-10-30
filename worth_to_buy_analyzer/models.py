@@ -6,7 +6,7 @@ from django.db import models
 
 from carbon_footprint.constants import MATERIAL_CHOICES
 
-
+# User Mode
 class PurchaseAnalysis(models.Model):
     class Category(models.TextChoices):
         TOP = "top", "Atasan"

@@ -1,2 +1,8 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'carbon_footprint/css/carbon_footprint.css' %}">
+{# Ruang Analyzer sudah memuat HTMX melalui layout bersama. #}
+{% if request.resolver_match.url_name != 'analyzer' and request.resolver_match.url_name != 'factors' %}
+{% include 'worth_to_buy_analyzer/partials/htmx_config.html' %}
+<script src="{% static 'vendor/htmx.min.js' %}" defer></script>
+{% endif %}
+<script src="{% static 'carbon_footprint/js/cf.js' %}" defer></script>

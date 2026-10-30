@@ -2,16 +2,19 @@
 {% load static i18n %}
 {% block title %}Worth to Buy Analyzer{% endblock %}
 {% block page_title %}Worth to Buy{% endblock %}
-{% block extra_css %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/worth_to_buy.css' %}">{% endblock %}
+{% block extra_css %}{{ block.super }}{% include 'worth_to_buy_analyzer/partials/htmx_config.html' %}<link rel="stylesheet" href="{% static 'css/worth_to_buy.css' %}">{% endblock %}
 {% block content %}
 {% language 'id' %}
-<section class="ww-page wtb-page" aria-label="Worth to Buy Analyzer">
+<section class="ww-page wtb-page" aria-label="Worth to Buy Analyzer" hx-history="false">
     <nav class="wtb-nav" aria-label="Navigasi Worth to Buy">
         <a href="{% url 'worth_to_buy_analyzer:analyzer' %}"{% if request.resolver_match.url_name == 'analyzer' %} aria-current="page"{% endif %}>Koleksi analisis</a>
         <a href="{% url 'worth_to_buy_analyzer:catalogue' %}"{% if request.resolver_match.url_name == 'catalogue' %} aria-current="page"{% endif %}>Referensi pakaian</a>
         <a href="{% url 'worth_to_buy_analyzer:create' %}"{% if request.resolver_match.url_name == 'create' %} aria-current="page"{% endif %}>Analisis baru <span aria-hidden="true">↗</span></a>
     </nav>
+    {% include 'worth_to_buy_analyzer/partials/request_error.html' %}
     {% block analyzer_content %}{% endblock %}
 </section>
 {% endlanguage %}
 {% endblock %}
+
+{% block extra_js %}{{ block.super }}{% include 'worth_to_buy_analyzer/partials/htmx_scripts.html' %}{% endblock %}
