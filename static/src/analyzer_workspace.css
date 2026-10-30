@@ -1,0 +1,14 @@
+/* Tailwind v4 CLI source for the Analyzer workspace. */
+@reference "./worth_to_buy.css";
+.ref-workspace .ref-stats { @apply rounded-lg bg-wf-deep px-7 pt-6 pb-0 max-[700px]:grid-cols-3 max-[700px]:gap-3 max-[700px]:px-4 max-[700px]:pt-4; }
+.ref-workspace .ref-filters { @apply mb-3 flex flex-wrap items-end gap-5; }
+.ref-workspace .ref-filters .wtb-field { @apply m-0 min-w-[150px] flex-1; }
+.ref-workspace .ref-filters .wtb-field:first-child { @apply flex-[2]; }
+.ref-workspace .ref-form { @apply max-w-[900px]; }
+.ref-workspace .ref-publication { @apply my-6 rounded-md border border-solid border-wf-line bg-wf-deep p-5; }
+.ref-workspace .ref-publication label { @apply flex cursor-pointer items-center gap-3; }
+.ref-workspace .ref-publication input { @apply h-5 w-5 accent-wf-olive; }
+.ref-workspace .ref-published { @apply border-wf-sage bg-wf-sage; }
+.ref-workspace .ref-notes { @apply my-6 whitespace-normal wrap-anywhere; }
+.ref-workspace .ref-stats .wtb-eyebrow { @apply max-[700px]:text-[.56rem] max-[700px]:tracking-[.08em]; }
+.ref-workspace .ref-stats .wtb-metric-value { @apply max-[700px]:text-[2rem]; }

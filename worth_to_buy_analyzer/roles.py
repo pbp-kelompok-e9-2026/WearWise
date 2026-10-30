@@ -2,8 +2,12 @@
 
 from functools import wraps
 
-from django.contrib.auth.decorators import login_required
+from django.conf import settings
+from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import resolve_url
+
+from .htmx import login_redirect
 
 
 ANALYZER_GROUP = "Analyzer"
@@ -24,9 +28,10 @@ def role_home(user):
 
 
 def analyzer_required(view):
-    @login_required
     @wraps(view)
     def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return login_redirect(request, redirect_to_login(request.get_full_path(), resolve_url(settings.LOGIN_URL)))
         if not (request.user.is_superuser or is_analyzer(request.user)):
             raise PermissionDenied("Halaman ini khusus akun Analyzer.")
         return view(request, *args, **kwargs)
@@ -34,9 +39,10 @@ def analyzer_required(view):
 
 
 def purchase_user_required(view):
-    @login_required
     @wraps(view)
     def wrapped(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return login_redirect(request, redirect_to_login(request.get_full_path(), resolve_url(settings.LOGIN_URL)))
         if is_analyzer(request.user) and not request.user.is_superuser:
             raise PermissionDenied("Gunakan ruang Analyzer untuk mengelola referensi pakaian.")
         return view(request, *args, **kwargs)

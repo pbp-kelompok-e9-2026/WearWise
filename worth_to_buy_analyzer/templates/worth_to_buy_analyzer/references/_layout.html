@@ -2,7 +2,7 @@
 {% load static i18n %}
 {% block title %}Ruang Analyzer - WearFit{% endblock %}
 {% block page_title %}Ruang Analyzer{% endblock %}
-{% block extra_css %}{{ block.super }}
+{% block extra_css %}{{ block.super }}{% include 'worth_to_buy_analyzer/partials/htmx_config.html' %}
 <link rel="stylesheet" href="{% static 'css/worth_to_buy.css' %}">
 <link rel="stylesheet" href="{% static 'css/analyzer_workspace.css' %}">
 {% endblock %}
@@ -27,12 +27,15 @@
 {% endblock %}
 {% block content %}
 {% language 'id' %}
-<section class="ww-page wtb-page ref-workspace" aria-label="Ruang Analyzer">
+<section class="ww-page wtb-page ref-workspace" aria-label="Ruang Analyzer" hx-history="false">
     <nav class="wtb-nav" aria-label="Navigasi referensi">
         <a href="{% url 'worth_to_buy_analyzer:reference_list' %}">Semua referensi</a>
         <a href="{% url 'worth_to_buy_analyzer:reference_create' %}">Tambah referensi ↗</a>
     </nav>
+    {% include 'worth_to_buy_analyzer/partials/request_error.html' %}
     {% block workspace_content %}{% endblock %}
 </section>
 {% endlanguage %}
 {% endblock %}
+
+{% block extra_js %}{{ block.super }}{% include 'worth_to_buy_analyzer/partials/htmx_scripts.html' %}{% endblock %}

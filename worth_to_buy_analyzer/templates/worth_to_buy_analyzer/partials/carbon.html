@@ -1,0 +1,11 @@
+{% load i18n %}{% language 'id' %}
+<section id="carbon-panel" class="wtb-carbon wtb-panel" aria-labelledby="wtb-carbon-title">
+    {% if notice %}<p class="{% if notice_warning %}wtb-notice{% else %}wtb-success{% endif %}" role="status">{{ notice }}</p>{% endif %}
+    <p class="wtb-eyebrow">Pertimbangan tambahan</p><h2 class="wtb-subtitle" id="wtb-carbon-title">Jejak di balik pakaian.</h2>
+    {% if item.carbon_kg_co2e is not None %}
+    <p class="wtb-metric-value">{{ item.carbon_kg_co2e|floatformat:4 }} <small>kg CO2e</small></p><p class="wtb-help">{{ result.carbon_per_wear|floatformat:4 }} kg CO2e per pakai<br>{{ item.get_material_display }} · {{ item.weight_kg }} kg</p>
+    <details class="wtb-disclosure"><summary>Sumber &amp; batas estimasi</summary><p class="wtb-help">Sumber: {{ item.carbon_reference }}</p><p class="wtb-help">{{ item.carbon_scope }}</p><p class="wtb-help">Diestimasi pada {{ item.carbon_estimated_at|date:'d M Y H:i' }}.</p></details>
+    {% else %}<p class="wtb-help">Data karbon belum tersedia. Lengkapi bahan dan berat jika kamu mengetahuinya. Analisis kebutuhan dan budget tetap bisa digunakan.</p>{% endif %}
+    {% if item.material and item.weight_kg %}<form hx-post="{% url 'worth_to_buy_analyzer:refresh_carbon' item.pk %}" hx-target="#carbon-panel" hx-swap="outerHTML" hx-disabled-elt="find button" method="post" action="{% url 'worth_to_buy_analyzer:refresh_carbon' item.pk %}">{% csrf_token %}<button class="wtb-button wtb-button--outline" type="submit">Perbarui estimasi karbon</button></form>{% else %}<a class="wtb-text-link" href="{% url 'worth_to_buy_analyzer:update' item.pk %}">Lengkapi detail pakaian ↗</a>{% endif %}
+</section>
+{% endlanguage %}

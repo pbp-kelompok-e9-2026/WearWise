@@ -303,6 +303,16 @@ class AnalyzerFlowTests(TestCase):
         self.assertRedirects(self.client.post(url), self.url("analyzer"))
         self.assertFalse(PurchaseAnalysis.objects.filter(pk=obj.pk).exists())
 
+    def test_deletePOST(self):
+        obj = self.saved_item()
+        self.assertRedirects(self.client.post(self.url("delete", obj)), self.url("analyzer"))
+        self.assertFalse(PurchaseAnalysis.objects.filter(pk=obj.pk).exists())
+
+    def test_deleteGET(self):
+        obj = self.saved_item()
+        self.assertContains(self.client.get(self.url("delete", obj)), "Hapus analisis?")
+        self.assertTrue(PurchaseAnalysis.objects.filter(pk=obj.pk).exists())
+
     def test_csrf_required_on_every_mutation(self):
         client = Client(enforce_csrf_checks=True)
         client.force_login(self.user)

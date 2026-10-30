@@ -49,6 +49,12 @@
 - **Update:** Mengubah data profile, progres eco challenge, dan data database yang sudah diinput
 - **Delete:** Menghapus data database yang tidak diperlukan dan keluar dari eco challenge
 
+## AI Disclosure
+
+### Worth to Buy Analyzer
+
+Bantuan AI digunakan untuk memperbaiki sebagian kode modul Worth to Buy Analyzer yang kurang tepat dan membantu memahami konsep integrasi Tailwind v4, serta pengujian. Perubahan diverifikasi melalui pengujian otomatis dan pengecekan antarmuka. Penanggung jawab modul tetap perlu meninjau, memahami, dan memvalidasi hasil sebelum menggabungkannya ke proyek kelompok.
+
 ## Public API / Mock API
 
 - [Climatiq](https://www.climatiq.io/docs/api-reference)

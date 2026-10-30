@@ -1,0 +1,3 @@
+# Native watcher binaries come from its optional platform package.
+allowBuilds:
+  '@parcel/watcher': false
