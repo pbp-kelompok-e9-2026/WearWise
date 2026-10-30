@@ -37,7 +37,10 @@ class DashboardBaseTest(TestCase):
         return ClothingItem.objects.create(
             user=self.user,
             name=name,
+            category='TOP',
+            material='cotton',
             price=price,
+            purchase_date='2026-01-10',
             wear_count=wear_count,
         )
 
@@ -101,7 +104,15 @@ class ShowProfileTest(DashboardBaseTest):
     def test_only_count_own_items(self):
         """Item user lain tidak ikut dihitung."""
         other = User.objects.create_user(username='bob', password='x')
-        ClothingItem.objects.create(user=other, name='Kaos', price=999, wear_count=99)
+        ClothingItem.objects.create(
+            user=other,
+            name='Kaos',
+            category='TOP',
+            material='cotton',
+            price=999,
+            purchase_date='2026-01-10',
+            wear_count=99,
+        )
 
         response = self.client.get(reverse('dashboard:show_profile'))
         self.assertEqual(response.context['wears_logged'], 0)
