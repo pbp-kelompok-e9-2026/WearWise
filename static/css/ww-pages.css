@@ -1,0 +1,52 @@
+/* ==========================================================================
+   WearWise: penyempurnaan halaman About
+   Muat SETELAH wearwise.css. File ini hanya menimpa tampilan; HTML dan
+   wearwise.css tidak perlu diubah. Home, Login, dan Register sengaja tidak
+   disentuh dan memakai wearwise.css apa adanya.
+   ========================================================================== */
+
+
+/* Fokus keyboard yang jelas untuk tombol dan tautan */
+.ww-hero .ww-btn:focus-visible,
+.ww-about .ww-btn:focus-visible,
+.ww-auth .ww-btn:focus-visible,
+.ww-auth a:focus-visible {
+  outline: 2px solid var(--ww-sage-deep);
+  outline-offset: 3px;
+}
+
+.ww-about .ww-btn:focus-visible { outline-color: var(--ww-clay-soft); }
+
+
+/* ==========================================================================
+   About
+   Judul tidak boleh patah baris di layar laptop: ukuran huruf dihitung dari
+   lebar kolom yang tersedia, dengan batas maksimum 10.5rem seperti di Figma.
+   ========================================================================== */
+
+.ww-about {
+  --ww-about-side: 340px;
+  --ww-about-gap: 48px;
+  container-type: inline-size;
+  gap: var(--ww-about-gap);
+  grid-template-columns: minmax(0, 1fr) var(--ww-about-side);
+}
+
+.ww-about__headline {
+  font-size: clamp(3rem, 7.4vw, 10.5rem);                    /* cadangan untuk browser lama */
+  /* 100cqw sudah tanpa padding; 5.6 = lebar "WEARING LESS." dalam em, plus sedikit ruang aman */
+  font-size: min(10.5rem, calc((100cqw - var(--ww-about-side) - var(--ww-about-gap)) / 5.6));
+  white-space: nowrap;
+}
+
+.ww-about__headline em { padding-left: 0.03em; }             /* italic terlihat lurus dengan baris lain */
+
+.ww-about__side { max-width: var(--ww-about-side); }
+
+@media (max-width: 900px) {
+  .ww-about { grid-template-columns: minmax(0, 1fr); }
+
+  .ww-about__headline {
+    font-size: min(10.5rem, calc(100cqw / 5.6));
+  }
+}
