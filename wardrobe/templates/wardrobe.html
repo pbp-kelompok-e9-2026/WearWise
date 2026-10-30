@@ -91,7 +91,8 @@
         const id = item.pk || item.id;
 
         const card = document.createElement('div');
-        card.className = 'ww-card';
+        //Nambahin Tailwind di bawah ini
+        card.className = 'ww-card bg-white rounded-xl shadow-sm hover:shadow-md transition border border-gray-200 overflow-hidden flex flex-col justify-between p-4';
 
         const bgColors = ['#a3b19b', '#e2beb4', '#d0c8b8', '#888f70'];
         const randomBg = bgColors[Math.floor(Math.random() * bgColors.length)];
@@ -174,4 +175,6 @@
 
     fetchWardrobe();
 </script>
+<!--Penghubung taiwilnd css -->
+<script src="https://cdn.tailwindcss.com"></script>
 {% endblock %}
