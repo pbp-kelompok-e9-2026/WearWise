@@ -1,0 +1,13 @@
+{% if p %}
+<div class="cf-preview__grid">
+  <div><p class="cf-preview__value">{{ p.co2e|floatformat:"1u" }} kg</p><p class="cf-stat__label">CO₂e, quick estimate</p></div>
+  <div><p class="cf-preview__value">{% if p.cost_per_wear is not None %}<span class="cf-stat__unit">{{ p.currency }}</span>{{ p.cost_per_wear|floatformat:"0g" }}{% else %}—{% endif %}</p><p class="cf-stat__label">Cost per wear</p></div>
+  <div><p class="cf-preview__value">{{ p.score }}</p><p class="cf-stat__label">Score</p></div>
+</div>
+<div class="cf-bar cf-bar--score cf-preview__bar" aria-hidden="true"><span class="cf-bar__fill" style="width: {{ p.score }}%"></span></div>
+<p class="cf-field__help">
+  {% if p.will_use_climatiq %}Saving with this price uses Climatiq, so the final CO₂e can differ.{% else %}Based on {{ p.weight|floatformat:"2u" }} kg and the material. Add a price to use Climatiq when saving.{% endif %}
+</p>
+{% else %}
+<p class="cf-field__help">Choose a category and material to see a quick estimate.</p>
+{% endif %}

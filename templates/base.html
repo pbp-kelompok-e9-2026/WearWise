@@ -15,7 +15,7 @@
       if (c) document.documentElement.classList.add("ww-collapsed");
     })();
   </script>
-  <title>{% block title %}WearFit{% endblock title %}</title>
+  <title>{% block title %}WiseFit{% endblock title %}</title>
 
   {# Font desain: Instrument Serif (judul) + Hanken Grotesk (teks) #}
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,16 +31,17 @@
 {# Nama URL di bawah adalah tebakan; kalau nama di proyekmu beda, link jatuh ke "#" tanpa error #}
 {% url 'main:show_main' as u_home %}
 {% url 'main:about' as u_about %}
+{% url 'dashboard:profile' as u_profile %}{% if not u_profile %}{% url 'main:profile' as u_profile %}{% endif %}
 {% url 'main:login' as u_login %}
 {% url 'main:register' as u_register %}
 {% url 'main:logout' as u_logout %}
 {% url 'carbon_footprint:index' as u_numbers %}
 {% url 'carbon_footprint:list' as u_numbers_list %}
-{% url 'wardrobe:index' as u_wardrobe %}
-{% url 'dashboard:show_profile' as u_profile %}{% if not u_profile %}{% url 'main:profile' as u_profile %}{% endif %}
+{% url 'wardrobe:show_wardrobe' as u_wardrobe %}{% if not u_wardrobe %}{% url 'wardrobe:index' as u_wardrobe %}{% endif %}
 {% url 'dashboard:discover' as u_discover %}
+{% url 'dashboard:show_profile' as u_profile %}{% if not u_profile %}{% url 'main:profile' as u_profile %}{% endif %}
 {% url 'worth_to_buy_analyzer:analyzer' as u_worth %}
-{% url 'dashboard:lifecycle' as u_lifecycle %}
+{% url 'lifecycle:index' as u_lifecycle %}
 {% url 'admin:index' as u_settings %}
 
 <body class="ww {% block body_class %}{% endblock body_class %}">
@@ -48,13 +49,13 @@
 
   {% block sidebar %}
   <aside class="ww-sidebar" id="ww-sidebar">
-    <a class="ww-logo" href="{% firstof u_home '/' %}">WearFit</a>
+    <a class="ww-logo" href="{% firstof u_home '/' %}">WiseFit</a>
 
     <nav aria-label="Menu utama">
       <ul class="ww-nav">
         <li><a class="ww-nav__link{% if request.path == u_home %} is-active{% endif %}" href="{% firstof u_home '/' %}">Home</a></li>
         <li><a class="ww-nav__link{% if u_discover and request.path == u_discover %} is-active{% endif %}" href="{% firstof u_discover '#' %}">Discover</a></li>
-        <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'worth_to_buy_analyzer' %} is-active{% endif %}" href="{{ u_worth }}">Worth to Buy</a></li>
+        <li><a class="ww-nav__link{% if u_worth and request.path == u_worth %} is-active{% endif %}" href="{% firstof u_worth '#' %}">Worth to Buy</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'carbon_footprint' %} is-active{% endif %}" href="{% firstof u_numbers '#' %}">Numbers</a></li>
         <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'wardrobe' %} is-active{% endif %}" href="{% firstof u_wardrobe '#' %}">Wardrobe</a></li>
         <li><a class="ww-nav__link{% if u_lifecycle and request.path == u_lifecycle %} is-active{% endif %}" href="{% firstof u_lifecycle '#' %}">Lifecycle</a></li>
@@ -64,9 +65,7 @@
       <p class="ww-nav__label">Account</p>
       <ul class="ww-nav">
         <li><a class="ww-nav__link{% if u_profile and request.path == u_profile %} is-active{% endif %}" href="{% firstof u_profile '#' %}">Edit Profile</a></li>
-        {% if user.is_staff %}
         <li><a class="ww-nav__link" href="{% firstof u_settings '#' %}">Settings</a></li>
-        {% endif %}
       </ul>
       {% endif %}
     </nav>
@@ -94,7 +93,7 @@
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M3 5h14M3 10h14M3 15h14"/></svg>
       </button>
       {% endblock sidebar_toggle %}
-      <p class="ww-topbar__title">{% block page_title %}WearFit{% endblock page_title %}</p>
+      <p class="ww-topbar__title">{% block page_title %}WiseFit{% endblock page_title %}</p>
 
       {% block topbar_tools %}
       <div class="ww-topbar__tools">

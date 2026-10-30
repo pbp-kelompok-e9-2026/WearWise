@@ -7,13 +7,17 @@
 <link rel="stylesheet" href="{% static 'css/analyzer_workspace.css' %}">
 {% endblock %}
 {% block sidebar %}
+{# Tautan modul karbon: kalau modul carbon_footprint tidak terpasang, {% url ... as %} kosong dan tautannya tidak tampil #}
+{% url 'carbon_footprint:analyzer' as u_carbon %}{% url 'carbon_footprint:factors' as u_factors %}
 <aside class="ww-sidebar" id="ww-sidebar">
     <a class="ww-logo" href="{% url 'worth_to_buy_analyzer:reference_list' %}">WearFit</a>
     <p class="ww-nav__label">Ruang Analyzer</p>
     <nav aria-label="Menu Analyzer">
         <ul class="ww-nav">
-            <li><a class="ww-nav__link{% if request.resolver_match.url_name != 'reference_create' %} is-active{% endif %}" href="{% url 'worth_to_buy_analyzer:reference_list' %}">Referensi pakaian</a></li>
+            <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'worth_to_buy_analyzer' and request.resolver_match.url_name != 'reference_create' %} is-active{% endif %}" href="{% url 'worth_to_buy_analyzer:reference_list' %}">Referensi pakaian</a></li>
             <li><a class="ww-nav__link{% if request.resolver_match.url_name == 'reference_create' %} is-active{% endif %}" href="{% url 'worth_to_buy_analyzer:reference_create' %}">Tambah referensi ↗</a></li>
+            {% if u_carbon %}<li><a class="ww-nav__link{% if request.resolver_match.url_name == 'analyzer' and request.resolver_match.app_name == 'carbon_footprint' %} is-active{% endif %}" href="{{ u_carbon }}">Analisis karbon</a></li>{% endif %}
+            {% if u_factors %}<li><a class="ww-nav__link{% if request.resolver_match.url_name == 'factors' %} is-active{% endif %}" href="{{ u_factors }}">Faktor emisi</a></li>{% endif %}
             {% if user.is_superuser %}<li><a class="ww-nav__link" href="{% url 'admin:index' %}">Administrasi akun</a></li>{% endif %}
         </ul>
     </nav>

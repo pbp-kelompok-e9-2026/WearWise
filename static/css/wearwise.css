@@ -1,5 +1,5 @@
 /* ==========================================================================
-   WearWise design system
+   WiseFit design system
    Dibuat dari desain Figma (8 halaman: Home, Discover, Worth to Buy, Numbers,
    Wardrobe, Lifecycle, About, Profile). Semua kelas berawalan "ww-".
    Muat SETELAH css/styles.css milik tim supaya token di bawah berlaku.
@@ -220,7 +220,7 @@ body.ww {
 .ww-toggle {
   position: absolute;
   top: 50%;
-  left: 10px;
+  left: 20px;
   display: grid;
   place-items: center;
   width: 40px;
@@ -574,8 +574,6 @@ body.ww {
   line-height: 1.05;
   letter-spacing: -0.02em;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .ww-stat__label {
@@ -816,139 +814,4 @@ body.ww {
 
 @media (prefers-reduced-motion: reduce) {
   .ww * { transition: none !important; }
-}
-
-/* ---------- Wardrobe Module (Halaman 5) ---------- */
-.ww-wardrobe-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 48px;
-  gap: 32px;
-}
-
-.ww-wardrobe-intro {
-  max-width: 320px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: var(--ww-muted);
-}
-
-.ww-wardrobe-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 32px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--ww-line);
-}
-
-.ww-select {
-  background: transparent;
-  border: 1px solid var(--ww-ink);
-  padding: 8px 16px;
-  border-radius: 999px;
-  font-family: var(--ww-sans);
-  font-size: 13px;
-  color: var(--ww-ink);
-  cursor: pointer;
-}
-
-/* Wardrobe Grid & Cards */
-.ww-wardrobe-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 32px;
-}
-
-.ww-card {
-  display: flex;
-  flex-direction: column;
-}
-
-.ww-card-media {
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  background-color: #d0c8b8;
-  border: 1px solid var(--ww-line);
-  margin-bottom: 16px;
-  object-fit: cover;
-  display: block;
-}
-
-.ww-card-title {
-  font-family: var(--ww-serif);
-  font-size: 26px;
-  font-weight: 400;
-  margin: 0 0 6px 0;
-  color: var(--ww-ink);
-}
-
-.ww-card-meta {
-  font-size: 13px;
-  color: var(--ww-muted);
-  margin-bottom: 4px;
-}
-
-.ww-card-price {
-  font-size: 14px;
-  color: #c27a62; /* Terracotta accent color dari Figma */
-  font-weight: 500;
-  margin-top: 4px;
-}
-
-.ww-card-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.ww-btn-sm {
-  padding: 6px 14px;
-  font-size: 12px;
-  border-radius: 999px;
-  border: 1px solid var(--ww-ink);
-  background: transparent;
-  color: var(--ww-ink);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.ww-btn-sm:hover {
-  background: var(--ww-ink);
-  color: var(--ww-bg);
-}
-
-.ww-btn-danger {
-  border-color: #a84343;
-  color: #a84343;
-}
-
-.ww-btn-danger:hover {
-  background: #a84343;
-  color: #fff;
-}
-
-/* ==========================================================================
-   Modal Popover (Tambah Pakaian)
-   ========================================================================== */
-.ww-modal {
-  position: fixed;
-  inset: 0;
-  margin: auto;
-  z-index: 9999;
-  padding: 32px;
-  background: var(--ww-ivory, #f4efe6);
-  border: 1px solid var(--ww-ink, #1b1a17);
-  max-width: 480px;
-  width: 90%;
-  max-height: 90vh;
-  overflow-y: auto;
-  border-radius: 16px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
-}
-
-.ww-modal::backdrop {
-  background-color: rgba(27, 26, 23, 0.5);
-  backdrop-filter: blur(4px);
 }
