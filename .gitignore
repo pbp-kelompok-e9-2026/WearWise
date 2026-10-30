@@ -13,3 +13,6 @@ __pycache__/
 .vscode/*
 !.vscode/settings.json
 .idea/
+# Frontend dependencies (compiled CSS and vendored browser assets are tracked)
+node_modules/
+.pnpm-store/

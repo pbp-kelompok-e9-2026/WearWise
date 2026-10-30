@@ -1,6 +1,5 @@
-/* Gaya khusus halaman Lifecycle (Modul 4). Warna dan font memakai token --ww-* dari wearwise.css */
+/* Gaya khusus halaman Lifecycle (Modul 4). Layout section dan repair guide memakai Tailwind (lihat tailwind.html). */
 
-.lc-section { margin-top: 64px; }
 .lc-section__title {
   margin: 0 0 24px;
   font-family: var(--ww-font-display);
@@ -27,15 +26,7 @@
 .lc-message { min-height: 1.5em; margin: 16px 0 0; color: var(--ww-sage-deep); font-size: 0.9375rem; }
 .lc-message.is-error { color: var(--ww-clay); }
 
-/* Filter */
-.lc-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px 32px;
-  margin-bottom: 24px;
-}
+/* Filter (baris judul + filter memakai Tailwind di list.html) */
 .lc-filter { display: flex; flex-wrap: wrap; gap: 16px 24px; }
 .lc-filter .ww-field { margin: 0; min-width: 200px; }
 
@@ -91,27 +82,8 @@
 .lc-badge--reuse { background: var(--ww-sage); color: var(--ww-ink); }
 .lc-badge--recycle { background: var(--ww-olive); color: var(--ww-ivory); }
 
-/* Repair guide: tiga kartu seperti alur Lifecycle di Figma */
-.lc-guides {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 44px minmax(0, 1fr) 44px minmax(0, 1fr);
-  gap: 24px;
-  align-items: stretch;
-}
-.lc-guides .ww-arrow { align-self: center; }
-.lc-guide { padding: 24px; border: 1px solid var(--ww-line); }
-.lc-guide .ww-eyebrow { margin-bottom: 16px; }
-.lc-guide .ww-img { height: 140px; margin-bottom: 18px; }
-.lc-guide__steps { margin: 16px 0 0; padding-left: 18px; color: var(--ww-ink-soft); line-height: 1.6; }
-.lc-guide__steps li + li { margin-top: 6px; }
-
 /* Halaman form edit dan konfirmasi hapus */
 .lc-narrow { max-width: 720px; }
-
-@media (max-width: 1280px) {
-  .lc-guides { grid-template-columns: 1fr; }
-  .lc-guides .ww-arrow { display: none; }
-}
 
 @media (max-width: 900px) {
   .lc-panel { padding: 24px; }

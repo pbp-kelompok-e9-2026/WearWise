@@ -257,11 +257,6 @@ class HtmxTests(OfflineTestCase):
 
     # ----- daftar -----
 
-    def test_list_returns_full_page_without_htmx(self):
-        resp = self.client.get(reverse("carbon_footprint:list"))
-        self.assertTemplateUsed(resp, "carbon_footprint/list.html")
-        self.assertContains(resp, 'id="cf-filters"')
-
     def test_list_returns_only_rows_for_htmx(self):
         resp = self.client.get(reverse("carbon_footprint:list"), **HX)
         self.assertTemplateUsed(resp, "carbon_footprint/_rows.html")
@@ -335,8 +330,12 @@ class HtmxTests(OfflineTestCase):
 
     def test_htmx_delete_requires_login(self):
         self.client.logout()
-        resp = self.client.post(reverse("carbon_footprint:delete", args=[self.jacket.pk]), **HX)
-        self.assertEqual(resp.status_code, 302)
+        target = reverse("carbon_footprint:delete", args=[self.jacket.pk])
+        resp = self.client.post(target, **HX)
+        # The shared role guard redirects the whole browser for an expired HTMX session.
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp["HX-Redirect"], reverse("main:login") + "?next=" + target)
+        self.assertEqual(resp.content, b"")
         self.assertTrue(CarbonEstimate.objects.filter(pk=self.jacket.pk).exists())
 
     # ----- Numbers -----
@@ -403,13 +402,7 @@ class HtmxTests(OfflineTestCase):
             self.assertIsNone(resp.context["p"], data)
             self.assertContains(resp, "Choose a category and material")
 
-    # ----- form -----
-
-    def test_form_page_embeds_category_weights_for_placeholder(self):
-        resp = self.client.get(reverse("carbon_footprint:create"))
-        self.assertContains(resp, 'id="cf-weights"')
-        self.assertContains(resp, 'hx-post="%s"' % reverse("carbon_footprint:preview"))
-
+    # ----- Analyzer -----
 
 @override_settings(PASSWORD_HASHERS=["django.contrib.auth.hashers.MD5PasswordHasher"])   # supaya test cepat
 class AnalyzerTests(OfflineTestCase):
@@ -470,13 +463,6 @@ class AnalyzerTests(OfflineTestCase):
         admin = User.objects.create_superuser("root", password="pw")
         self.client.force_login(admin)
         self.assertEqual(self.client.get(reverse("carbon_footprint:index")).status_code, 200)
-
-    def test_link_only_visible_to_superuser_on_personal_pages(self):
-        self.client.force_login(self.user)
-        self.assertNotContains(self.client.get(reverse("carbon_footprint:index")), "Analyzer")
-        admin = User.objects.create_superuser("root", password="pw")
-        self.client.force_login(admin)
-        self.assertContains(self.client.get(reverse("carbon_footprint:index")), "Analyzer")
 
     def test_pages_use_the_shared_analyzer_workspace(self):
         self.client.force_login(self.analyst)

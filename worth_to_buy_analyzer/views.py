@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from .forms import DecisionForm, PurchaseAnalysisForm
+from .htmx import is_partial, page_or_fragment
 from .models import ClothingReference, PurchaseAnalysis
 from .roles import purchase_user_required
 from .services import RULE_VERSION, analyze, refresh_carbon_snapshot
@@ -87,15 +88,24 @@ def update(request, pk):
 
 
 @purchase_user_required
-@require_http_methods(["GET", "POST"])
-def delete(request, pk):
+@require_GET
+def deleteGET(request, pk):
     item = _owned_analysis(request, pk)
-    if request.method == "POST":
-        item.delete()
-        messages.success(request, "Analisis berhasil dihapus.")
-        return redirect("worth_to_buy_analyzer:analyzer")
     return render(request, "worth_to_buy_analyzer/confirm_delete.html", {"item": item})
 
+@purchase_user_required
+@require_POST
+def deletePOST(request, pk):
+    item = _owned_analysis(request, pk)
+    item.delete()
+    messages.success(request, "Analisis berhasil dihapus.")
+    return redirect("worth_to_buy_analyzer:analyzer")
+
+
+@require_http_methods(["GET", "POST"])
+def delete(request, pk):
+    # Preserve existing links while keeping GET confirmation and POST mutation separate.
+    return deletePOST(request, pk) if request.method == "POST" else deleteGET(request, pk)
 
 @purchase_user_required
 @require_POST
@@ -110,9 +120,13 @@ def decide(request, pk):
         elif obj.decision != previous_decision or obj.decided_at is None:
             obj.decided_at = timezone.now()
         obj.save(update_fields=["decision", "decision_note", "decided_at", "updated_at"])
+        if is_partial(request):
+            return page_or_fragment(request, "worth_to_buy_analyzer/detail.html", "worth_to_buy_analyzer/partials/decision.html", {
+                "item": obj, "decision_form": DecisionForm(instance=obj), "notice": "Keputusan berhasil disimpan.",
+            })
         messages.success(request, "Keputusan berhasil disimpan.")
         return redirect("worth_to_buy_analyzer:detail", pk=obj.pk)
-    return render(request, "worth_to_buy_analyzer/detail.html", {
+    return page_or_fragment(request, "worth_to_buy_analyzer/detail.html", "worth_to_buy_analyzer/partials/decision.html", {
         "item": item, "result": analyze(item), "decision_form": form,
     })
 
@@ -126,6 +140,14 @@ def refresh_carbon(request, pk):
         "carbon_kg_co2e", "carbon_reference", "carbon_source", "carbon_scope",
         "carbon_estimated_at", "updated_at",
     ])
+    if is_partial(request):
+        feedback = notice or (
+            "Lengkapi material dan berat pakaian untuk menyertakan estimasi karbon."
+            if item.carbon_kg_co2e is None else "Estimasi karbon berhasil diperbarui."
+        )
+        return page_or_fragment(request, "worth_to_buy_analyzer/detail.html", "worth_to_buy_analyzer/partials/carbon.html", {
+            "item": item, "result": analyze(item), "notice": feedback, "notice_warning": bool(notice),
+        })
     if notice:
         messages.warning(request, notice)
     elif item.carbon_kg_co2e is None:
