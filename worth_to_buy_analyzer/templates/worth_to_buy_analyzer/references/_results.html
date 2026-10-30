@@ -1,0 +1,30 @@
+{% load i18n %}{% language 'id' %}
+<div id="reference-results" class="wtb-fragment" aria-live="polite">
+{% if notice %}<p class="wtb-success" role="status">{{ notice }}</p>{% endif %}
+<div class="wtb-metrics ref-stats">
+    <div class="wtb-metric"><p class="wtb-eyebrow">Total referensi</p><p class="wtb-metric-value">{{ total_count }}</p></div>
+    <div class="wtb-metric"><p class="wtb-eyebrow">Terbit di katalog</p><p class="wtb-metric-value">{{ published_count }}</p></div>
+    <div class="wtb-metric"><p class="wtb-eyebrow">Draft</p><p class="wtb-metric-value">{{ draft_count }}</p></div>
+</div>
+
+{% for item in page_obj %}
+<article class="wtb-history-item">
+    <div class="wtb-item-mark" aria-hidden="true">{{ item.clothing_name|slice:':1'|upper }}</div>
+    <div class="wtb-item-main">
+        <p class="wtb-eyebrow">{{ item.get_category_display }}{% if item.brand %} · {{ item.brand }}{% endif %}</p>
+        <h2 class="wtb-item-title"><a href="{% url 'worth_to_buy_analyzer:reference_detail' item.pk %}">{{ item.clothing_name }}</a></h2>
+        <p class="wtb-help">Rp{{ item.price|floatformat:'2g' }} · Sumber: {{ item.source_name }}</p>
+        <span class="wtb-pill{% if item.is_published %} ref-published{% endif %}">{% if item.is_published %}Terbit{% else %}Draft{% endif %}</span>
+    </div>
+    <div class="wtb-item-actions"><form method="post" action="{% url 'worth_to_buy_analyzer:reference_publish' item.pk %}" hx-post="{% url 'worth_to_buy_analyzer:reference_publish' item.pk %}?{{ filter_query }}&amp;page={{ page_obj.number }}" hx-target="#reference-results" hx-swap="outerHTML" hx-disabled-elt="find button" hx-sync="#reference-filters:queue all">
+            {% csrf_token %}
+            <input type="hidden" name="publication" value="{% if item.is_published %}withdraw{% else %}publish{% endif %}">
+            <button class="wtb-button wtb-button--outline" type="submit">{% if item.is_published %}Tarik dari katalog{% else %}Terbitkan{% endif %}</button>
+        </form><a class="wtb-text-link" href="{% url 'worth_to_buy_analyzer:reference_update' item.pk %}">Edit ↗</a><a class="wtb-subtle-link" href="{% url 'worth_to_buy_analyzer:reference_delete' item.pk %}">Hapus</a></div>
+</article>
+{% empty %}
+<div class="wtb-empty"><p class="wtb-eyebrow">Database referensi</p><h2 class="wtb-subtitle">{% if query or status %}Belum ada yang cocok.{% else %}Mulai dari satu pakaian.{% endif %}</h2><p class="wtb-intro">{% if query or status %}Coba kata pencarian atau status lainnya.{% else %}Tambahkan data pakaian dan asal datanya agar user punya acuan saat menganalisis.{% endif %}</p><a class="wtb-button" href="{% url 'worth_to_buy_analyzer:reference_create' %}">Tambah referensi ↗</a></div>
+{% endfor %}
+{% include 'worth_to_buy_analyzer/references/_pagination.html' %}
+</div>
+{% endlanguage %}

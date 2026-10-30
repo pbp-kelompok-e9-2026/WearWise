@@ -3,10 +3,13 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_GET, require_http_methods
+from django.urls import reverse
+from django.views.decorators.http import require_GET, require_http_methods, require_POST
 
 from .forms import ClothingReferenceForm
+from .htmx import is_partial, page_or_fragment
 from .models import ClothingReference, PurchaseAnalysis
 from .roles import analyzer_required, purchase_user_required
 
@@ -31,21 +34,29 @@ def _search(request, items):
     }
 
 
-@analyzer_required
-@require_GET
-def reference_list(request):
+def _workspace_context(request):
     items = ClothingReference.objects.select_related("updated_by")
     status = request.GET.get("status", "")
     if status in ("published", "draft"):
         items = items.filter(is_published=status == "published")
     context = _search(request, items)
     context.update({
+        "results_target": "#reference-results", "filter_id": "reference-filters",
         "status": status,
         "total_count": ClothingReference.objects.count(),
         "published_count": ClothingReference.objects.filter(is_published=True).count(),
         "draft_count": ClothingReference.objects.filter(is_published=False).count(),
     })
-    return render(request, "worth_to_buy_analyzer/references/list.html", context)
+    return context
+
+
+@analyzer_required
+@require_GET
+def reference_list(request):
+    return page_or_fragment(
+        request, "worth_to_buy_analyzer/references/list.html",
+        "worth_to_buy_analyzer/references/_results.html", _workspace_context(request),
+    )
 
 
 def _reference_form(request, item=None):
@@ -91,8 +102,33 @@ def reference_delete(request, pk):
     return render(request, "worth_to_buy_analyzer/references/confirm_delete.html", {"item": item})
 
 
+@analyzer_required
+@require_POST
+def reference_publish(request, pk):
+    # An explicit desired state is safe to retry; do not blindly toggle it.
+    if request.POST.get("publication") not in ("publish", "withdraw"):
+        return HttpResponseBadRequest("Pilih status publikasi yang valid.")
+    item = get_object_or_404(ClothingReference, pk=pk)
+    item.is_published = request.POST["publication"] == "publish"
+    item.updated_by = request.user
+    item.save(update_fields=["is_published", "updated_by", "updated_at"])
+    notice = "Referensi diterbitkan ke katalog user." if item.is_published else "Referensi ditarik dari katalog user."
+    if is_partial(request):
+        context = _workspace_context(request)
+        context["notice"] = notice
+        response = page_or_fragment(request, "worth_to_buy_analyzer/references/list.html", "worth_to_buy_analyzer/references/_results.html", context)
+        # Removing the last result on a page can move the list back one page.
+        params = request.GET.copy()
+        params["page"] = context["page_obj"].number
+        response.headers["HX-Replace-Url"] = reverse("worth_to_buy_analyzer:reference_list") + "?" + params.urlencode()
+        return response
+    messages.success(request, notice)
+    return redirect("worth_to_buy_analyzer:reference_list")
+
+
 @purchase_user_required
 @require_GET
 def catalogue(request):
     context = _search(request, ClothingReference.objects.filter(is_published=True))
-    return render(request, "worth_to_buy_analyzer/catalogue.html", context)
+    context.update({"results_target": "#catalogue-results", "filter_id": "catalogue-filters"})
+    return page_or_fragment(request, "worth_to_buy_analyzer/catalogue.html", "worth_to_buy_analyzer/partials/catalogue_results.html", context)

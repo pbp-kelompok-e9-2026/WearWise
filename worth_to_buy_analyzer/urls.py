@@ -10,6 +10,7 @@ urlpatterns = [
     path('workspace/<int:pk>/', reference_views.reference_detail, name='reference_detail'),
     path('workspace/<int:pk>/edit/', reference_views.reference_update, name='reference_update'),
     path('workspace/<int:pk>/delete/', reference_views.reference_delete, name='reference_delete'),
+    path('workspace/<int:pk>/publication/', reference_views.reference_publish, name='reference_publish'),
     path('catalogue/', reference_views.catalogue, name='catalogue'),
     path('', views.analyzer, name='analyzer'),
     path('new/', views.create, name='create'),

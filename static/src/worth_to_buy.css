@@ -1,0 +1,148 @@
+/* Tailwind v4 CLI source for Worth to Buy. Build output: static/css/worth_to_buy.css. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+/* Shared Django shell supplies its existing reset; do not reset other modules. */
+@import "tailwindcss/utilities.css" layer(utilities) source(none);
+@source "../../worth_to_buy_analyzer/templates";
+@source "../../worth_to_buy_analyzer/forms.py";
+
+@theme inline {
+  --color-wf-ink: var(--ww-ink, #1b1a17);
+  --color-wf-soft: var(--ww-ink-soft, #5f5a50);
+  --color-wf-paper: var(--ww-ivory, #f4efe6);
+  --color-wf-deep: var(--ww-ivory-deep, #eae3d6);
+  --color-wf-line: var(--ww-line, #d4c7b0);
+  --color-wf-sage: var(--ww-sage, #a8b8a1);
+  --color-wf-olive: var(--ww-olive, #6b6a45);
+  --color-wf-clay: var(--ww-clay, #b2624a);
+  --color-wf-blush: var(--ww-clay-soft, #e3c2b5);
+  --font-wf-display: var(--ww-font-display, Georgia, serif);
+  --font-wf-body: var(--ww-font-body, system-ui, sans-serif);
+}
+
+/* 01 Dasar halaman */
+.wtb-page { @apply mx-auto max-w-[1440px] px-[clamp(20px,4vw,64px)] pt-7 pb-[72px] max-[700px]:px-5 max-[700px]:pt-4 max-[700px]:pb-12; }
+.wtb-page *, .wtb-page *::before, .wtb-page *::after { @apply box-border; }
+.wtb-page [id] { @apply scroll-mt-[calc(var(--ww-topbar)+28px)]; }
+
+/* 02 Navigasi */
+.wtb-nav { @apply mb-10 flex flex-wrap gap-x-7 border-0 border-b border-solid border-wf-line max-[700px]:mb-7 max-[700px]:gap-x-6; }
+.wtb-nav a { @apply border-0 border-b-2 border-solid border-transparent pt-2.5 pb-3.5 text-sm text-wf-soft no-underline hover:text-wf-ink; }
+.wtb-nav a[aria-current] { @apply border-wf-ink text-wf-ink; }
+
+/* 03 Judul halaman */
+.wtb-heading { @apply mb-[38px] max-[700px]:mb-8; }
+.wtb-eyebrow { @apply mt-0 mb-3.5 text-[.68rem] font-semibold tracking-[.15em] uppercase; }
+.wtb-title { @apply mt-0 mb-5 font-wf-display text-[clamp(2.6rem,4.6vw,4.6rem)] leading-[1.04] font-normal tracking-[-.025em] wrap-anywhere; }
+.wtb-title em { @apply font-normal text-wf-olive; }
+.wtb-intro { @apply m-0 max-w-[550px] text-base leading-[1.7] text-wf-soft; }
+
+/* 04 Form analisis */
+.wtb-form-layout { @apply grid grid-cols-[minmax(0,1fr)_290px] items-start gap-[clamp(24px,3vw,48px)] max-[1150px]:grid-cols-[minmax(0,1fr)_240px] max-[1150px]:gap-6 max-[700px]:grid-cols-1; }
+.wtb-form { @apply min-w-0; }
+.wtb-section { @apply mt-0 mr-0 mb-8 ml-0 min-w-0 border-0 border-t border-solid border-wf-line px-0 pt-6 pb-0; }
+.wtb-section legend { @apply py-0 pr-3.5 pl-0 text-[1.05rem] font-semibold; }
+.wtb-step { @apply mr-2 inline-flex text-[.8rem] font-medium text-wf-olive; }
+.wtb-section-copy { @apply -mt-2 mr-0 mb-[22px] ml-0 text-sm text-wf-soft; }
+.wtb-grid { @apply grid grid-cols-2 gap-5 max-[1150px]:grid-cols-1; }
+.wtb-field { @apply mt-0 mr-0 mb-5 ml-0 min-w-0; }
+.wtb-grid .wtb-field { @apply mb-0; }
+.wtb-field label { @apply mb-2 block text-[.85rem] font-medium; }
+.wtb-optional { @apply ml-2 inline-block text-[.68rem] font-normal text-wf-soft; }
+.wtb-field input, .wtb-field select, .wtb-field textarea { @apply min-h-12 w-full max-w-full rounded-md border border-solid border-wf-line bg-white p-3 font-wf-body text-[.95rem] text-wf-ink shadow-none; }
+.wtb-field select { @apply pr-6 text-ellipsis; }
+.wtb-field textarea { @apply resize-y; }
+.wtb-field input::placeholder, .wtb-field textarea::placeholder { @apply text-wf-soft opacity-80; }
+.wtb-page :is(a,button,input,select,textarea,summary):focus-visible { @apply outline-2 outline-offset-4 outline-wf-olive; }
+.wtb-field :is(input,select,textarea):focus-visible { @apply outline-offset-2; }
+.wtb-help { @apply mt-2 mr-0 mb-0 ml-0 text-[.8rem] leading-[1.6] text-wf-soft wrap-anywhere; }
+.wtb-field--error :is(input,select,textarea) { @apply border-wf-clay; }
+.wtb-field .errorlist { @apply mt-2 mr-0 mb-0 ml-0 pl-[18px] text-[.8rem] text-wf-ink; }
+
+/* 05 Bagian opsional */
+.wtb-disclosure { @apply mt-[22px] border-0 border-t border-solid border-wf-line py-4; }
+.wtb-disclosure summary { @apply cursor-pointer py-1 text-sm font-medium; }
+.wtb-disclosure summary::marker { @apply text-wf-olive; }
+.wtb-disclosure[open] > summary { @apply mb-[18px]; }
+.wtb-disclosure .wtb-grid { @apply mt-4; }
+.wtb-carbon-option { @apply mt-0 mr-0 mb-7 ml-0 rounded-md border border-solid border-wf-line bg-wf-deep px-5 py-4; }
+
+/* 06 Preview samping */
+.wtb-aside { @apply sticky top-[calc(var(--ww-topbar)+24px)] max-[700px]:static; }
+.wtb-preview { @apply rounded-[100px_100px_8px_8px] bg-wf-sage px-7 pt-[52px] pb-7 text-center text-wf-ink max-[1150px]:px-5 max-[1150px]:pt-11 max-[1150px]:pb-6 max-[700px]:rounded-lg max-[700px]:p-7; }
+.wtb-preview .wtb-eyebrow { @apply text-[.59rem]; }
+.wtb-shirt { @apply mx-auto mt-3.5 mb-7 block h-[126px] w-[138px] max-[700px]:my-3 max-[700px]:h-[82px] max-[700px]:w-[90px]; }
+.wtb-preview-label { @apply mt-0 mr-0 mb-2 ml-0 text-[.8rem]; }
+.wtb-preview-value { @apply mt-0 mr-0 mb-3 ml-0 font-wf-display text-[clamp(2rem,3vw,2.8rem)] leading-[1.15] wrap-anywhere; }
+.wtb-preview-note { @apply m-0 min-h-[54px] text-[.8rem] leading-[1.6] max-[700px]:min-h-0; }
+.wtb-preview-foot { @apply mt-6 mr-0 mb-0 ml-0 border-0 border-t border-solid border-wf-olive pt-4 text-[.7rem] leading-[1.6]; }
+.wtb-tip { @apply px-3 py-6 text-[.9rem] max-[700px]:pb-0; }
+.wtb-tip p { @apply my-2.5 mx-0; }
+
+/* 07 Aksi dan pesan */
+.wtb-actions { @apply flex flex-wrap items-center gap-6 max-[700px]:gap-5; }
+.wtb-button { @apply inline-flex min-h-12 cursor-pointer items-center justify-center gap-6 rounded border border-solid border-wf-ink bg-wf-ink px-[22px] py-3.5 font-wf-body text-sm leading-[1.4] font-medium text-wf-paper no-underline transition-colors hover:border-wf-olive hover:bg-wf-olive hover:text-white disabled:cursor-wait disabled:opacity-60; }
+.wtb-button--outline { @apply bg-transparent text-wf-ink; }
+.wtb-button--danger { @apply border-wf-clay bg-wf-clay text-white; }
+.wtb-actions .wtb-button { @apply max-[700px]:flex-1; }
+.wtb-text-link { @apply border-0 border-b border-solid border-current py-[5px] text-sm no-underline; }
+.wtb-subtle-link { @apply text-[.8rem] text-wf-soft underline-offset-4; }
+.wtb-alert, .wtb-notice { @apply mt-0 mr-0 mb-8 ml-0 border-0 border-l-[3px] border-solid border-wf-clay bg-wf-blush p-5 text-sm; }
+.wtb-alert p { @apply my-2 mx-0; }
+.wtb-alert ul { @apply pl-[18px]; }
+.wtb-success { @apply my-4 border-0 border-l-[3px] border-solid border-wf-olive bg-wf-sage p-4 text-sm; }
+
+/* 08 Riwayat analisis */
+.wtb-heading--split { @apply flex items-end justify-between gap-6 max-[1150px]:flex-col max-[1150px]:items-start; }
+.wtb-heading--split .wtb-title { @apply text-[clamp(2.6rem,4vw,4rem)]; }
+.wtb-heading--split > .wtb-button { @apply mb-1.5 shrink-0; }
+.wtb-list-heading { @apply flex items-center justify-between gap-4 border-0 border-t border-solid border-wf-ink py-6; }
+.wtb-subtitle { @apply mt-0 mr-0 mb-4 ml-0 font-wf-display text-[2rem] leading-[1.12] font-normal max-[700px]:text-[1.65rem]; }
+.wtb-list-heading .wtb-subtitle { @apply m-0; }
+.wtb-pill { @apply inline-block rounded-[30px] border border-solid border-wf-line px-3 py-[5px] text-[.7rem] leading-normal; }
+.wtb-history-item { @apply flex items-center gap-6 border-0 border-b border-solid border-wf-line py-7 max-[700px]:flex-wrap max-[700px]:gap-4; }
+.wtb-item-mark { @apply grid h-[88px] w-[72px] shrink-0 place-items-center rounded-[36px_36px_4px_4px] bg-wf-sage font-wf-display text-[2.8rem] max-[700px]:h-16 max-[700px]:w-12 max-[700px]:text-[2rem]; }
+.wtb-history-item:nth-of-type(even) .wtb-item-mark { @apply bg-wf-blush; }
+.wtb-item-main { @apply min-w-0 flex-1; }
+.wtb-item-main .wtb-eyebrow { @apply mb-2; }
+.wtb-item-title { @apply m-0 font-wf-display text-[1.8rem] font-normal wrap-anywhere; }
+.wtb-item-title a { @apply no-underline hover:underline; }
+.wtb-item-main .wtb-pill { @apply mt-3; }
+.wtb-item-actions { @apply flex flex-wrap items-center gap-5 max-[1150px]:flex-col max-[1150px]:gap-3.5 max-[700px]:w-full max-[700px]:flex-row max-[700px]:justify-end; }
+.wtb-empty { @apply rounded-lg bg-wf-deep px-7 py-12 text-center max-[700px]:px-5 max-[700px]:py-9; }
+.wtb-empty-mark { @apply mb-3.5 block text-5xl text-wf-olive; }
+.wtb-title--small { @apply text-[clamp(2rem,3vw,3rem)]; }
+.wtb-empty .wtb-intro { @apply mx-auto mt-0 mb-7; }
+.wtb-empty .wtb-actions { @apply justify-center; }
+.wtb-pagination { @apply mt-8 flex flex-wrap justify-center gap-6 text-[.85rem]; }
+
+/* 09 Hasil analisis */
+.wtb-verdict { @apply flex items-center justify-between gap-8 rounded-lg bg-wf-sage p-8 max-[700px]:flex-col max-[700px]:items-stretch max-[700px]:p-6; }
+.wtb-verdict-title { @apply mt-0 mr-0 mb-4 ml-0 font-wf-display text-[clamp(2rem,3vw,3rem)] leading-[1.12] font-normal; }
+.wtb-verdict-reason { @apply m-0 max-w-[600px] text-[.95rem]; }
+.wtb-score { @apply flex shrink-0 flex-col border-0 border-l border-solid border-wf-olive pl-8 text-center text-xs max-[700px]:border-t max-[700px]:border-l-0 max-[700px]:px-0 max-[700px]:pt-5 max-[700px]:pb-0; }
+.wtb-score-number { @apply font-wf-display text-[4.5rem] leading-[1.1]; }
+.wtb-score-number small { @apply font-wf-body text-[.9rem]; }
+.wtb-score-caption { @apply mt-2 text-[.65rem]; }
+.wtb-metrics { @apply my-8 mx-0 grid grid-cols-3 gap-6 max-[700px]:grid-cols-1 max-[700px]:gap-3; }
+.wtb-metric { @apply border-0 border-b border-solid border-wf-line pb-6; }
+.wtb-metric-value { @apply my-4 mx-0 font-wf-display text-[clamp(1.7rem,2.4vw,2.6rem)] leading-[1.2] wrap-anywhere; }
+.wtb-metric-value small { @apply font-wf-body text-[.8rem]; }
+.wtb-rules { @apply mt-0 mr-0 mb-6 ml-0; }
+.wtb-breakdown { @apply max-w-[480px] text-[.85rem]; }
+.wtb-breakdown div { @apply flex justify-between gap-4 py-2; }
+.wtb-breakdown dd { @apply m-0 whitespace-nowrap; }
+
+/* 10 Detail hasil */
+.wtb-detail-grid { @apply grid grid-cols-[1.1fr_1fr] gap-6 max-[700px]:grid-cols-1; }
+.wtb-panel { @apply min-w-0 rounded-lg border border-solid border-wf-line p-7 max-[700px]:p-[22px]; }
+.wtb-panel .wtb-form, .wtb-carbon > form, .wtb-carbon > .wtb-text-link { @apply mt-6; }
+.wtb-carbon > .wtb-text-link { @apply inline-block; }
+
+/* HTMX states */
+.wtb-loading { @apply invisible text-sm text-wf-soft; }
+.wtb-loading.htmx-request { @apply visible; }
+.wtb-fragment { @apply transition-opacity duration-150; }
+.wtb-fragment.htmx-swapping { @apply opacity-50; }
+.wtb-filters { @apply mb-6 flex flex-wrap items-end gap-5; }
+.wtb-filters .wtb-field { @apply m-0 min-w-[150px] flex-1; }

@@ -30,15 +30,15 @@
 
 {% url 'main:show_main' as u_home %}
 {% url 'main:about' as u_about %}
-{% url 'dashboard:profile' as u_profile %}{% if not u_profile %}{% url 'main:profile' as u_profile %}{% endif %}
 {% url 'main:login' as u_login %}
 {% url 'main:register' as u_register %}
 {% url 'main:logout' as u_logout %}
 {% url 'carbon_footprint:index' as u_numbers %}
 {% url 'carbon_footprint:list' as u_numbers_list %}
-{% url 'wardrobe:show_wardrobe' as u_wardrobe %}{% if not u_wardrobe %}{% url 'wardrobe:index' as u_wardrobe %}{% endif %}
+{% url 'wardrobe:show_wardrobe' as u_wardrobe %}
+{% url 'dashboard:show_profile' as u_profile %}
+{% url 'dashboard:edit_profile' as u_edit_profile %}
 {% url 'dashboard:discover' as u_discover %}
-{% url 'dashboard:show_profile' as u_profile %}{% if not u_profile %}{% url 'main:profile' as u_profile %}{% endif %}
 {% url 'worth_to_buy_analyzer:analyzer' as u_worth %}
 {% url 'lifecycle:index' as u_lifecycle %}
 {% url 'admin:index' as u_settings %}
@@ -48,23 +48,25 @@
 
   {% block sidebar %}
   <aside class="ww-sidebar" id="ww-sidebar">
-    <a class="ww-logo" href="{% firstof u_home '/' %}">WiseFit</a>
+    <a class="ww-logo" href="{{ u_home }}">WiseFit</a>
 
     <nav aria-label="Menu utama">
       <ul class="ww-nav">
-        <li><a class="ww-nav__link{% if request.path == u_home %} is-active{% endif %}" href="{% firstof u_home '/' %}">Home</a></li>
-        <li><a class="ww-nav__link{% if u_discover and request.path == u_discover %} is-active{% endif %}" href="{% firstof u_discover '#' %}">Discover</a></li>
-        <li><a class="ww-nav__link{% if u_worth and request.path == u_worth %} is-active{% endif %}" href="{% firstof u_worth '#' %}">Worth to Buy</a></li>
-        <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'carbon_footprint' %} is-active{% endif %}" href="{% firstof u_numbers '#' %}">Numbers</a></li>
-        <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'wardrobe' %} is-active{% endif %}" href="{% firstof u_wardrobe '#' %}">Wardrobe</a></li>
-        <li><a class="ww-nav__link{% if u_lifecycle and request.path == u_lifecycle %} is-active{% endif %}" href="{% firstof u_lifecycle '#' %}">Lifecycle</a></li>
+        <li><a class="ww-nav__link{% if request.path == u_home %} is-active{% endif %}" href="{{ u_home }}">Home</a></li>
+        {% if u_discover %}<li><a class="ww-nav__link{% if request.path == u_discover %} is-active{% endif %}" href="{{ u_discover }}">Discover</a></li>{% endif %}
+        <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'worth_to_buy_analyzer' %} is-active{% endif %}" href="{{ u_worth }}">Worth to Buy</a></li>
+        <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'carbon_footprint' %} is-active{% endif %}" href="{{ u_numbers }}">Numbers</a></li>
+        <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'wardrobe' %} is-active{% endif %}" href="{{ u_wardrobe }}">Wardrobe</a></li>
+        <li><a class="ww-nav__link{% if request.resolver_match.app_name == 'lifecycle' %} is-active{% endif %}" href="{{ u_lifecycle }}">Lifecycle</a></li>
       </ul>
 
       {% if user.is_authenticated %}
       <p class="ww-nav__label">Account</p>
       <ul class="ww-nav">
-        <li><a class="ww-nav__link{% if u_profile and request.path == u_profile %} is-active{% endif %}" href="{% firstof u_profile '#' %}">Edit Profile</a></li>
-        <li><a class="ww-nav__link" href="{% firstof u_settings '#' %}">Settings</a></li>
+        <li><a class="ww-nav__link{% if request.path == u_edit_profile %} is-active{% endif %}" href="{{ u_edit_profile }}">Edit Profile</a></li>
+        {% if user.is_staff %}
+        <li><a class="ww-nav__link" href="{{ u_settings }}">Settings</a></li>
+        {% endif %}
       </ul>
       {% endif %}
     </nav>
@@ -72,13 +74,13 @@
     <div class="ww-sidebar__foot">
       {% if user.is_authenticated %}
       {# Django 5: logout wajib POST #}
-      <form method="post" action="{% firstof u_logout '/logout/' %}">
+      <form method="post" action="{{ u_logout }}">
         {% csrf_token %}
         <button type="submit" class="ww-nav__link">Logout</button>
       </form>
       {% else %}
-      <a class="ww-nav__link" href="{% firstof u_login '#' %}">Login</a>
-      <a class="ww-nav__link" href="{% firstof u_register '#' %}">Daftar</a>
+      <a class="ww-nav__link" href="{{ u_login }}">Login</a>
+      <a class="ww-nav__link" href="{{ u_register }}">Daftar</a>
       {% endif %}
     </div>
   </aside>
@@ -101,7 +103,7 @@
         </span>
 
         {% if user.is_authenticated %}
-        <a class="ww-user" href="{% firstof u_profile '#' %}">
+        <a class="ww-user" href="{{ u_profile }}">
           <span class="ww-avatar">{{ user.get_username|slice:":1"|upper }}</span>
           <span class="ww-user__text">
             <span class="ww-user__name">{{ user.get_username }}</span>
@@ -110,7 +112,7 @@
           <svg class="ww-user__chev" width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="m1 1 4 4 4-4"/></svg>
         </a>
         {% else %}
-        <a class="ww-link ww-link--plain" href="{% firstof u_login '#' %}">Login</a>
+        <a class="ww-link ww-link--plain" href="{{ u_login }}">Login</a>
         {% endif %}
       </div>
       {% endblock topbar_tools %}

@@ -11,7 +11,7 @@
 
 {% block content %}
 {% language 'id' %}
-<section class="ww-page wtb-page ref-workspace" aria-label="Ruang Analyzer">
+<section class="ww-page wtb-page ref-workspace" aria-label="Ruang Analyzer" hx-history="false">
     <nav class="wtb-nav" aria-label="Navigasi Analyzer">
         <a href="{% url 'worth_to_buy_analyzer:reference_list' %}">Semua referensi</a>
         <a href="{% url 'carbon_footprint:analyzer' %}"{% if request.resolver_match.url_name == 'analyzer' %} aria-current="page"{% endif %}>Analisis karbon</a>

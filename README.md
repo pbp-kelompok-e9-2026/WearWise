@@ -49,6 +49,12 @@
 - **Update:** Mengubah data profile, progres eco challenge, dan data database yang sudah diinput
 - **Delete:** Menghapus data database yang tidak diperlukan dan keluar dari eco challenge
 
+## AI Disclosure
+
+### Worth to Buy Analyzer
+
+Bantuan AI digunakan untuk memperbaiki sebagian kode modul Worth to Buy Analyzer yang kurang tepat dan membantu memahami konsep integrasi Tailwind v4, serta pengujian. Perubahan diverifikasi melalui pengujian otomatis dan pengecekan antarmuka. Penanggung jawab modul tetap perlu meninjau, memahami, dan memvalidasi hasil sebelum menggabungkannya ke proyek kelompok.
+
 ## Public API / Mock API
 
 - [Climatiq](https://www.climatiq.io/docs/api-reference)
@@ -81,7 +87,69 @@
 - Monitor perilaku user atau problem
 
 
-# Dokumentasi
+## Dokumentasi
+### Modul 1: Wardrobe Management ('wardrobe')
+
+Bertanggungjawab menyimpan, meneglompokkan, dan mengelola koleksi pakaian digital milik pengguna yang sudah login. 
+
+#### Fitur
+- CRUD Pakaian Berbasis AJAX: Tambah item baru pakai modal popover serta hapus item yang dilakukan secara asinkronus
+
+- Kalkulasi Cost Per Wear: hitung otomatis rasio kehematan pakaian tiap user menambah jumlah pemakaian
+CPW  = Harga Beli / Jumlah Pemakaian
+
+- Filter Kategori Dinamis: Mengambil dan menyaring daftar pakaian berdasarkan kategori secara real-time menggunakan query parameter JSON
+
+- Isolasi data: setiap entri pakaian hanya bisa diakses oleh pemiliknya sendiri, menggunakan @login_required
+
+#### Model 'ClothingItem'
+`id (UUID)`, `user (ForeignKey)`, `name`, `category`, `material`, `price`, `purchase_date`, `image`, `image_url`, `wear_count (default 0)`, `created_at`, `updated_at`
+
+#### URL
+| Path | Nama | Fungsi |
+|---|---|---|
+|/wardrobe/|	wardrobe:index	
+Halaman utama| digital wardrobe|
+
+|/wardrobe/json/|	wardrobe:get_clothing_json	|
+Ambil data pakaian JSON (dukungan filter ?category=) |
+
+|/wardrobe/add-ajax/|	wardrobe:add_clothing_ajax|	
+Tambah pakaian baru via AJAX|
+
+|/wardrobe/increment-wear/<id>/|	wardrobe:increment_wear	|
+Tambah frekuensi pemakaian (+1) via AJAX|
+
+|/wardrobe/delete-ajax/<id>/	|wardrobe:delete_clothing_ajax|	
+Hapus item pakaian via AJAX|
+
+#### Konfigurasi
+Daftarkan modul di `settings.py`:
+```python
+INSTALLED_APPS = [
+    # ...
+    'wardrobe',
+]
+```
+Atur konfigurasi media file di `settings.py` untuk mendukung unggah foto pakaian:
+```python
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+```
+
+
+Semua endpoint perlu otentikasi pengguna
+#### Menjalankan
+```bash
+python manage.py makemigrations wardrobe
+python manage.py migrate
+python manage.py runserver
+```
+#### Pengujian
+```bash
+python manage.py test wardrobe
+```
+Test jalan mandiri agar semua fungsi pembuatan model, kalkulasi, kelancaran AJAX, serta keamanan berjalan sesuai yang diinginkan
 
 ## Modul 3: Carbon Footprint & Sustainability (`carbon_footprint`)
 

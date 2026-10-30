@@ -330,8 +330,12 @@ class HtmxTests(OfflineTestCase):
 
     def test_htmx_delete_requires_login(self):
         self.client.logout()
-        resp = self.client.post(reverse("carbon_footprint:delete", args=[self.jacket.pk]), **HX)
-        self.assertEqual(resp.status_code, 302)
+        target = reverse("carbon_footprint:delete", args=[self.jacket.pk])
+        resp = self.client.post(target, **HX)
+        # The shared role guard redirects the whole browser for an expired HTMX session.
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp["HX-Redirect"], reverse("main:login") + "?next=" + target)
+        self.assertEqual(resp.content, b"")
         self.assertTrue(CarbonEstimate.objects.filter(pk=self.jacket.pk).exists())
 
     # ----- Numbers -----
