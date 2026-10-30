@@ -365,7 +365,20 @@ lifecycle/
 ├── services.py    # aturan rekomendasi dan isi repair guide
 ├── models.py  forms.py  views.py  urls.py  admin.py
 ├── templates/lifecycle/   # list, form, confirm_delete, field
-├── static/lifecycle/css/lifecycle.css   # tampilan halaman Lifecycle
+│   ├── tailwind.html      # memuat Tailwind (tanpa preflight) + warna Figma
+│   └── guide_icon.html    # ikon Repair, Reuse, Recycle
+├── static/lifecycle/css/lifecycle.css   # gaya khusus Lifecycle
 ├── static/lifecycle/js/lifecycle.js     # AJAX
 └── tests.py
 ```
+
+#### AI Disclosure
+- **Tools:** Gemini (Google).
+- **Link chat Gemini:** (https://share.gemini.google/oJvsIBapX0qo)
+- **Tujuan:** menjelaskan konsep Django (ModelForm, `commit=False`, `get_object_or_404`, AJAX + CSRF, unit test), memandu langkah pengerjaan dan alur Git, serta membantu menyusun dan meninjau kode modul ini (model, view, form, AJAX, test, styling) dan dokumentasinya.
+- **Strategi prompt:** bertanya per langkah kecil sesuai fitur yang sedang dikerjakan, menempelkan kode atau pesan error untuk dicek, dan meminta penjelasan alasan di balik kode. Setiap perubahan diterapkan sendiri di VS Code, lalu dicek lewat `python manage.py test lifecycle` dan browser sebelum di-commit.
+- **Keterbatasan dan perbaikan manual:**
+  - Saran AI tidak selalu sesuai konteks tim, misalnya letak file JS. Akhirnya disimpan per app mengikuti kesepakatan kelompok dan jawaban asisten dosen.
+  - AI sempat tidak mengingatkan syarat wajib framework CSS, sehingga styling perlu ditinjau ulang. Tailwind akhirnya dipakai untuk sebagian layout sesuai keputusan kelompok.
+  - Beberapa error muncul saat menerapkan kode (indentasi, nama template, file belum tersimpan, kode tertempel di tempat yang salah) dan diperbaiki manual dengan membaca pesan error.
+  - Desain repair guide dari AI ditinjau ulang dan disesuaikan dengan design system kelompok.
