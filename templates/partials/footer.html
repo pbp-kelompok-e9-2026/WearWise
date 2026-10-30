@@ -1,7 +1,6 @@
 {% url 'main:about' as about_url %}
 {% url 'wardrobe:show_wardrobe' as wardrobe_url %}
 {% url 'carbon_footprint:index' as numbers_url %}
-{% url 'dashboard:discover' as discover_url %}
 {% url 'worth_to_buy_analyzer:analyzer' as worth_url %}
 <footer class="ww-footer">
   <div class="ww-footer__top">
@@ -10,7 +9,6 @@
       <p class="ww-footer__tag">Make every wear count.</p>
     </div>
     <ul class="ww-footer__nav">
-      {% if discover_url %}<li><a href="{{ discover_url }}">Discover</a></li>{% endif %}
       <li><a href="{{ worth_url }}">Worth to Buy</a></li>
       <li><a href="{{ wardrobe_url }}">Wardrobe</a></li>
       <li><a href="{{ numbers_url }}">Sustainability</a></li>
