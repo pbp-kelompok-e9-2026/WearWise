@@ -7,7 +7,7 @@ from django.urls import reverse
 from wardrobe.models import ClothingItem
 
 from .models import ConditionRecord
-from .services import recommend
+from .services import REPAIR_GUIDES, recommend
 
 
 class RecommendTest(TestCase):
@@ -23,6 +23,12 @@ class RecommendTest(TestCase):
 
     def test_kondisi_tidak_dikenal_menjadi_repair(self):
         self.assertEqual(recommend("aneh"), "repair")
+
+    def test_repair_guide_untuk_setiap_rekomendasi(self):
+        guide_keys = [guide["recommendation"] for guide in REPAIR_GUIDES]
+        self.assertEqual(guide_keys, ["repair", "reuse", "recycle"])
+        for guide in REPAIR_GUIDES:
+            self.assertTrue(guide["steps"])
 
 
 class LifecycleViewTest(TestCase):
@@ -174,3 +180,9 @@ class LifecycleViewTest(TestCase):
         self.assertEqual(self.client.post(status_url, {"status": "done"}).status_code, 404)
         self.assertEqual(self.client.post(delete_url).status_code, 404)
         self.assertTrue(ConditionRecord.objects.filter(pk=self.record.pk).exists())
+        
+    def test_halaman_list_menampilkan_repair_guide(self):
+        response = self.client.get(reverse("lifecycle:index"))
+        self.assertEqual(len(response.context["guides"]), 3)
+        self.assertContains(response, 'id="guide-repair"')
+        self.assertContains(response, "Kancing lepas")

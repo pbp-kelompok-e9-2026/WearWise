@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 
 from .forms import ConditionRecordForm
 from .models import ConditionRecord
-from .services import recommend
+from .services import REPAIR_GUIDES, recommend
 
 
 def _user_records(request):
@@ -30,6 +30,7 @@ def record_list(request):
         "selected_recommendation": request.GET.get("recommendation", ""),
         "selected_status": request.GET.get("status", ""),
         "form": ConditionRecordForm(user=request.user),
+        "guides": REPAIR_GUIDES,
     }
     return render(request, "lifecycle/list.html", context)
 

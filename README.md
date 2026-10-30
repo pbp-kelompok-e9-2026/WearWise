@@ -84,6 +84,68 @@ Bantuan AI digunakan untuk memperbaiki sebagian kode modul Worth to Buy Analyzer
 
 
 ## Dokumentasi
+### Modul 1: Wardrobe Management ('wardrobe')
+
+Bertanggungjawab menyimpan, meneglompokkan, dan mengelola koleksi pakaian digital milik pengguna yang sudah login. 
+
+#### Fitur
+- CRUD Pakaian Berbasis AJAX: Tambah item baru pakai modal popover serta hapus item yang dilakukan secara asinkronus
+
+- Kalkulasi Cost Per Wear: hitung otomatis rasio kehematan pakaian tiap user menambah jumlah pemakaian
+CPW  = Harga Beli / Jumlah Pemakaian
+
+- Filter Kategori Dinamis: Mengambil dan menyaring daftar pakaian berdasarkan kategori secara real-time menggunakan query parameter JSON
+
+- Isolasi data: setiap entri pakaian hanya bisa diakses oleh pemiliknya sendiri, menggunakan @login_required
+
+#### Model 'ClothingItem'
+`id (UUID)`, `user (ForeignKey)`, `name`, `category`, `material`, `price`, `purchase_date`, `image`, `image_url`, `wear_count (default 0)`, `created_at`, `updated_at`
+
+#### URL
+| Path | Nama | Fungsi |
+|---|---|---|
+|/wardrobe/|	wardrobe:index	
+Halaman utama| digital wardrobe|
+
+|/wardrobe/json/|	wardrobe:get_clothing_json	|
+Ambil data pakaian JSON (dukungan filter ?category=) |
+
+|/wardrobe/add-ajax/|	wardrobe:add_clothing_ajax|	
+Tambah pakaian baru via AJAX|
+
+|/wardrobe/increment-wear/<id>/|	wardrobe:increment_wear	|
+Tambah frekuensi pemakaian (+1) via AJAX|
+
+|/wardrobe/delete-ajax/<id>/	|wardrobe:delete_clothing_ajax|	
+Hapus item pakaian via AJAX|
+
+#### Konfigurasi
+Daftarkan modul di `settings.py`:
+```python
+INSTALLED_APPS = [
+    # ...
+    'wardrobe',
+]
+```
+Atur konfigurasi media file di `settings.py` untuk mendukung unggah foto pakaian:
+```python
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+```
+
+
+Semua endpoint perlu otentikasi pengguna
+#### Menjalankan
+```bash
+python manage.py makemigrations wardrobe
+python manage.py migrate
+python manage.py runserver
+```
+#### Pengujian
+```bash
+python manage.py test wardrobe
+```
+Test jalan mandiri agar semua fungsi pembuatan model, kalkulasi, kelancaran AJAX, serta keamanan berjalan sesuai yang diinginkan
 
 ### Modul 3: Carbon Footprint & Sustainability (`carbon_footprint`)
 
@@ -166,3 +228,61 @@ carbon_footprint/
 - Faktor cadangan per material berasal dari data publik (CAEP 2022, basis produksi Tiongkok), jadi sifatnya perkiraan kasar, bukan angka resmi untuk Indonesia.
 - Faktor berbasis pengeluaran (CEDA) menghitung emisi dari nilai uang, sehingga barang mahal berbahan sama bisa tampak lebih berdampak daripada yang murah.
 - Data bahan dari database berlisensi (misalnya ecoinvent) tidak dipakai karena memerlukan langganan Climatiq.
+
+
+### Modul 4: Repair & Clothing Lifecycle (`lifecycle`)
+
+Mencatat kondisi pakaian yang sudah dimiliki, lalu memberi rekomendasi apakah pakaian sebaiknya di-**repair**, **reuse**, atau **recycle**, lengkap dengan panduan langkahnya. Tujuannya supaya pakaian dipakai selama mungkin sebelum dibuang.
+
+#### Fitur
+- CRUD catatan kondisi: tambah, lihat riwayat, ubah, dan hapus. Setiap catatan hanya bisa diakses oleh pemiliknya.
+- Dropdown pakaian hanya berisi pakaian milik user sendiri (dari modul Wardrobe).
+- Rekomendasi dihitung otomatis dari kondisi setiap kali catatan dibuat atau diubah.
+- AJAX: tambah catatan, filter, ubah status, dan hapus tanpa reload halaman.
+- Filter riwayat berdasarkan rekomendasi dan status tindak lanjut.
+- Repair guide berisi langkah praktis untuk Repair, Reuse, dan Recycle.
+- Endpoint JSON untuk data riwayat milik user yang login.
+
+#### Aturan rekomendasi
+| Kondisi | Rekomendasi |
+|---|---|
+| Masih bagus | Reuse |
+| Rusak ringan | Repair |
+| Rusak berat | Repair |
+| Tidak layak pakai | Recycle |
+
+Aturan dan isi repair guide ada di `lifecycle/services.py`.
+
+#### Model `ConditionRecord`
+`user`, `item` (relasi ke `ClothingItem` milik Wardrobe), `condition`, `damage_description`, `notes`, `recommendation`, `status` (Belum ditindaklanjuti / Sedang dikerjakan / Selesai), `created_at`, `updated_at`.
+
+#### URL
+| Path | Nama | Fungsi |
+|---|---|---|
+| `/lifecycle/` | `lifecycle:index` | Riwayat, form tambah, filter, dan repair guide |
+| `/lifecycle/create/` | `lifecycle:create` | Tambah catatan (tanpa AJAX) |
+| `/lifecycle/<id>/edit/` | `lifecycle:update` | Ubah catatan |
+| `/lifecycle/<id>/delete/` | `lifecycle:delete` | Konfirmasi dan hapus catatan |
+| `/lifecycle/json/` | `lifecycle:json` | Data riwayat dalam JSON |
+| `/lifecycle/ajax/create/` | `lifecycle:create_ajax` | Tambah catatan via AJAX (POST) |
+| `/lifecycle/<id>/ajax/status/` | `lifecycle:status_ajax` | Ubah status via AJAX (POST) |
+| `/lifecycle/<id>/ajax/delete/` | `lifecycle:delete_ajax` | Hapus via AJAX (POST) |
+
+Semua halaman wajib login. Mengakses catatan milik user lain menghasilkan 404.
+
+#### Pengujian
+```bash
+python manage.py test lifecycle
+```
+28 test mencakup aturan rekomendasi, repair guide, CRUD, filter, JSON, AJAX, dan pembatasan akses antar user.
+
+#### Struktur
+```
+lifecycle/
+├── services.py    # aturan rekomendasi dan isi repair guide
+├── models.py  forms.py  views.py  urls.py  admin.py
+├── templates/lifecycle/   # list, form, confirm_delete, field
+├── static/lifecycle/css/lifecycle.css   # tampilan halaman Lifecycle
+├── static/lifecycle/js/lifecycle.js     # AJAX
+└── tests.py
+```

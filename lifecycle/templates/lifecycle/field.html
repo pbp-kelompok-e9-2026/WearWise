@@ -1,0 +1,7 @@
+<div class="ww-field{% if wide %} ww-field--wide{% endif %}">
+  {{ field.label_tag }}
+  {{ field }}
+  {% for error in field.errors %}
+    <p class="ww-field__error">{{ error }}</p>
+  {% endfor %}
+</div>
