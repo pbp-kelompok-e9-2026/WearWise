@@ -12,19 +12,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+# Deployment mode: strip() also handles accidental spaces in PWS Environs.
+PRODUCTION = os.getenv("PRODUCTION", "False").strip().lower() == "true"
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.getenv("SECRET_KEY", "").strip()
 if not SECRET_KEY:
     raise RuntimeError("SECRET_KEY belum diatur di environment variables")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Never expose Django's detailed error page in production.
+DEBUG = False if PRODUCTION else (
+    os.getenv("DEBUG", "True").strip().lower() == "true"
+)
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "zidan-fauzan-wearwise.pws.cs.ui.ac.id"]
 CSRF_TRUSTED_ORIGINS = ["https://zidan-fauzan-wearwise.pws.cs.ui.ac.id"]
-
-PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
 
 # Application definition
 
@@ -79,45 +81,52 @@ WSGI_APPLICATION = 'WiseFit.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Database configuration
-# Database configuration
 if PRODUCTION:
-
-    required_vars = [
-        'DB_NAME',
-        'DB_USER',
-        'DB_PASSWORD',
-        'DB_HOST',
-    ]
+    # Normalize text fields to avoid accidental leading/trailing spaces
+    # in PWS Environs (especially DB_HOST and PRODUCTION).
+    db_name = os.getenv("DB_NAME", "").strip()
+    db_user = os.getenv("DB_USER", "").strip()
+    db_password = os.getenv("DB_PASSWORD", "")  # Preserve password exactly.
+    db_host = os.getenv("DB_HOST", "").strip()
+    db_port = os.getenv("DB_PORT", "5432").strip() or "5432"
+    db_schema = os.getenv("SCHEMA", "public").strip() or "public"
 
     missing_vars = [
-        var for var in required_vars
-        if not os.getenv(var)
+        name
+        for name, value in {
+            "DB_NAME": db_name,
+            "DB_USER": db_user,
+            "DB_PASSWORD": db_password,
+            "DB_HOST": db_host,
+        }.items()
+        if not value
     ]
 
     if missing_vars:
         raise RuntimeError(
-            f"Missing database environment variables: {missing_vars}"
+            "Environment variables database belum lengkap: "
+            + ", ".join(missing_vars)
         )
 
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME'),
-            'USER': os.getenv('DB_USER'),
-            'PASSWORD': os.getenv('DB_PASSWORD'),
-            'HOST': os.getenv('DB_HOST'),
-            'PORT': os.getenv('DB_PORT', '5432'),
-            'OPTIONS': {
-                'options': f"-c search_path={os.getenv('SCHEMA', 'public')}"
-            }
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": db_name,
+            "USER": db_user,
+            "PASSWORD": db_password,
+            "HOST": db_host,
+            "PORT": db_port,
+            "OPTIONS": {
+                "options": f"-c search_path={db_schema}",
+                "connect_timeout": 10,
+            },
         }
     }
-
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 
