@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'carbon_footprint', # Modul 3
     'lifecycle',       # Modul 4
     'dashboard',       # Modul 5
+    'seed_data',       # Data awal (50 referensi pakaian)
 ]
 
 MIDDLEWARE = [
