@@ -1,4 +1,4 @@
-{% url 'main:about' as about_url %}
+{% url 'lifecycle:index' as lifecycle_url %}
 {% url 'wardrobe:show_wardrobe' as wardrobe_url %}
 {% url 'carbon_footprint:index' as numbers_url %}
 {% url 'worth_to_buy_analyzer:analyzer' as worth_url %}
@@ -12,7 +12,7 @@
       <li><a href="{{ worth_url }}">Worth to Buy</a></li>
       <li><a href="{{ wardrobe_url }}">Wardrobe</a></li>
       <li><a href="{{ numbers_url }}">Sustainability</a></li>
-      <li><a href="{{ about_url }}">About</a></li>
+      <li><a href="{{ lifecycle_url }}">Lifecycle</a></li>
     </ul>
   </div>
   <div class="ww-footer__bottom">
